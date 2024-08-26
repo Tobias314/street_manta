@@ -1,0 +1,8 @@
+fastapi
+networkx
+uvicorn
+SQLAlchemy
+fs
+pytest
+numpy
+opencv-python
