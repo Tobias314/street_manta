@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:street_manta_client/utils/geo_photo_uploader.dart';
 
 import '../globals.dart';
 import '../widgets/footer.dart';
@@ -15,10 +16,23 @@ class _SettingsPageState extends State<SettingsPage> {
   bool waitingForApiCall = false;
   final Future<Globals> _globalsFuture = Globals.getInstance();
   late Globals globals;
+  int filesQueuedForUpload = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    GeoPhotoUploader().registerCallback(this.widget, () {
+      setState(() {
+        filesQueuedForUpload = GeoPhotoUploader().filesQueuedForUpload.length;
+      });
+    });
+    GeoPhotoUploader().reloadListOfQueuedFiles();
+  }
 
   @override
   void dispose() {
     //_serverUrlController.dispose();
+    GeoPhotoUploader().unregisterCallback(this.widget);
     super.dispose();
   }
 
@@ -63,6 +77,10 @@ class _SettingsPageState extends State<SettingsPage> {
                               globals.backendUrl = text.trim(),
                         ),
                         const SizedBox(height: 20),
+                        ListTile(
+                          title: Text(
+                              'Anzahl Dateien in Uploadwarteschlange: $filesQueuedForUpload'),
+                        ),
                       ],
                     ),
                   )),

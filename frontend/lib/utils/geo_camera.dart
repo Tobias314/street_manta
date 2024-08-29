@@ -1,10 +1,15 @@
 import 'dart:async';
 
 import 'package:camera/camera.dart';
+import 'package:logger/logger.dart';
 import 'geo_photo_uploader.dart';
 import '../models/geo_photo.dart';
 import 'package:motion_sensors/motion_sensors.dart';
 import 'package:geolocator/geolocator.dart';
+
+const double MIN_CAPTURE_DISTANCE_METER = 10.0;
+
+Logger logger = Logger();
 
 class GeoCamera {
   GeoCamera(CameraDescription cameraDescription)
@@ -16,6 +21,7 @@ class GeoCamera {
   double currentPitch = 0;
   double currentRoll = 0;
   double currentYaw = 0;
+  Position? _last_updated_position;
   MotionSensors ms = MotionSensors();
   GeoPhotoUploader uploader = GeoPhotoUploader();
   bool _isTakingPicture = false;
@@ -30,6 +36,19 @@ class GeoCamera {
   }
 
   void _handlePositionUpdate(Position position) {
+    if (_last_updated_position == null) {
+      _last_updated_position = position;
+    } else {
+      var dist = Geolocator.distanceBetween(
+          position.latitude,
+          position.longitude,
+          _last_updated_position!.latitude,
+          _last_updated_position!.longitude);
+      if (dist < MIN_CAPTURE_DISTANCE_METER) {
+        return;
+      }
+      _last_updated_position = position;
+    }
     if (isContiniousUploadEnabled && !_isTakingPicture) {
       takePictureRegisterForUpload();
     }
@@ -68,7 +87,7 @@ class GeoCamera {
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
-    await Geolocator.getCurrentPosition();
+    _last_updated_position = await Geolocator.getCurrentPosition();
 
     const LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
@@ -119,7 +138,12 @@ class GeoCamera {
   Future<void> takePictureRegisterForUpload() async {
     _isTakingPicture = true;
     final image = await cameraController.takePicture();
-    var position = await Geolocator.getLastKnownPosition();
+    var position = _last_updated_position;
+    if (position == null) {
+      return;
+    }
+    logger.i(
+        'Taking picture for upload at position: ${position.latitude}, ${position.longitude}');
     var geoPhotoToUpload = GeoPhotoUpload(
       path: image.path,
       latitude: position?.latitude ?? 0,
@@ -129,7 +153,7 @@ class GeoCamera {
       yaw: currentYaw,
       elevation: position?.altitude ?? 0,
     );
-    uploader.registerForUpload(geoPhotoToUpload);
+    uploader.queueForUpload(geoPhotoToUpload);
     _isTakingPicture = false;
     logger.i('Registered for upload: ${geoPhotoToUpload.path}');
   }
