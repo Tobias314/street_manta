@@ -55,7 +55,7 @@ RUN flutter clean
 RUN flutter pub get
 RUN flutter packages get
 # Bulding a dummy app to download and cache dependencies
-RUN mkdir app
+RUN mkdir lib
 RUN echo 'import "package:flutter/material.dart";Future<void> main() async {runApp(const MyApp());}class MyApp extends StatelessWidget {const MyApp({super.key});@override Widget build(BuildContext context) {return Text("Hello, World!");}}' > lib/main.dart
 RUN flutter build apk --dart-define=BACKEND_URL=${BACKEND_URL} lib/main.dart
 RUN rm lib/main.dart
