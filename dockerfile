@@ -73,7 +73,6 @@ ARG BACKEND_URL="https://streetmanta.redpielabs.com:4343"
 
 # Build frontend
 COPY frontend/assets /street_manta/frontend/assets
-COPY frontend/test /street_manta/frontend/test
 COPY frontend/lib /street_manta/frontend/lib
 WORKDIR /street_manta/frontend
 RUN echo "Building with BACKEND_URL: ${BACKEND_URL}"
