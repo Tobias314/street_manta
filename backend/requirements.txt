@@ -6,3 +6,4 @@ fs
 pytest
 numpy
 opencv-python
+httpx
