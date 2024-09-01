@@ -7,3 +7,4 @@ pytest
 numpy
 opencv-python
 httpx
+python-multipart
