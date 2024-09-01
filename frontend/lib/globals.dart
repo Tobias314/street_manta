@@ -13,7 +13,7 @@ class Globals {
         _singleton!.preferences.setString(
             'backendUrl',
             const String.fromEnvironment('BACKEND_URL',
-                defaultValue: 'http://127.0.0.1:8080'));
+                defaultValue: 'http://localhost:8080'));
       }
     }
     return _singleton!;
