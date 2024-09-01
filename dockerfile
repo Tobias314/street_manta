@@ -28,7 +28,7 @@ RUN yes | sdkmanager --licenses
 # RUN sdkmanager "build-tools;29.0.2"
 
 # Install Flutter
-RUN curl -o flutter_linux.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.22.2-stable.tar.xz
+RUN curl -o flutter_linux.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.1-stable.tar.xz
 RUN tar -xf flutter_linux.tar.xz -C /usr/bin/
 RUN git config --global --add safe.directory /usr/bin/flutter
 ENV PATH="${PATH}:/usr/bin/flutter/bin"
@@ -55,7 +55,7 @@ RUN flutter clean
 RUN flutter pub get
 RUN flutter packages get
 # Bulding a dummy app to download and cache dependencies
-RUN mkdir app
+RUN mkdir lib
 RUN echo 'import "package:flutter/material.dart";Future<void> main() async {runApp(const MyApp());}class MyApp extends StatelessWidget {const MyApp({super.key});@override Widget build(BuildContext context) {return Text("Hello, World!");}}' > lib/main.dart
 RUN flutter build apk --dart-define=BACKEND_URL=${BACKEND_URL} lib/main.dart
 RUN rm lib/main.dart
@@ -73,11 +73,10 @@ ARG BACKEND_URL="https://streetmanta.redpielabs.com:4343"
 
 # Build frontend
 COPY frontend/assets /street_manta/frontend/assets
-COPY frontend/test /street_manta/frontend/test
 COPY frontend/lib /street_manta/frontend/lib
 WORKDIR /street_manta/frontend
 RUN echo "Building with BACKEND_URL: ${BACKEND_URL}"
-RUN flutter build web --base-href /static/ --dart-define=BACKEND_URL=${BACKEND_URL} -t app/main.dart
+RUN flutter build web --base-href /static/ --dart-define=BACKEND_URL=${BACKEND_URL} -t lib/main.dart
 RUN flutter build apk --dart-define=BACKEND_URL=${BACKEND_URL} lib/main.dart
 RUN mkdir -p build/web/app/android
 RUN cp build/app/outputs/flutter-apk/app-release.apk build/web/app/android/streetmanta.apk

@@ -16,7 +16,6 @@ Future<void> main() async {
   var uploader = GeoPhotoUploader();
   if (Constants.isMobileApp) {
     uploader.enableAutoUpload();
-    uploader.enableAutoUpload();
     Workmanager().initialize(
         callbackDispatcher, // The top level function, aka callbackDispatcher
         isInDebugMode:

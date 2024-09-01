@@ -1,4 +1,4 @@
-fastapi
+fastapi[standard]
 networkx
 uvicorn
 SQLAlchemy
@@ -6,3 +6,5 @@ fs
 pytest
 numpy
 opencv-python
+httpx
+python-multipart
