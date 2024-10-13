@@ -146,12 +146,12 @@ class GeoCamera {
         'Taking picture for upload at position: ${position.latitude}, ${position.longitude}');
     var geoPhotoToUpload = GeoPhotoUpload(
       path: image.path,
-      latitude: position?.latitude ?? 0,
-      longitude: position?.longitude ?? 0,
+      latitude: position.latitude ?? 0,
+      longitude: position.longitude ?? 0,
       pitch: currentPitch,
       roll: currentRoll,
       yaw: currentYaw,
-      elevation: position?.altitude ?? 0,
+      elevation: position.altitude ?? 0,
     );
     uploader.queueForUpload(geoPhotoToUpload);
     _isTakingPicture = false;

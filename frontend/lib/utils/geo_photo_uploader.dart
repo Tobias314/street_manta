@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -10,7 +9,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../api/geo_photo.dart';
-import '../constants.dart';
 import '../models/geo_photo.dart';
 //import '../protobufs/street_manta/SensorData.pb.dart';
 
@@ -24,7 +22,7 @@ class GeoPhotoUploader {
   bool isUploading = false;
   Timer? _uploadTimer;
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  HashMap<int, Function> _registeredCallbacks = HashMap();
+  final HashMap<int, Function> _registeredCallbacks = HashMap();
   List<FileSystemEntity> filesQueuedForUpload = [];
 
   GeoPhotoUploader._internal() {

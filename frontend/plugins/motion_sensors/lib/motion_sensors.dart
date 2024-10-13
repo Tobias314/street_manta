@@ -249,63 +249,49 @@ class MotionSensors {
 
   /// A broadcast stream of events from the device accelerometer.
   Stream<AccelerometerEvent> get accelerometer {
-    if (_accelerometerEvents == null) {
-      _accelerometerEvents = _accelerometerEventChannel.receiveBroadcastStream().map((dynamic event) => AccelerometerEvent.fromList(event.cast<double>()));
-    }
+    _accelerometerEvents ??= _accelerometerEventChannel.receiveBroadcastStream().map((dynamic event) => AccelerometerEvent.fromList(event.cast<double>()));
     return _accelerometerEvents!;
   }
 
   /// A broadcast stream of events from the device gyroscope.
   Stream<GyroscopeEvent> get gyroscope {
-    if (_gyroscopeEvents == null) {
-      _gyroscopeEvents = _gyroscopeEventChannel.receiveBroadcastStream().map((dynamic event) => GyroscopeEvent.fromList(event.cast<double>()));
-    }
+    _gyroscopeEvents ??= _gyroscopeEventChannel.receiveBroadcastStream().map((dynamic event) => GyroscopeEvent.fromList(event.cast<double>()));
     return _gyroscopeEvents!;
   }
 
   /// Events from the device accelerometer with gravity removed.
   Stream<UserAccelerometerEvent> get userAccelerometer {
-    if (_userAccelerometerEvents == null) {
-      _userAccelerometerEvents = _userAccelerometerEventChannel.receiveBroadcastStream().map((dynamic event) => UserAccelerometerEvent.fromList(event.cast<double>()));
-    }
+    _userAccelerometerEvents ??= _userAccelerometerEventChannel.receiveBroadcastStream().map((dynamic event) => UserAccelerometerEvent.fromList(event.cast<double>()));
     return _userAccelerometerEvents!;
   }
 
   /// A broadcast stream of events from the device magnetometer.
   Stream<MagnetometerEvent> get magnetometer {
-    if (_magnetometerEvents == null) {
-      _magnetometerEvents = _magnetometerEventChannel.receiveBroadcastStream().map((dynamic event) => MagnetometerEvent.fromList(event.cast<double>()));
-    }
+    _magnetometerEvents ??= _magnetometerEventChannel.receiveBroadcastStream().map((dynamic event) => MagnetometerEvent.fromList(event.cast<double>()));
     return _magnetometerEvents!;
   }
 
   /// The current orientation of the device.
   Stream<OrientationEvent> get orientation {
-    if (_orientationEvents == null) {
-      _orientationEvents = _orientationChannel.receiveBroadcastStream().map((dynamic event) {
+    _orientationEvents ??= _orientationChannel.receiveBroadcastStream().map((dynamic event) {
         var orientation = OrientationEvent.fromList(event.cast<double>());
         _initialOrientation ??= orientation;
         // Change the initial yaw of the orientation to zero
         var yaw = (orientation.yaw + math.pi - _initialOrientation!.yaw) % (math.pi * 2) - math.pi;
         return OrientationEvent(yaw, orientation.pitch, orientation.roll);
       });
-    }
     return _orientationEvents!;
   }
 
   /// The current absolute orientation of the device.
   Stream<AbsoluteOrientationEvent> get absoluteOrientation {
-    if (_absoluteOrientationEvents == null) {
-      _absoluteOrientationEvents = _absoluteOrientationChannel.receiveBroadcastStream().map((dynamic event) => AbsoluteOrientationEvent.fromList(event.cast<double>()));
-    }
+    _absoluteOrientationEvents ??= _absoluteOrientationChannel.receiveBroadcastStream().map((dynamic event) => AbsoluteOrientationEvent.fromList(event.cast<double>()));
     return _absoluteOrientationEvents!;
   }
 
   /// The rotation of the screen from its "natural" orientation.
   Stream<ScreenOrientationEvent> get screenOrientation {
-    if (_screenOrientationEvents == null) {
-      _screenOrientationEvents = _screenOrientationChannel.receiveBroadcastStream().map((dynamic event) => ScreenOrientationEvent(event as double?));
-    }
+    _screenOrientationEvents ??= _screenOrientationChannel.receiveBroadcastStream().map((dynamic event) => ScreenOrientationEvent(event as double?));
     return _screenOrientationEvents!;
   }
 

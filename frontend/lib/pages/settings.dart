@@ -21,7 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    GeoPhotoUploader().registerCallback(this.widget, () {
+    GeoPhotoUploader().registerCallback(widget, () {
       setState(() {
         filesQueuedForUpload = GeoPhotoUploader().filesQueuedForUpload.length;
       });
@@ -32,7 +32,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void dispose() {
     //_serverUrlController.dispose();
-    GeoPhotoUploader().unregisterCallback(this.widget);
+    GeoPhotoUploader().unregisterCallback(widget);
     super.dispose();
   }
 
