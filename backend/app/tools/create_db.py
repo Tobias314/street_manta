@@ -75,6 +75,10 @@ def __main__(args):
     print(os.getcwd())
     p = Path(f"{DATASTORE_PATH}/database.db")
     p.parent.mkdir(parents=True, exist_ok=True)
+    images_dir = p.parent/"images"
+    print("Images dir:", images_dir)
+    images_dir.mkdir(parents=True, exist_ok=True)
+    
     if args.example:
         create_example_database(p, overwrite=args.overwrite)
     else:

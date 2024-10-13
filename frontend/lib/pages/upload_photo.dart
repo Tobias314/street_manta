@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:street_manta_client/protobufs/geo_capture.pb.dart';
 import 'dart:io';
+import '../api/capture.dart';
 import '../api/geo_photo.dart';
 import '../models/geo_photo.dart';
 
 // A screen that allows users to take a picture using a given camera.
 class UploadGeoPhotoScreen extends StatefulWidget {
-  const UploadGeoPhotoScreen({
+  UploadGeoPhotoScreen({
     super.key,
-    required this.geoPhoto,
+    required this.photoCapture,
   });
 
-  final GeoPhotoUpload geoPhoto;
+  PhotoCapture photoCapture;
+  //final GeoPhotoUpload geoPhoto;
 
   @override
   UploadGeoPhotoScreenState createState() => UploadGeoPhotoScreenState();
@@ -18,13 +21,13 @@ class UploadGeoPhotoScreen extends StatefulWidget {
 
 // A widget that displays the picture taken by the user.
 class UploadGeoPhotoScreenState extends State<UploadGeoPhotoScreen> {
-  late GeoPhotoUpload geoPhoto;
+  late PhotoCapture photoCapture;
   bool waitingForApiCall = false;
 
   @override
   void initState() {
     super.initState();
-    geoPhoto = widget.geoPhoto;
+    photoCapture = widget.photoCapture;
   }
 
   @override
@@ -35,7 +38,7 @@ class UploadGeoPhotoScreenState extends State<UploadGeoPhotoScreen> {
       // constructor with the given path to display the image.
       body: Column(children: <Widget>[
         Flexible(
-          child: Image.file(File(geoPhoto.path)),
+          child: Image.file(File(photoCapture.file)),
         ),
         const TextField(
           decoration: InputDecoration(hintText: 'Description'),
@@ -45,15 +48,16 @@ class UploadGeoPhotoScreenState extends State<UploadGeoPhotoScreen> {
               setState(() {
                 waitingForApiCall = true;
               });
-              _uploadGeoPhoto();
+              _uploadPhotoCapture();
             },
             child: const Text('Upload')),
       ]),
     );
   }
 
-  void _uploadGeoPhoto() async {
-    var response = await uploadGeoPhoto(geoPhoto);
+  void _uploadPhotoCapture() async {
+    var geoCapture = GeoCapture(photos: [photoCapture]);
+    var response = await uploadGeoCapture(geoCapture);
     if (!mounted) return;
     if (response.statusCode == 200) {
       Navigator.pop(context);

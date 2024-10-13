@@ -108,7 +108,7 @@ def save_image_from_bytes(
     image_bytes: bytes, image_id: str, image_fs: FS, create_thumbnail: bool = True
 ) -> str:
     nparr = np.fromstring(image_bytes, np.uint8)
-    image_fs.writebytes(f"{image_id}.png", image_bytes)
+    image_fs.writebytes(f"{image_id}.jpg", image_bytes)
     logger.info(f"Saved image with {image_id}")
     if create_thumbnail:
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)

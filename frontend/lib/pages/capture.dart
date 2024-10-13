@@ -1,7 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import '../constants.dart';
-import '../utils/geo_camera.dart';
+import '../utils/recorder.dart';
 import '../widgets/menu_drawer.dart';
 import '../widgets/auto_photo.dart';
 import '../widgets/single_photo.dart';
@@ -14,7 +14,7 @@ class CapturePage extends StatefulWidget {
 }
 
 class _CapturePageState extends State<CapturePage> {
-  late Future<GeoCamera> geoCameraFuture;
+  late Future<Recorder> geoCameraFuture;
   //late Future<CameraController> _initializationFuture;
   bool _continuousMode = false;
   @override
@@ -23,9 +23,9 @@ class _CapturePageState extends State<CapturePage> {
     geoCameraFuture = _initializationFuture();
   }
 
-  Future<GeoCamera> _initializationFuture() async {
+  Future<Recorder> _initializationFuture() async {
     var availableCameraDescriptors = await availableCameras();
-    var geoCamera = GeoCamera(availableCameraDescriptors.first);
+    var geoCamera = Recorder(availableCameraDescriptors.first);
     await geoCamera.initialize();
     return geoCamera;
   }
@@ -38,13 +38,13 @@ class _CapturePageState extends State<CapturePage> {
 
   @override
   Widget build(BuildContext context) {
-    late var body = FutureBuilder<GeoCamera>(
+    late var body = FutureBuilder<Recorder>(
         future: geoCameraFuture,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             var geoCamera = snapshot.data!;
             if (!_continuousMode) {
-              return SinglePhotoWidget(geoCamera: geoCamera);
+              return SinglePhotoWidget(recorder: geoCamera);
             } else {
               return AutoPhotoWidget(geoCamera: geoCamera);
             }

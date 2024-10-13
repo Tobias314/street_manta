@@ -2,7 +2,8 @@
 image_data/
 database.db
 test_database.db
-.vscode/
+/.vscode/*
+!/.vscode/launch.json
 
 
 # Byte-compiled / optimized / DLL files

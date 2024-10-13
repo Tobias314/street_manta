@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter_archive/flutter_archive.dart';
+
 Future<File> moveFile(File sourceFile, String newPath) async {
   try {
     // prefer using rename as it is probably faster

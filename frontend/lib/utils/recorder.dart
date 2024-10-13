@@ -2,17 +2,20 @@ import 'dart:async';
 
 import 'package:camera/camera.dart';
 import 'package:logger/logger.dart';
+import 'package:street_manta_client/utils/device_info.dart';
 import 'geo_photo_uploader.dart';
 import '../models/geo_photo.dart';
 import 'package:motion_sensors/motion_sensors.dart';
 import 'package:geolocator/geolocator.dart';
+import '../protobufs/geo_capture.pb.dart';
+import 'package:fixnum/fixnum.dart';
 
 const double MIN_CAPTURE_DISTANCE_METER = 10.0;
 
 Logger logger = Logger();
 
-class GeoCamera {
-  GeoCamera(CameraDescription cameraDescription)
+class Recorder {
+  Recorder(CameraDescription cameraDescription)
       : cameraController =
             CameraController(cameraDescription, ResolutionPreset.max);
 
@@ -22,17 +25,31 @@ class GeoCamera {
   double currentRoll = 0;
   double currentYaw = 0;
   Position? _last_updated_position;
-  MotionSensors ms = MotionSensors();
+  MotionSensors motionSensors = MotionSensors();
   GeoPhotoUploader uploader = GeoPhotoUploader();
   bool _isTakingPicture = false;
-  bool isContiniousUploadEnabled = false;
+  bool isContinuousUploadEnabled = false;
+  String deviceModel = 'Unknown';
+  bool isRecording = false;
+
+  void startContinuousRecording(){
+    isRecording = true;
+    cameraController.startVideoRecording();
+  }
+
+  void stopContinuousRecording(){
+    if(isRecording){
+      var videoFileFuture = cameraController.stopVideoRecording();
+    }
+    isRecording = false;
+  }
 
   void enableContiniousMode() {
-    isContiniousUploadEnabled = true;
+    isContinuousUploadEnabled = true;
   }
 
   void disableContiniousMode() {
-    isContiniousUploadEnabled = false;
+    isContinuousUploadEnabled = false;
   }
 
   void _handlePositionUpdate(Position position) {
@@ -49,7 +66,7 @@ class GeoCamera {
       }
       _last_updated_position = position;
     }
-    if (isContiniousUploadEnabled && !_isTakingPicture) {
+    if (isContinuousUploadEnabled && !_isTakingPicture) {
       takePictureRegisterForUpload();
     }
   }
@@ -96,9 +113,9 @@ class GeoCamera {
     Geolocator.getPositionStream(locationSettings: locationSettings)
         .listen(_handlePositionUpdate);
 
-    ms.setSensorUpdateInterval(
+    motionSensors.setSensorUpdateInterval(
         MotionSensors.TYPE_ABSOLUTE_ORIENTATION, 10000000);
-    ms.absoluteOrientation.listen((AbsoluteOrientationEvent event) {
+    motionSensors.absoluteOrientation.listen((AbsoluteOrientationEvent event) {
       currentPitch = event.pitch;
       currentRoll = event.roll;
       currentYaw = event.yaw;
@@ -108,6 +125,7 @@ class GeoCamera {
   Future<CameraController> initialize() async {
     await _loadGeolocator();
     await cameraController.initialize();
+    deviceModel = await getDeviceModel();
     if (!cameraController.value.isInitialized) {
       throw 'Error initializing camera';
     }
@@ -117,6 +135,19 @@ class GeoCamera {
   void dispose() {
     disableContiniousMode();
     cameraController.dispose();
+  }
+
+  Future<PhotoCapture> takeSinglePhotoCapture() async {
+    _isTakingPicture = true;
+    final imageFile = await cameraController.takePicture();
+    var gpsPosition = await Geolocator.getCurrentPosition();
+    var gpsPositionProto = GpsPosition(latitude: gpsPosition.latitude, longitude: gpsPosition.longitude, elevation: gpsPosition.altitude);
+    var orientation = Orientation(pitch: currentPitch, roll: currentRoll, yaw: currentYaw);
+    var time = Int64(DateTime.now().microsecondsSinceEpoch);
+    _isTakingPicture = false;
+    var cameraSpecification = CameraSpecification(cameraIndex: cameraController.cameraId);
+    var photoCapture = PhotoCapture(epochMicroSeconds: time, file: imageFile.path, cameraSpecification: cameraSpecification, gpsPosition: gpsPositionProto, orientation: orientation);
+    return photoCapture;
   }
 
   Future<GeoPhotoUpload> takePicture() async {

@@ -6,11 +6,7 @@ import '../models/geo_photo.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import '../globals.dart';
-
-Future<String> getUserToken() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getString('userToken') ?? '';
-}
+import 'authentication.dart';
 
 Future<String> uploadImage(String imagePath) async {
   final globals = await Globals.getInstance();

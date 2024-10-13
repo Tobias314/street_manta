@@ -1,5 +1,8 @@
+import io
+from pathlib import Path
 from typing import Dict, List, Annotated
 import logging
+import zipfile
 
 import cv2
 from fastapi import FastAPI, Response, UploadFile, APIRouter, Depends, HTTPException
@@ -26,6 +29,7 @@ from .authentication import (
     user_generate_token,
 )
 from .data.db_interface import save_image_from_bytes
+from .protobufs.geo_capture_pb2 import GeoCapture
 
 logger = logging.getLogger(__name__)
 
@@ -125,6 +129,45 @@ async def fetch_thumbnail(
     return Response(content=image_bytes, media_type="image/png")
 
 
+@api_router.post("/geo_capture/upload/{capture_id}")
+async def upload_geo_capture(
+    capture_id: str,
+    user: Annotated[models.User, Depends(get_current_user)],
+    geo_capture: UploadFile,
+    db: Session = Depends(get_db),
+    image_fs: FS = Depends(get_image_fs),
+) -> str:
+    zf = zipfile.ZipFile(io.BytesIO(await geo_capture.read()))
+    protobuf = [
+        zip_info.filename
+        for zip_info in zf.infolist()
+        if zip_info.filename.endswith(".pb")
+    ]
+    assert len(protobuf) == 1
+    geo_capture = GeoCapture()
+    geo_capture.ParseFromString(zf.read(protobuf[0]))
+    for photo_capture in geo_capture.photos:
+        photo_path = Path(photo_capture.file)
+        image_bytes = zf.read(photo_path.name)
+        save_image_from_bytes(image_bytes, photo_path.stem, image_fs)
+        geophoto = models.GeoPhotoCreate(
+            image_id=photo_path.stem,
+            latitude=photo_capture.gps_position.latitude,
+            longitude=photo_capture.gps_position.longitude,
+            elevation=photo_capture.gps_position.elevation,
+            pitch=photo_capture.orientation.pitch,
+            roll=photo_capture.orientation.roll,
+            yaw=photo_capture.orientation.yaw,
+            description=geo_capture.description,
+        )
+        db_interface.create_geophoto(db=db, geophoto=geophoto, user=user)
+    for video_capture in geo_capture.videos:
+        #TODO(pito)
+        pass
+    #TODO(pito) parse other sensor time series
+    return capture_id
+
+
 @api_router.post("/geophoto/upload_image")
 async def upload_image(
     user: Annotated[models.User, Depends(get_current_user)],
@@ -152,9 +195,7 @@ def create_single_geophoto(
 
 
 app.include_router(api_router)
-app.mount(
-    "/static", StaticFiles(directory="../frontend/build/web"), name="static"
-)
+app.mount("/static", StaticFiles(directory="../frontend/build/web"), name="static")
 
 
 if __name__ == "__main__":

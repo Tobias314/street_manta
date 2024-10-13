@@ -3,6 +3,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../globals.dart';
 
+Future<String> getUserToken() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('userToken') ?? '';
+}
+
 Future<String> login(String email, String password) async {
   final globals = await Globals.getInstance();
   final Uri uri = Uri.parse('${globals.backendUrl}/api/token');

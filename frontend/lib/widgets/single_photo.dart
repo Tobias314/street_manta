@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import '../utils/geo_camera.dart';
+import '../utils/recorder.dart';
 import '../pages/upload_photo.dart';
 //import 'package:sensors_plus/sensors_plus.dart';
 
 class SinglePhotoWidget extends StatefulWidget {
-  final GeoCamera geoCamera;
-  const SinglePhotoWidget({super.key, required this.geoCamera});
+  final Recorder recorder;
+  const SinglePhotoWidget({super.key, required this.recorder});
 
   @override
   State<SinglePhotoWidget> createState() => _SinglePhotoWidgetState();
@@ -16,7 +16,7 @@ class _SinglePhotoWidgetState extends State<SinglePhotoWidget> {
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
-      Column(children: [CameraPreview(widget.geoCamera.cameraController)]),
+      Column(children: [CameraPreview(widget.recorder.cameraController)]),
       Positioned.fill(
           bottom: 200,
           child: Align(
@@ -30,7 +30,7 @@ class _SinglePhotoWidgetState extends State<SinglePhotoWidget> {
                 try {
                   // Attempt to take a picture and get the file `image`
                   // where it was saved.
-                  final image = await widget.geoCamera.takePicture();
+                  final photoCapture = await widget.recorder.takeSinglePhotoCapture();
 
                   if (!context.mounted) return;
 
@@ -38,7 +38,7 @@ class _SinglePhotoWidgetState extends State<SinglePhotoWidget> {
                   await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => UploadGeoPhotoScreen(
-                        geoPhoto: image,
+                        photoCapture: photoCapture,
                       ),
                     ),
                   );

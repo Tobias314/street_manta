@@ -1,6 +1,6 @@
 //
 //  Generated code. Do not modify.
-//  source: protobufs/sensors.proto
+//  source: protobufs/geo_capture.proto
 //
 // @dart = 2.12
 

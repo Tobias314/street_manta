@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package street_manata;
+
+message GpsPosition {
+  float longitude = 1;
+  float latitude = 2;
+  float elevation = 3;
+}
+
+message Orientation {
+  float roll = 1;
+  float pitch = 2;
+  float yaw = 3;
+}
+
+message GpsCapture {
+  int64 epoch_micro_seconds = 1;
+  GpsPosition position = 2;
+}
+
+message ImuCapture {
+  int64 epoch_micro_seconds = 1;
+  float x = 2;
+  float y = 3;
+  float z = 4;
+  float w = 5;
+}
+
+message CameraSpecification {
+  optional int32 camera_index = 1;
+  optional float focal_length = 2;
+  optional float exposure_time = 3;
+}
+
+message PhotoCapture {
+  int64 epoch_micro_seconds = 1;
+  string file = 2;
+  optional CameraSpecification camera_specification = 3;
+  optional GpsPosition gps_position = 4;
+  optional Orientation orientation = 5;
+}
+
+message VideoCapture {
+  int64 start_epoch_micro_seconds = 1;
+  int64 end_epoch_micro_seconds = 2;
+  int64 fps = 3;
+  string file = 4;
+  CameraSpecification camera_specification = 5;
+}
+
+message GeoCapture {
+  string device = 1;
+  repeated GpsCapture gps = 2;
+  repeated ImuCapture imu = 3;
+  repeated PhotoCapture photos = 4;
+  repeated VideoCapture videos = 5;
+  optional string description = 6;
+  repeated string tags = 7;
+}

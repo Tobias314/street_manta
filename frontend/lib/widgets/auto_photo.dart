@@ -4,10 +4,10 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'geo_photo_marker_layer.dart';
 
-import '../utils/geo_camera.dart';
+import '../utils/recorder.dart';
 
 class AutoPhotoWidget extends StatefulWidget {
-  final GeoCamera geoCamera;
+  final Recorder geoCamera;
 
   const AutoPhotoWidget({super.key, required this.geoCamera});
 
@@ -76,7 +76,7 @@ class _AutoPhotoWidgetState extends State<AutoPhotoWidget> {
                     heroTag: 'auto_photo',
                     // Provide an onPressed callback.
                     onPressed: () async {
-                      if (widget.geoCamera.isContiniousUploadEnabled) {
+                      if (widget.geoCamera.isContinuousUploadEnabled) {
                         setState(() {
                           widget.geoCamera.disableContiniousMode();
                           buttonText = 'Erfassung starten';
