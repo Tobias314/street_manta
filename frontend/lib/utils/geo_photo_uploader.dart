@@ -12,6 +12,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../api/geo_photo.dart';
 import '../constants.dart';
 import '../models/geo_photo.dart';
+//import '../protobufs/street_manta/SensorData.pb.dart';
 
 Logger logger = Logger();
 

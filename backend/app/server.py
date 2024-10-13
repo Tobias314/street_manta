@@ -153,7 +153,7 @@ def create_single_geophoto(
 
 app.include_router(api_router)
 app.mount(
-    "/static", StaticFiles(directory="/street_manta/frontend/build/web"), name="static"
+    "/static", StaticFiles(directory="../frontend/build/web"), name="static"
 )
 
 

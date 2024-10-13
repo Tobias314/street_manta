@@ -94,7 +94,7 @@ EXPOSE 80
 WORKDIR /street_manta/backend
 # Command to run the application using uvicorn
 ARG DATASTORE_PATH="/datastore"
-CMD DATASTORE_PATH="/datastore" ./create_db.sh && DATASTORE_PATH="/datastore" fastapi run app/server.py --host 0.0.0.0 --proxy-headers --port 80
+CMD DATASTORE_PATH="/datastore" ./create_db.sh && fastapi run app/server.py --host 0.0.0.0 --proxy-headers --port 80
 
 
 
