@@ -24,7 +24,7 @@ Please note that this deployment is for demonstration purposes only and should n
 - More to come...
 
 # Contributing
-The project currently still is in its infancy. More work and features are required. For that any help is welcome. If you are interested, just get in contact, spread the word, leave a start, a comment or even open a PR.
+The project currently still is in its infancy. More work and features are required. For that any help is welcome. If you are interested, just get in contact, spread the word, leave a comment or even open a PR.
 
 ## Possible Future Features
 - User groups as well as administration accounts to create and manage users and user groups
@@ -34,5 +34,5 @@ The project currently still is in its infancy. More work and features are requir
 # FAQ
 - Why is the UI in German?
    - The idea for the project originates from the observation that road maintenance in German municipalities is often done without specialised digital tools or using costly software which is not freely available/open-source.
-- Why is most of the code prototypical or even ugly?
+- Why does most of the code look rather prototypical (some might also call it ugly)?
     - Currently, the project is still more or less a prototype in an early stage. This should change in the future. If this bothers you and you want to change it rather sooner than later feel free to contribute :) 
