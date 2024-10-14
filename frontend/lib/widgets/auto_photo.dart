@@ -76,14 +76,16 @@ class _AutoPhotoWidgetState extends State<AutoPhotoWidget> {
                     heroTag: 'auto_photo',
                     // Provide an onPressed callback.
                     onPressed: () async {
-                      if (widget.geoCamera.isContinuousUploadEnabled) {
+                      if (widget.geoCamera.isRecording) {
+                        await widget.geoCamera.stopContinuousRecording();
                         setState(() {
-                          widget.geoCamera.disableContiniousMode();
+                          //widget.geoCamera.disableContiniousMode();
                           buttonText = 'Erfassung starten';
                         });
                       } else {
+                        //widget.geoCamera.enableContiniousMode();
+                        await widget.geoCamera.startContinuousRecording();
                         setState(() {
-                          widget.geoCamera.enableContiniousMode();
                           setState(() => buttonText = 'Erfassung stoppen');
                         });
                       }

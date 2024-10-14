@@ -13,7 +13,7 @@ var logger = Logger();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  var uploader = GeoPhotoUploader();
+  var uploader = ZipUploader();
   if (Constants.isMobileApp) {
     uploader.enableAutoUpload();
     Workmanager().initialize(
@@ -59,7 +59,7 @@ void callbackDispatcher() {
     //     await SharedPreferences.getInstance(); //Initialize dependency
 
     try {
-      var uploader = GeoPhotoUploader();
+      var uploader = ZipUploader();
       await uploader.triggerUpload();
     } catch (err) {
       Logger().e(err

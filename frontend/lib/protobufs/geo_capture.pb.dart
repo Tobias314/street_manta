@@ -536,8 +536,8 @@ class VideoCapture extends $pb.GeneratedMessage {
   factory VideoCapture({
     $fixnum.Int64? startEpochMicroSeconds,
     $fixnum.Int64? endEpochMicroSeconds,
-    $fixnum.Int64? fps,
     $core.String? file,
+    $fixnum.Int64? fps,
     CameraSpecification? cameraSpecification,
   }) {
     final $result = create();
@@ -547,11 +547,11 @@ class VideoCapture extends $pb.GeneratedMessage {
     if (endEpochMicroSeconds != null) {
       $result.endEpochMicroSeconds = endEpochMicroSeconds;
     }
-    if (fps != null) {
-      $result.fps = fps;
-    }
     if (file != null) {
       $result.file = file;
+    }
+    if (fps != null) {
+      $result.fps = fps;
     }
     if (cameraSpecification != null) {
       $result.cameraSpecification = cameraSpecification;
@@ -565,8 +565,8 @@ class VideoCapture extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'VideoCapture', package: const $pb.PackageName(_omitMessageNames ? '' : 'street_manata'), createEmptyInstance: create)
     ..aInt64(1, _omitFieldNames ? '' : 'startEpochMicroSeconds')
     ..aInt64(2, _omitFieldNames ? '' : 'endEpochMicroSeconds')
-    ..aInt64(3, _omitFieldNames ? '' : 'fps')
-    ..aOS(4, _omitFieldNames ? '' : 'file')
+    ..aOS(3, _omitFieldNames ? '' : 'file')
+    ..aInt64(4, _omitFieldNames ? '' : 'fps')
     ..aOM<CameraSpecification>(5, _omitFieldNames ? '' : 'cameraSpecification', subBuilder: CameraSpecification.create)
     ..hasRequiredFields = false
   ;
@@ -611,22 +611,22 @@ class VideoCapture extends $pb.GeneratedMessage {
   void clearEndEpochMicroSeconds() => clearField(2);
 
   @$pb.TagNumber(3)
-  $fixnum.Int64 get fps => $_getI64(2);
+  $core.String get file => $_getSZ(2);
   @$pb.TagNumber(3)
-  set fps($fixnum.Int64 v) { $_setInt64(2, v); }
+  set file($core.String v) { $_setString(2, v); }
   @$pb.TagNumber(3)
-  $core.bool hasFps() => $_has(2);
+  $core.bool hasFile() => $_has(2);
   @$pb.TagNumber(3)
-  void clearFps() => clearField(3);
+  void clearFile() => clearField(3);
 
   @$pb.TagNumber(4)
-  $core.String get file => $_getSZ(3);
+  $fixnum.Int64 get fps => $_getI64(3);
   @$pb.TagNumber(4)
-  set file($core.String v) { $_setString(3, v); }
+  set fps($fixnum.Int64 v) { $_setInt64(3, v); }
   @$pb.TagNumber(4)
-  $core.bool hasFile() => $_has(3);
+  $core.bool hasFps() => $_has(3);
   @$pb.TagNumber(4)
-  void clearFile() => clearField(4);
+  void clearFps() => clearField(4);
 
   @$pb.TagNumber(5)
   CameraSpecification get cameraSpecification => $_getN(4);

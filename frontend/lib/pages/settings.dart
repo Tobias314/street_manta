@@ -21,18 +21,18 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    GeoPhotoUploader().registerCallback(widget, () {
+    ZipUploader().registerCallback(widget, () {
       setState(() {
-        filesQueuedForUpload = GeoPhotoUploader().filesQueuedForUpload.length;
+        filesQueuedForUpload = ZipUploader().filesQueuedForUpload.length;
       });
     });
-    GeoPhotoUploader().reloadListOfQueuedFiles();
+    ZipUploader().reloadListOfQueuedFiles();
   }
 
   @override
   void dispose() {
     //_serverUrlController.dispose();
-    GeoPhotoUploader().unregisterCallback(widget);
+    ZipUploader().unregisterCallback(widget);
     super.dispose();
   }
 

@@ -44,9 +44,9 @@ message PhotoCapture {
 message VideoCapture {
   int64 start_epoch_micro_seconds = 1;
   int64 end_epoch_micro_seconds = 2;
-  int64 fps = 3;
-  string file = 4;
-  CameraSpecification camera_specification = 5;
+  string file = 3;
+  optional int64 fps = 4;
+  optional CameraSpecification camera_specification = 5;
 }
 
 message GeoCapture {

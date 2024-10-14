@@ -8,14 +8,15 @@ import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+import '../api/capture.dart';
 import '../api/geo_photo.dart';
 import '../models/geo_photo.dart';
 //import '../protobufs/street_manta/SensorData.pb.dart';
 
 Logger logger = Logger();
 
-class GeoPhotoUploader {
-  static final GeoPhotoUploader _instance = GeoPhotoUploader._internal();
+class ZipUploader {
+  static final ZipUploader _instance = ZipUploader._internal();
 
   late Directory uploadDirectory;
   bool _isUploadDirectoryInitialized = false;
@@ -25,11 +26,11 @@ class GeoPhotoUploader {
   final HashMap<int, Function> _registeredCallbacks = HashMap();
   List<FileSystemEntity> filesQueuedForUpload = [];
 
-  GeoPhotoUploader._internal() {
+  ZipUploader._internal() {
     enableAutoUpload();
   }
 
-  factory GeoPhotoUploader() {
+  factory ZipUploader() {
     return _instance;
   }
 
@@ -42,9 +43,9 @@ class GeoPhotoUploader {
   }
 
   Future<void> reloadListOfQueuedFiles() async {
-    filesQueuedForUpload = (await _getUploadDirectory())
+    filesQueuedForUpload = (await getUploadDirectory())
         .listSync()
-        .where((element) => element.path.split('.').last == 'json')
+        .where((element) => element.path.split('.').last == 'zip')
         .toList();
     _registeredCallbacks.forEach((key, callback) {
       callback();
@@ -58,7 +59,7 @@ class GeoPhotoUploader {
         connectivityResult.contains(ConnectivityResult.ethernet);
   }
 
-  Future<Directory> _getUploadDirectory() async {
+  Future<Directory> getUploadDirectory() async {
     if (!_isUploadDirectoryInitialized) {
       var documentDirectory = await getApplicationDocumentsDirectory();
       uploadDirectory = Directory('${documentDirectory.path}/uploads');
@@ -89,7 +90,7 @@ class GeoPhotoUploader {
       reloadListOfQueuedFiles();
       if (isWifiAvailable) {
         isUploading = true;
-        var uploadDir = await _getUploadDirectory();
+        var uploadDir = await getUploadDirectory();
         const AndroidNotificationDetails androidNotificationDetails =
             AndroidNotificationDetails(
                 'streetmanta_file_upload', 'StreetManta File Upload',
@@ -104,7 +105,7 @@ class GeoPhotoUploader {
             await flutterLocalNotificationsPlugin.show(
                 0,
                 'StreetManta Upload',
-                'Uploading images: ${filesQueuedForUpload.length} images remaining...',
+                'Uploading captures: ${filesQueuedForUpload.length} captures remaining...',
                 notificationDetails);
             var file = filesQueuedForUpload.first;
             var lockFile = File('${file.path}.lock');
@@ -122,12 +123,8 @@ class GeoPhotoUploader {
             try {
               logger.i('Uploading file: ${file.path}');
               lockFile.createSync(exclusive: true);
-              var jsonFile = File(file.path);
-              var geoPhoto =
-                  GeoPhotoUpload.fromJson(await jsonFile.readAsString());
-              await uploadGeoPhoto(geoPhoto);
-              await File(geoPhoto.path).delete();
-              await jsonFile.delete();
+              await uploadGeoCaptureZip(file.path);
+              await file.delete();
             } catch (err) {
               logger.e('Error uploading file: ${file.path}');
               logger.e(err.toString());
@@ -148,8 +145,9 @@ class GeoPhotoUploader {
   }
 
   Future<void> queueForUpload(GeoPhotoUpload geoPhoto) async {
+    //TODO: remove or refactor this
     //TODO: upload directely when executing in the web
-    var uploadDir = await _getUploadDirectory();
+    var uploadDir = await getUploadDirectory();
     await geoPhoto.saveToDirectory(uploadDir);
   }
 }

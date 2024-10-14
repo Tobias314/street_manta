@@ -131,9 +131,13 @@ const VideoCapture$json = {
   '2': [
     {'1': 'start_epoch_micro_seconds', '3': 1, '4': 1, '5': 3, '10': 'startEpochMicroSeconds'},
     {'1': 'end_epoch_micro_seconds', '3': 2, '4': 1, '5': 3, '10': 'endEpochMicroSeconds'},
-    {'1': 'fps', '3': 3, '4': 1, '5': 3, '10': 'fps'},
-    {'1': 'file', '3': 4, '4': 1, '5': 9, '10': 'file'},
-    {'1': 'camera_specification', '3': 5, '4': 1, '5': 11, '6': '.street_manata.CameraSpecification', '10': 'cameraSpecification'},
+    {'1': 'file', '3': 3, '4': 1, '5': 9, '10': 'file'},
+    {'1': 'fps', '3': 4, '4': 1, '5': 3, '9': 0, '10': 'fps', '17': true},
+    {'1': 'camera_specification', '3': 5, '4': 1, '5': 11, '6': '.street_manata.CameraSpecification', '9': 1, '10': 'cameraSpecification', '17': true},
+  ],
+  '8': [
+    {'1': '_fps'},
+    {'1': '_camera_specification'},
   ],
 };
 
@@ -141,9 +145,10 @@ const VideoCapture$json = {
 final $typed_data.Uint8List videoCaptureDescriptor = $convert.base64Decode(
     'CgxWaWRlb0NhcHR1cmUSOQoZc3RhcnRfZXBvY2hfbWljcm9fc2Vjb25kcxgBIAEoA1IWc3Rhcn'
     'RFcG9jaE1pY3JvU2Vjb25kcxI1ChdlbmRfZXBvY2hfbWljcm9fc2Vjb25kcxgCIAEoA1IUZW5k'
-    'RXBvY2hNaWNyb1NlY29uZHMSEAoDZnBzGAMgASgDUgNmcHMSEgoEZmlsZRgEIAEoCVIEZmlsZR'
-    'JVChRjYW1lcmFfc3BlY2lmaWNhdGlvbhgFIAEoCzIiLnN0cmVldF9tYW5hdGEuQ2FtZXJhU3Bl'
-    'Y2lmaWNhdGlvblITY2FtZXJhU3BlY2lmaWNhdGlvbg==');
+    'RXBvY2hNaWNyb1NlY29uZHMSEgoEZmlsZRgDIAEoCVIEZmlsZRIVCgNmcHMYBCABKANIAFIDZn'
+    'BziAEBEloKFGNhbWVyYV9zcGVjaWZpY2F0aW9uGAUgASgLMiIuc3RyZWV0X21hbmF0YS5DYW1l'
+    'cmFTcGVjaWZpY2F0aW9uSAFSE2NhbWVyYVNwZWNpZmljYXRpb26IAQFCBgoEX2Zwc0IXChVfY2'
+    'FtZXJhX3NwZWNpZmljYXRpb24=');
 
 @$core.Deprecated('Use geoCaptureDescriptor instead')
 const GeoCapture$json = {

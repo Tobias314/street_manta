@@ -137,7 +137,10 @@ async def upload_geo_capture(
     db: Session = Depends(get_db),
     image_fs: FS = Depends(get_image_fs),
 ) -> str:
-    zf = zipfile.ZipFile(io.BytesIO(await geo_capture.read()))
+    geo_capture_bytes = await geo_capture.read()
+    with open(f"{DATASTORE_PATH}/{capture_id}.zip", "wb") as f:
+        f.write(geo_capture_bytes)
+    zf = zipfile.ZipFile(io.BytesIO(geo_capture_bytes))
     protobuf = [
         zip_info.filename
         for zip_info in zf.infolist()
