@@ -1,5 +1,4 @@
 
-import 'dart:io';
 
 import 'package:street_manta_client/protobufs/geo_capture.pb.dart';
 

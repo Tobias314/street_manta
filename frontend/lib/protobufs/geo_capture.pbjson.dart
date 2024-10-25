@@ -20,13 +20,34 @@ const GpsPosition$json = {
     {'1': 'longitude', '3': 1, '4': 1, '5': 2, '10': 'longitude'},
     {'1': 'latitude', '3': 2, '4': 1, '5': 2, '10': 'latitude'},
     {'1': 'elevation', '3': 3, '4': 1, '5': 2, '10': 'elevation'},
+    {'1': 'position_accuracy', '3': 4, '4': 1, '5': 2, '9': 0, '10': 'positionAccuracy', '17': true},
+    {'1': 'elevation_accuracy', '3': 5, '4': 1, '5': 2, '9': 1, '10': 'elevationAccuracy', '17': true},
+    {'1': 'speed', '3': 6, '4': 1, '5': 2, '9': 2, '10': 'speed', '17': true},
+    {'1': 'speed_accuracy', '3': 7, '4': 1, '5': 2, '9': 3, '10': 'speedAccuracy', '17': true},
+    {'1': 'heading', '3': 8, '4': 1, '5': 2, '9': 4, '10': 'heading', '17': true},
+    {'1': 'heading_accuracy', '3': 9, '4': 1, '5': 2, '9': 5, '10': 'headingAccuracy', '17': true},
+  ],
+  '8': [
+    {'1': '_position_accuracy'},
+    {'1': '_elevation_accuracy'},
+    {'1': '_speed'},
+    {'1': '_speed_accuracy'},
+    {'1': '_heading'},
+    {'1': '_heading_accuracy'},
   ],
 };
 
 /// Descriptor for `GpsPosition`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List gpsPositionDescriptor = $convert.base64Decode(
     'CgtHcHNQb3NpdGlvbhIcCglsb25naXR1ZGUYASABKAJSCWxvbmdpdHVkZRIaCghsYXRpdHVkZR'
-    'gCIAEoAlIIbGF0aXR1ZGUSHAoJZWxldmF0aW9uGAMgASgCUgllbGV2YXRpb24=');
+    'gCIAEoAlIIbGF0aXR1ZGUSHAoJZWxldmF0aW9uGAMgASgCUgllbGV2YXRpb24SMAoRcG9zaXRp'
+    'b25fYWNjdXJhY3kYBCABKAJIAFIQcG9zaXRpb25BY2N1cmFjeYgBARIyChJlbGV2YXRpb25fYW'
+    'NjdXJhY3kYBSABKAJIAVIRZWxldmF0aW9uQWNjdXJhY3mIAQESGQoFc3BlZWQYBiABKAJIAlIF'
+    'c3BlZWSIAQESKgoOc3BlZWRfYWNjdXJhY3kYByABKAJIA1INc3BlZWRBY2N1cmFjeYgBARIdCg'
+    'doZWFkaW5nGAggASgCSARSB2hlYWRpbmeIAQESLgoQaGVhZGluZ19hY2N1cmFjeRgJIAEoAkgF'
+    'Ug9oZWFkaW5nQWNjdXJhY3mIAQFCFAoSX3Bvc2l0aW9uX2FjY3VyYWN5QhUKE19lbGV2YXRpb2'
+    '5fYWNjdXJhY3lCCAoGX3NwZWVkQhEKD19zcGVlZF9hY2N1cmFjeUIKCghfaGVhZGluZ0ITChFf'
+    'aGVhZGluZ19hY2N1cmFjeQ==');
 
 @$core.Deprecated('Use orientationDescriptor instead')
 const Orientation$json = {
@@ -43,6 +64,66 @@ final $typed_data.Uint8List orientationDescriptor = $convert.base64Decode(
     'CgtPcmllbnRhdGlvbhISCgRyb2xsGAEgASgCUgRyb2xsEhQKBXBpdGNoGAIgASgCUgVwaXRjaB'
     'IQCgN5YXcYAyABKAJSA3lhdw==');
 
+@$core.Deprecated('Use accelerationDescriptor instead')
+const Acceleration$json = {
+  '1': 'Acceleration',
+  '2': [
+    {'1': 'x', '3': 1, '4': 1, '5': 2, '10': 'x'},
+    {'1': 'y', '3': 2, '4': 1, '5': 2, '10': 'y'},
+    {'1': 'z', '3': 3, '4': 1, '5': 2, '10': 'z'},
+  ],
+};
+
+/// Descriptor for `Acceleration`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List accelerationDescriptor = $convert.base64Decode(
+    'CgxBY2NlbGVyYXRpb24SDAoBeBgBIAEoAlIBeBIMCgF5GAIgASgCUgF5EgwKAXoYAyABKAJSAX'
+    'o=');
+
+@$core.Deprecated('Use angularVelocityDescriptor instead')
+const AngularVelocity$json = {
+  '1': 'AngularVelocity',
+  '2': [
+    {'1': 'x', '3': 1, '4': 1, '5': 2, '10': 'x'},
+    {'1': 'y', '3': 2, '4': 1, '5': 2, '10': 'y'},
+    {'1': 'z', '3': 3, '4': 1, '5': 2, '10': 'z'},
+  ],
+};
+
+/// Descriptor for `AngularVelocity`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List angularVelocityDescriptor = $convert.base64Decode(
+    'Cg9Bbmd1bGFyVmVsb2NpdHkSDAoBeBgBIAEoAlIBeBIMCgF5GAIgASgCUgF5EgwKAXoYAyABKA'
+    'JSAXo=');
+
+@$core.Deprecated('Use magneticFieldDescriptor instead')
+const MagneticField$json = {
+  '1': 'MagneticField',
+  '2': [
+    {'1': 'x', '3': 1, '4': 1, '5': 2, '10': 'x'},
+    {'1': 'y', '3': 2, '4': 1, '5': 2, '10': 'y'},
+    {'1': 'z', '3': 3, '4': 1, '5': 2, '10': 'z'},
+  ],
+};
+
+/// Descriptor for `MagneticField`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List magneticFieldDescriptor = $convert.base64Decode(
+    'Cg1NYWduZXRpY0ZpZWxkEgwKAXgYASABKAJSAXgSDAoBeRgCIAEoAlIBeRIMCgF6GAMgASgCUg'
+    'F6');
+
+@$core.Deprecated('Use orientationCaptureDescriptor instead')
+const OrientationCapture$json = {
+  '1': 'OrientationCapture',
+  '2': [
+    {'1': 'epoch_micro_seconds', '3': 1, '4': 1, '5': 3, '10': 'epochMicroSeconds'},
+    {'1': 'orientation', '3': 2, '4': 1, '5': 11, '6': '.street_manata.Orientation', '10': 'orientation'},
+  ],
+};
+
+/// Descriptor for `OrientationCapture`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List orientationCaptureDescriptor = $convert.base64Decode(
+    'ChJPcmllbnRhdGlvbkNhcHR1cmUSLgoTZXBvY2hfbWljcm9fc2Vjb25kcxgBIAEoA1IRZXBvY2'
+    'hNaWNyb1NlY29uZHMSPAoLb3JpZW50YXRpb24YAiABKAsyGi5zdHJlZXRfbWFuYXRhLk9yaWVu'
+    'dGF0aW9uUgtvcmllbnRhdGlvbg==');
+
 @$core.Deprecated('Use gpsCaptureDescriptor instead')
 const GpsCapture$json = {
   '1': 'GpsCapture',
@@ -58,23 +139,50 @@ final $typed_data.Uint8List gpsCaptureDescriptor = $convert.base64Decode(
     'NvbmRzEjYKCHBvc2l0aW9uGAIgASgLMhouc3RyZWV0X21hbmF0YS5HcHNQb3NpdGlvblIIcG9z'
     'aXRpb24=');
 
-@$core.Deprecated('Use imuCaptureDescriptor instead')
-const ImuCapture$json = {
-  '1': 'ImuCapture',
+@$core.Deprecated('Use accelerationCaptureDescriptor instead')
+const AccelerationCapture$json = {
+  '1': 'AccelerationCapture',
   '2': [
     {'1': 'epoch_micro_seconds', '3': 1, '4': 1, '5': 3, '10': 'epochMicroSeconds'},
-    {'1': 'x', '3': 2, '4': 1, '5': 2, '10': 'x'},
-    {'1': 'y', '3': 3, '4': 1, '5': 2, '10': 'y'},
-    {'1': 'z', '3': 4, '4': 1, '5': 2, '10': 'z'},
-    {'1': 'w', '3': 5, '4': 1, '5': 2, '10': 'w'},
+    {'1': 'acceleration', '3': 2, '4': 1, '5': 11, '6': '.street_manata.Acceleration', '10': 'acceleration'},
   ],
 };
 
-/// Descriptor for `ImuCapture`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List imuCaptureDescriptor = $convert.base64Decode(
-    'CgpJbXVDYXB0dXJlEi4KE2Vwb2NoX21pY3JvX3NlY29uZHMYASABKANSEWVwb2NoTWljcm9TZW'
-    'NvbmRzEgwKAXgYAiABKAJSAXgSDAoBeRgDIAEoAlIBeRIMCgF6GAQgASgCUgF6EgwKAXcYBSAB'
-    'KAJSAXc=');
+/// Descriptor for `AccelerationCapture`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List accelerationCaptureDescriptor = $convert.base64Decode(
+    'ChNBY2NlbGVyYXRpb25DYXB0dXJlEi4KE2Vwb2NoX21pY3JvX3NlY29uZHMYASABKANSEWVwb2'
+    'NoTWljcm9TZWNvbmRzEj8KDGFjY2VsZXJhdGlvbhgCIAEoCzIbLnN0cmVldF9tYW5hdGEuQWNj'
+    'ZWxlcmF0aW9uUgxhY2NlbGVyYXRpb24=');
+
+@$core.Deprecated('Use angularVelocityCaptureDescriptor instead')
+const AngularVelocityCapture$json = {
+  '1': 'AngularVelocityCapture',
+  '2': [
+    {'1': 'epoch_micro_seconds', '3': 1, '4': 1, '5': 3, '10': 'epochMicroSeconds'},
+    {'1': 'angular_velocity', '3': 2, '4': 1, '5': 11, '6': '.street_manata.AngularVelocity', '10': 'angularVelocity'},
+  ],
+};
+
+/// Descriptor for `AngularVelocityCapture`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List angularVelocityCaptureDescriptor = $convert.base64Decode(
+    'ChZBbmd1bGFyVmVsb2NpdHlDYXB0dXJlEi4KE2Vwb2NoX21pY3JvX3NlY29uZHMYASABKANSEW'
+    'Vwb2NoTWljcm9TZWNvbmRzEkkKEGFuZ3VsYXJfdmVsb2NpdHkYAiABKAsyHi5zdHJlZXRfbWFu'
+    'YXRhLkFuZ3VsYXJWZWxvY2l0eVIPYW5ndWxhclZlbG9jaXR5');
+
+@$core.Deprecated('Use magneticFieldCaptureDescriptor instead')
+const MagneticFieldCapture$json = {
+  '1': 'MagneticFieldCapture',
+  '2': [
+    {'1': 'epoch_micro_seconds', '3': 1, '4': 1, '5': 3, '10': 'epochMicroSeconds'},
+    {'1': 'magnetic_field', '3': 2, '4': 1, '5': 11, '6': '.street_manata.MagneticField', '10': 'magneticField'},
+  ],
+};
+
+/// Descriptor for `MagneticFieldCapture`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List magneticFieldCaptureDescriptor = $convert.base64Decode(
+    'ChRNYWduZXRpY0ZpZWxkQ2FwdHVyZRIuChNlcG9jaF9taWNyb19zZWNvbmRzGAEgASgDUhFlcG'
+    '9jaE1pY3JvU2Vjb25kcxJDCg5tYWduZXRpY19maWVsZBgCIAEoCzIcLnN0cmVldF9tYW5hdGEu'
+    'TWFnbmV0aWNGaWVsZFINbWFnbmV0aWNGaWVsZA==');
 
 @$core.Deprecated('Use cameraSpecificationDescriptor instead')
 const CameraSpecification$json = {
@@ -156,11 +264,14 @@ const GeoCapture$json = {
   '2': [
     {'1': 'device', '3': 1, '4': 1, '5': 9, '10': 'device'},
     {'1': 'gps', '3': 2, '4': 3, '5': 11, '6': '.street_manata.GpsCapture', '10': 'gps'},
-    {'1': 'imu', '3': 3, '4': 3, '5': 11, '6': '.street_manata.ImuCapture', '10': 'imu'},
-    {'1': 'photos', '3': 4, '4': 3, '5': 11, '6': '.street_manata.PhotoCapture', '10': 'photos'},
-    {'1': 'videos', '3': 5, '4': 3, '5': 11, '6': '.street_manata.VideoCapture', '10': 'videos'},
-    {'1': 'description', '3': 6, '4': 1, '5': 9, '9': 0, '10': 'description', '17': true},
-    {'1': 'tags', '3': 7, '4': 3, '5': 9, '10': 'tags'},
+    {'1': 'orientation', '3': 3, '4': 3, '5': 11, '6': '.street_manata.OrientationCapture', '10': 'orientation'},
+    {'1': 'acceleration', '3': 4, '4': 3, '5': 11, '6': '.street_manata.AccelerationCapture', '10': 'acceleration'},
+    {'1': 'angular_velocity', '3': 5, '4': 3, '5': 11, '6': '.street_manata.AngularVelocityCapture', '10': 'angularVelocity'},
+    {'1': 'magnetic_field', '3': 6, '4': 3, '5': 11, '6': '.street_manata.MagneticFieldCapture', '10': 'magneticField'},
+    {'1': 'photos', '3': 7, '4': 3, '5': 11, '6': '.street_manata.PhotoCapture', '10': 'photos'},
+    {'1': 'videos', '3': 8, '4': 3, '5': 11, '6': '.street_manata.VideoCapture', '10': 'videos'},
+    {'1': 'description', '3': 9, '4': 1, '5': 9, '9': 0, '10': 'description', '17': true},
+    {'1': 'tags', '3': 10, '4': 3, '5': 9, '10': 'tags'},
   ],
   '8': [
     {'1': '_description'},
@@ -170,9 +281,14 @@ const GeoCapture$json = {
 /// Descriptor for `GeoCapture`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List geoCaptureDescriptor = $convert.base64Decode(
     'CgpHZW9DYXB0dXJlEhYKBmRldmljZRgBIAEoCVIGZGV2aWNlEisKA2dwcxgCIAMoCzIZLnN0cm'
-    'VldF9tYW5hdGEuR3BzQ2FwdHVyZVIDZ3BzEisKA2ltdRgDIAMoCzIZLnN0cmVldF9tYW5hdGEu'
-    'SW11Q2FwdHVyZVIDaW11EjMKBnBob3RvcxgEIAMoCzIbLnN0cmVldF9tYW5hdGEuUGhvdG9DYX'
-    'B0dXJlUgZwaG90b3MSMwoGdmlkZW9zGAUgAygLMhsuc3RyZWV0X21hbmF0YS5WaWRlb0NhcHR1'
-    'cmVSBnZpZGVvcxIlCgtkZXNjcmlwdGlvbhgGIAEoCUgAUgtkZXNjcmlwdGlvbogBARISCgR0YW'
-    'dzGAcgAygJUgR0YWdzQg4KDF9kZXNjcmlwdGlvbg==');
+    'VldF9tYW5hdGEuR3BzQ2FwdHVyZVIDZ3BzEkMKC29yaWVudGF0aW9uGAMgAygLMiEuc3RyZWV0'
+    'X21hbmF0YS5PcmllbnRhdGlvbkNhcHR1cmVSC29yaWVudGF0aW9uEkYKDGFjY2VsZXJhdGlvbh'
+    'gEIAMoCzIiLnN0cmVldF9tYW5hdGEuQWNjZWxlcmF0aW9uQ2FwdHVyZVIMYWNjZWxlcmF0aW9u'
+    'ElAKEGFuZ3VsYXJfdmVsb2NpdHkYBSADKAsyJS5zdHJlZXRfbWFuYXRhLkFuZ3VsYXJWZWxvY2'
+    'l0eUNhcHR1cmVSD2FuZ3VsYXJWZWxvY2l0eRJKCg5tYWduZXRpY19maWVsZBgGIAMoCzIjLnN0'
+    'cmVldF9tYW5hdGEuTWFnbmV0aWNGaWVsZENhcHR1cmVSDW1hZ25ldGljRmllbGQSMwoGcGhvdG'
+    '9zGAcgAygLMhsuc3RyZWV0X21hbmF0YS5QaG90b0NhcHR1cmVSBnBob3RvcxIzCgZ2aWRlb3MY'
+    'CCADKAsyGy5zdHJlZXRfbWFuYXRhLlZpZGVvQ2FwdHVyZVIGdmlkZW9zEiUKC2Rlc2NyaXB0aW'
+    '9uGAkgASgJSABSC2Rlc2NyaXB0aW9uiAEBEhIKBHRhZ3MYCiADKAlSBHRhZ3NCDgoMX2Rlc2Ny'
+    'aXB0aW9u');
 

@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 from sqlalchemy import create_engine, text
 
-from ..server import get_image_fs
+from ..server import get_fs
 
 from ..data.models import GeoPhotoCreate
 from ..data.schemas import Base, SessionLocal
@@ -40,6 +40,10 @@ def create_database(path: Path, overwrite: bool = False):
             "CREATE VIRTUAL TABLE geo_photos_rtree USING rtree(id, latitude_min, latitude_max, longitude_min, longitude_max);"
         )
         con.execute(statement)
+    with contextlib.contextmanager(get_fs)() as fs:
+         fs.makedir("images", recreate=True)
+         fs.makedir("videos", recreate=True)
+         fs.makedir("zipped", recreate=True)
 
 
 def create_example_database(path: Path, overwrite: bool = False):
@@ -47,14 +51,14 @@ def create_example_database(path: Path, overwrite: bool = False):
     print("Adding example GeoPhotos to database...")
     db = SessionLocal()
     tester_user = asyncio.run(create_user(email="test", password="test", db=db))
-    with contextlib.contextmanager(get_image_fs)() as image_fs:
+    with contextlib.contextmanager(get_fs)() as fs:
         for i in range(5):
             img = (np.arange(1000000).reshape(1000, 1000) / 1000000 * 255).astype(
                 np.uint8
             )
             success, encoded_image = cv2.imencode(".png", img)
             img_bytes = encoded_image.tobytes()
-            save_image_from_bytes(img_bytes, str(i), image_fs)
+            save_image_from_bytes(img_bytes, str(i), fs)
             create_geophoto(
                 db=db,
                 geophoto=GeoPhotoCreate(

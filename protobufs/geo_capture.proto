@@ -6,6 +6,12 @@ message GpsPosition {
   float longitude = 1;
   float latitude = 2;
   float elevation = 3;
+  optional float position_accuracy = 4;
+  optional float elevation_accuracy = 5;
+  optional float speed = 6;
+  optional float speed_accuracy = 7;
+  optional float heading = 8;
+  optional float heading_accuracy = 9;
 }
 
 message Orientation {
@@ -14,17 +20,47 @@ message Orientation {
   float yaw = 3;
 }
 
+message Acceleration {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message AngularVelocity {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message MagneticField {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message OrientationCapture {
+  int64 epoch_micro_seconds = 1;
+  Orientation orientation = 2;
+}
+
 message GpsCapture {
   int64 epoch_micro_seconds = 1;
   GpsPosition position = 2;
 }
 
-message ImuCapture {
+message AccelerationCapture {
   int64 epoch_micro_seconds = 1;
-  float x = 2;
-  float y = 3;
-  float z = 4;
-  float w = 5;
+  Acceleration acceleration = 2;
+}
+
+message AngularVelocityCapture {
+  int64 epoch_micro_seconds = 1;
+  AngularVelocity angular_velocity = 2;
+}
+
+message MagneticFieldCapture {
+  int64 epoch_micro_seconds = 1;
+  MagneticField magnetic_field = 2;
 }
 
 message CameraSpecification {
@@ -52,9 +88,12 @@ message VideoCapture {
 message GeoCapture {
   string device = 1;
   repeated GpsCapture gps = 2;
-  repeated ImuCapture imu = 3;
-  repeated PhotoCapture photos = 4;
-  repeated VideoCapture videos = 5;
-  optional string description = 6;
-  repeated string tags = 7;
+  repeated OrientationCapture orientation = 3;
+  repeated AccelerationCapture acceleration = 4;
+  repeated AngularVelocityCapture angular_velocity = 5;
+  repeated MagneticFieldCapture magnetic_field = 6;
+  repeated PhotoCapture photos = 7;
+  repeated VideoCapture videos = 8;
+  optional string description = 9;
+  repeated string tags = 10;
 }

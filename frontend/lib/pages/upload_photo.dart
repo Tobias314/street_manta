@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:street_manta_client/protobufs/geo_capture.pb.dart';
 import 'dart:io';
 import '../api/capture.dart';
-import '../api/geo_photo.dart';
-import '../models/geo_photo.dart';
 
 // A screen that allows users to take a picture using a given camera.
 class UploadGeoPhotoScreen extends StatefulWidget {

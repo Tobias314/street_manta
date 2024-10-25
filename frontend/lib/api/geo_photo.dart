@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/geo_photo.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:street_manta_client/utils/geo_photo_uploader.dart';
+import 'package:street_manta_client/utils/zip_uploader.dart';
 
 import '../globals.dart';
 import '../widgets/footer.dart';

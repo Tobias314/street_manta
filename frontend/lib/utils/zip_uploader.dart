@@ -9,7 +9,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../api/capture.dart';
-import '../api/geo_photo.dart';
 import '../models/geo_photo.dart';
 //import '../protobufs/street_manta/SensorData.pb.dart';
 

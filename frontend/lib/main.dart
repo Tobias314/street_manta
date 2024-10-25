@@ -7,7 +7,7 @@ import 'package:workmanager/workmanager.dart';
 
 import 'constants.dart';
 import 'pages/login.dart';
-import 'utils/geo_photo_uploader.dart';
+import 'utils/zip_uploader.dart';
 
 var logger = Logger();
 

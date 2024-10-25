@@ -105,16 +105,16 @@ def update_user(user: schemas.User, db: Session):
 
 
 def save_image_from_bytes(
-    image_bytes: bytes, image_id: str, image_fs: FS, create_thumbnail: bool = True
+    image_bytes: bytes, image_id: str, fs: FS, create_thumbnail: bool = True
 ) -> str:
     nparr = np.fromstring(image_bytes, np.uint8)
-    image_fs.writebytes(f"{image_id}.jpg", image_bytes)
+    fs.opendir("images").writebytes(f"{image_id}.jpg", image_bytes)
     logger.info(f"Saved image with {image_id}")
     if create_thumbnail:
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         scaling_factor = 100 / max(img.shape[:2])
         thumbnail = cv2.resize(img, None, fx=scaling_factor, fy=scaling_factor)
         thumbnail_bytes = cv2.imencode(".png", thumbnail)[1].tobytes()
-        image_fs.writebytes(f"{image_id}_thumbnail.png", thumbnail_bytes)
+        fs.opendir("images").writebytes(f"{image_id}_thumbnail.png", thumbnail_bytes)
         logger.info(f"Saved thumbnail with {image_id}")
     return image_id

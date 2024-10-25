@@ -1,0 +1,16 @@
+[project]
+name = "street_manta"
+version = "0.0.1"
+dependencies = [
+    "fastapi[standard]",
+    "networkx",
+    "uvicorn",
+    "SQLAlchemy",
+    "fs",
+    "pytest",
+    "numpy",
+    "opencv-python",
+    "httpx",
+    "python-multipart",
+    "protobuf",
+]

@@ -13,10 +13,9 @@ import cv2
 from fastapi.testclient import TestClient
 from fs.memoryfs import MemoryFS
 
-from app.server import app, get_db, get_image_fs
-from app.tools.create_db import create_database
-from app.authentication import get_current_user
-from app.data.schemas import User
+from street_manta.server import app, get_db, get_image_fs
+from street_manta.tools.create_db import create_database
+from street_manta.data.schemas import User
 
 
 client = TestClient(app)

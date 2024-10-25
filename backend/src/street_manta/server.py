@@ -45,12 +45,44 @@ app.add_middleware(
 api_router = APIRouter(prefix="/api")
 
 
+def get_fs():
+    fs_dir = Path(f"{DATASTORE_PATH}")
+    fs_dir.mkdir(parents=True, exist_ok=True)
+    fs = OSFS(str(fs_dir))
+    try:
+        yield fs
+    finally:
+        fs.close()
+
+
 def get_image_fs():
-    image_fs = OSFS(f"{DATASTORE_PATH}/images")
+    image_fs_dir = Path(f"{DATASTORE_PATH}/images")
+    image_fs_dir.mkdir(parents=True, exist_ok=True)
+    image_fs = OSFS(str(image_fs_dir))
     try:
         yield image_fs
     finally:
         image_fs.close()
+
+
+def get_video_fs():
+    video_fs_dir = Path(f"{DATASTORE_PATH}/videos")
+    video_fs_dir.mkdir(parents=True, exist_ok=True)
+    video_fs = OSFS(str(video_fs_dir))
+    try:
+        yield video_fs
+    finally:
+        video_fs.close()
+
+
+def get_capture_fs():
+    capture_fs_dir = Path(f"{DATASTORE_PATH}/captures")
+    capture_fs_dir.mkdir(parents=True, exist_ok=True)
+    video_fs = OSFS(str(capture_fs_dir))
+    try:
+        yield video_fs
+    finally:
+        video_fs.close()
 
 
 @app.get("/")
@@ -113,9 +145,9 @@ def get_geophotos_for_region(
 async def fetch_image(
     image_id: str,
     user: Annotated[models.User, Depends(get_current_user)],
-    image_fs: FS = Depends(get_image_fs),
+    fs: FS = Depends(get_fs),
 ) -> str:
-    image_bytes = image_fs.readbytes(f"{image_id}.png")
+    image_bytes = fs.opendir("images").readbytes(f"{image_id}.png")
     return Response(content=image_bytes, media_type="image/png")
 
 
@@ -123,9 +155,9 @@ async def fetch_image(
 async def fetch_thumbnail(
     image_id: str,
     user: Annotated[models.User, Depends(get_current_user)],
-    image_fs: FS = Depends(get_image_fs),
+    fs: FS = Depends(get_fs),
 ) -> str:
-    image_bytes = image_fs.readbytes(f"{image_id}_thumbnail.png")
+    image_bytes = fs.opendir("images").readbytes(f"{image_id}_thumbnail.png")
     return Response(content=image_bytes, media_type="image/png")
 
 
@@ -135,11 +167,10 @@ async def upload_geo_capture(
     user: Annotated[models.User, Depends(get_current_user)],
     geo_capture: UploadFile,
     db: Session = Depends(get_db),
-    image_fs: FS = Depends(get_image_fs),
+    fs: FS = Depends(get_fs),
 ) -> str:
     geo_capture_bytes = await geo_capture.read()
-    with open(f"{DATASTORE_PATH}/{capture_id}.zip", "wb") as f:
-        f.write(geo_capture_bytes)
+    fs.opendir("zipped").writebytes(capture_id, geo_capture_bytes)
     zf = zipfile.ZipFile(io.BytesIO(geo_capture_bytes))
     protobuf = [
         zip_info.filename
@@ -152,7 +183,7 @@ async def upload_geo_capture(
     for photo_capture in geo_capture.photos:
         photo_path = Path(photo_capture.file)
         image_bytes = zf.read(photo_path.name)
-        save_image_from_bytes(image_bytes, photo_path.stem, image_fs)
+        save_image_from_bytes(image_bytes, photo_path.stem, fs)
         geophoto = models.GeoPhotoCreate(
             image_id=photo_path.stem,
             latitude=photo_capture.gps_position.latitude,
@@ -164,10 +195,13 @@ async def upload_geo_capture(
             description=geo_capture.description,
         )
         db_interface.create_geophoto(db=db, geophoto=geophoto, user=user)
+        photo_capture.file = photo_path.stem
     for video_capture in geo_capture.videos:
-        #TODO(pito)
-        pass
-    #TODO(pito) parse other sensor time series
+        video_capture.file = Path(video_capture.file).name
+        video_bytes = zf.read(video_capture.file)
+        video_capture.file = f"{str(Path(video_capture.file).name)}"
+        fs.opendir('videos').writebytes(video_capture.file, video_bytes)
+    fs.writebytes(f"{capture_id}.pb", geo_capture.SerializeToString())
     return capture_id
 
 
@@ -175,11 +209,11 @@ async def upload_geo_capture(
 async def upload_image(
     user: Annotated[models.User, Depends(get_current_user)],
     image: UploadFile,
-    image_fs: FS = Depends(get_image_fs),
+    fs: FS = Depends(get_fs),
 ) -> str:
     image_bytes = await image.read()
     image_id = str(uuid4())
-    save_image_from_bytes(image_bytes, image_id, image_fs)
+    save_image_from_bytes(image_bytes, image_id, fs)
     return image_id
 
 
@@ -188,17 +222,17 @@ def create_single_geophoto(
     geophoto: models.GeoPhotoCreate,
     user: Annotated[models.User, Depends(get_current_user)],
     db: Session = Depends(get_db),
-    image_fs: FS = Depends(get_image_fs),
+    fs: FS = Depends(get_fs),
 ) -> int:
     image_path = f"{geophoto.image_id}.png"
     print(image_path)
-    assert image_fs.exists(image_path)
+    assert fs.opendir("images").exists(image_path)
     geophoto_id = db_interface.create_geophoto(db=db, geophoto=geophoto, user=user)
     return geophoto_id
 
 
 app.include_router(api_router)
-app.mount("/static", StaticFiles(directory="../frontend/build/web"), name="static")
+app.mount("/static", StaticFiles(directory=Path(__file__).parent.resolve() /"../../../frontend/build/web"), name="static")
 
 
 if __name__ == "__main__":

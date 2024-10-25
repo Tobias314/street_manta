@@ -19,6 +19,12 @@ class GpsPosition extends $pb.GeneratedMessage {
     $core.double? longitude,
     $core.double? latitude,
     $core.double? elevation,
+    $core.double? positionAccuracy,
+    $core.double? elevationAccuracy,
+    $core.double? speed,
+    $core.double? speedAccuracy,
+    $core.double? heading,
+    $core.double? headingAccuracy,
   }) {
     final $result = create();
     if (longitude != null) {
@@ -30,6 +36,24 @@ class GpsPosition extends $pb.GeneratedMessage {
     if (elevation != null) {
       $result.elevation = elevation;
     }
+    if (positionAccuracy != null) {
+      $result.positionAccuracy = positionAccuracy;
+    }
+    if (elevationAccuracy != null) {
+      $result.elevationAccuracy = elevationAccuracy;
+    }
+    if (speed != null) {
+      $result.speed = speed;
+    }
+    if (speedAccuracy != null) {
+      $result.speedAccuracy = speedAccuracy;
+    }
+    if (heading != null) {
+      $result.heading = heading;
+    }
+    if (headingAccuracy != null) {
+      $result.headingAccuracy = headingAccuracy;
+    }
     return $result;
   }
   GpsPosition._() : super();
@@ -40,6 +64,12 @@ class GpsPosition extends $pb.GeneratedMessage {
     ..a<$core.double>(1, _omitFieldNames ? '' : 'longitude', $pb.PbFieldType.OF)
     ..a<$core.double>(2, _omitFieldNames ? '' : 'latitude', $pb.PbFieldType.OF)
     ..a<$core.double>(3, _omitFieldNames ? '' : 'elevation', $pb.PbFieldType.OF)
+    ..a<$core.double>(4, _omitFieldNames ? '' : 'positionAccuracy', $pb.PbFieldType.OF)
+    ..a<$core.double>(5, _omitFieldNames ? '' : 'elevationAccuracy', $pb.PbFieldType.OF)
+    ..a<$core.double>(6, _omitFieldNames ? '' : 'speed', $pb.PbFieldType.OF)
+    ..a<$core.double>(7, _omitFieldNames ? '' : 'speedAccuracy', $pb.PbFieldType.OF)
+    ..a<$core.double>(8, _omitFieldNames ? '' : 'heading', $pb.PbFieldType.OF)
+    ..a<$core.double>(9, _omitFieldNames ? '' : 'headingAccuracy', $pb.PbFieldType.OF)
     ..hasRequiredFields = false
   ;
 
@@ -90,6 +120,60 @@ class GpsPosition extends $pb.GeneratedMessage {
   $core.bool hasElevation() => $_has(2);
   @$pb.TagNumber(3)
   void clearElevation() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.double get positionAccuracy => $_getN(3);
+  @$pb.TagNumber(4)
+  set positionAccuracy($core.double v) { $_setFloat(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasPositionAccuracy() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearPositionAccuracy() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.double get elevationAccuracy => $_getN(4);
+  @$pb.TagNumber(5)
+  set elevationAccuracy($core.double v) { $_setFloat(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasElevationAccuracy() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearElevationAccuracy() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.double get speed => $_getN(5);
+  @$pb.TagNumber(6)
+  set speed($core.double v) { $_setFloat(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasSpeed() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearSpeed() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.double get speedAccuracy => $_getN(6);
+  @$pb.TagNumber(7)
+  set speedAccuracy($core.double v) { $_setFloat(6, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasSpeedAccuracy() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearSpeedAccuracy() => clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.double get heading => $_getN(7);
+  @$pb.TagNumber(8)
+  set heading($core.double v) { $_setFloat(7, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasHeading() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearHeading() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.double get headingAccuracy => $_getN(8);
+  @$pb.TagNumber(9)
+  set headingAccuracy($core.double v) { $_setFloat(8, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasHeadingAccuracy() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearHeadingAccuracy() => clearField(9);
 }
 
 class Orientation extends $pb.GeneratedMessage {
@@ -170,6 +254,306 @@ class Orientation extends $pb.GeneratedMessage {
   void clearYaw() => clearField(3);
 }
 
+class Acceleration extends $pb.GeneratedMessage {
+  factory Acceleration({
+    $core.double? x,
+    $core.double? y,
+    $core.double? z,
+  }) {
+    final $result = create();
+    if (x != null) {
+      $result.x = x;
+    }
+    if (y != null) {
+      $result.y = y;
+    }
+    if (z != null) {
+      $result.z = z;
+    }
+    return $result;
+  }
+  Acceleration._() : super();
+  factory Acceleration.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Acceleration.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Acceleration', package: const $pb.PackageName(_omitMessageNames ? '' : 'street_manata'), createEmptyInstance: create)
+    ..a<$core.double>(1, _omitFieldNames ? '' : 'x', $pb.PbFieldType.OF)
+    ..a<$core.double>(2, _omitFieldNames ? '' : 'y', $pb.PbFieldType.OF)
+    ..a<$core.double>(3, _omitFieldNames ? '' : 'z', $pb.PbFieldType.OF)
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Acceleration clone() => Acceleration()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Acceleration copyWith(void Function(Acceleration) updates) => super.copyWith((message) => updates(message as Acceleration)) as Acceleration;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Acceleration create() => Acceleration._();
+  Acceleration createEmptyInstance() => create();
+  static $pb.PbList<Acceleration> createRepeated() => $pb.PbList<Acceleration>();
+  @$core.pragma('dart2js:noInline')
+  static Acceleration getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Acceleration>(create);
+  static Acceleration? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.double get x => $_getN(0);
+  @$pb.TagNumber(1)
+  set x($core.double v) { $_setFloat(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasX() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearX() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.double get y => $_getN(1);
+  @$pb.TagNumber(2)
+  set y($core.double v) { $_setFloat(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasY() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearY() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.double get z => $_getN(2);
+  @$pb.TagNumber(3)
+  set z($core.double v) { $_setFloat(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasZ() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearZ() => clearField(3);
+}
+
+class AngularVelocity extends $pb.GeneratedMessage {
+  factory AngularVelocity({
+    $core.double? x,
+    $core.double? y,
+    $core.double? z,
+  }) {
+    final $result = create();
+    if (x != null) {
+      $result.x = x;
+    }
+    if (y != null) {
+      $result.y = y;
+    }
+    if (z != null) {
+      $result.z = z;
+    }
+    return $result;
+  }
+  AngularVelocity._() : super();
+  factory AngularVelocity.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AngularVelocity.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AngularVelocity', package: const $pb.PackageName(_omitMessageNames ? '' : 'street_manata'), createEmptyInstance: create)
+    ..a<$core.double>(1, _omitFieldNames ? '' : 'x', $pb.PbFieldType.OF)
+    ..a<$core.double>(2, _omitFieldNames ? '' : 'y', $pb.PbFieldType.OF)
+    ..a<$core.double>(3, _omitFieldNames ? '' : 'z', $pb.PbFieldType.OF)
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AngularVelocity clone() => AngularVelocity()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AngularVelocity copyWith(void Function(AngularVelocity) updates) => super.copyWith((message) => updates(message as AngularVelocity)) as AngularVelocity;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static AngularVelocity create() => AngularVelocity._();
+  AngularVelocity createEmptyInstance() => create();
+  static $pb.PbList<AngularVelocity> createRepeated() => $pb.PbList<AngularVelocity>();
+  @$core.pragma('dart2js:noInline')
+  static AngularVelocity getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AngularVelocity>(create);
+  static AngularVelocity? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.double get x => $_getN(0);
+  @$pb.TagNumber(1)
+  set x($core.double v) { $_setFloat(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasX() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearX() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.double get y => $_getN(1);
+  @$pb.TagNumber(2)
+  set y($core.double v) { $_setFloat(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasY() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearY() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.double get z => $_getN(2);
+  @$pb.TagNumber(3)
+  set z($core.double v) { $_setFloat(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasZ() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearZ() => clearField(3);
+}
+
+class MagneticField extends $pb.GeneratedMessage {
+  factory MagneticField({
+    $core.double? x,
+    $core.double? y,
+    $core.double? z,
+  }) {
+    final $result = create();
+    if (x != null) {
+      $result.x = x;
+    }
+    if (y != null) {
+      $result.y = y;
+    }
+    if (z != null) {
+      $result.z = z;
+    }
+    return $result;
+  }
+  MagneticField._() : super();
+  factory MagneticField.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory MagneticField.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'MagneticField', package: const $pb.PackageName(_omitMessageNames ? '' : 'street_manata'), createEmptyInstance: create)
+    ..a<$core.double>(1, _omitFieldNames ? '' : 'x', $pb.PbFieldType.OF)
+    ..a<$core.double>(2, _omitFieldNames ? '' : 'y', $pb.PbFieldType.OF)
+    ..a<$core.double>(3, _omitFieldNames ? '' : 'z', $pb.PbFieldType.OF)
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  MagneticField clone() => MagneticField()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  MagneticField copyWith(void Function(MagneticField) updates) => super.copyWith((message) => updates(message as MagneticField)) as MagneticField;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static MagneticField create() => MagneticField._();
+  MagneticField createEmptyInstance() => create();
+  static $pb.PbList<MagneticField> createRepeated() => $pb.PbList<MagneticField>();
+  @$core.pragma('dart2js:noInline')
+  static MagneticField getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<MagneticField>(create);
+  static MagneticField? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.double get x => $_getN(0);
+  @$pb.TagNumber(1)
+  set x($core.double v) { $_setFloat(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasX() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearX() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.double get y => $_getN(1);
+  @$pb.TagNumber(2)
+  set y($core.double v) { $_setFloat(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasY() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearY() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.double get z => $_getN(2);
+  @$pb.TagNumber(3)
+  set z($core.double v) { $_setFloat(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasZ() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearZ() => clearField(3);
+}
+
+class OrientationCapture extends $pb.GeneratedMessage {
+  factory OrientationCapture({
+    $fixnum.Int64? epochMicroSeconds,
+    Orientation? orientation,
+  }) {
+    final $result = create();
+    if (epochMicroSeconds != null) {
+      $result.epochMicroSeconds = epochMicroSeconds;
+    }
+    if (orientation != null) {
+      $result.orientation = orientation;
+    }
+    return $result;
+  }
+  OrientationCapture._() : super();
+  factory OrientationCapture.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory OrientationCapture.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'OrientationCapture', package: const $pb.PackageName(_omitMessageNames ? '' : 'street_manata'), createEmptyInstance: create)
+    ..aInt64(1, _omitFieldNames ? '' : 'epochMicroSeconds')
+    ..aOM<Orientation>(2, _omitFieldNames ? '' : 'orientation', subBuilder: Orientation.create)
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  OrientationCapture clone() => OrientationCapture()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  OrientationCapture copyWith(void Function(OrientationCapture) updates) => super.copyWith((message) => updates(message as OrientationCapture)) as OrientationCapture;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static OrientationCapture create() => OrientationCapture._();
+  OrientationCapture createEmptyInstance() => create();
+  static $pb.PbList<OrientationCapture> createRepeated() => $pb.PbList<OrientationCapture>();
+  @$core.pragma('dart2js:noInline')
+  static OrientationCapture getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<OrientationCapture>(create);
+  static OrientationCapture? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get epochMicroSeconds => $_getI64(0);
+  @$pb.TagNumber(1)
+  set epochMicroSeconds($fixnum.Int64 v) { $_setInt64(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasEpochMicroSeconds() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearEpochMicroSeconds() => clearField(1);
+
+  @$pb.TagNumber(2)
+  Orientation get orientation => $_getN(1);
+  @$pb.TagNumber(2)
+  set orientation(Orientation v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasOrientation() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearOrientation() => clearField(2);
+  @$pb.TagNumber(2)
+  Orientation ensureOrientation() => $_ensure(1);
+}
+
 class GpsCapture extends $pb.GeneratedMessage {
   factory GpsCapture({
     $fixnum.Int64? epochMicroSeconds,
@@ -236,42 +620,27 @@ class GpsCapture extends $pb.GeneratedMessage {
   GpsPosition ensurePosition() => $_ensure(1);
 }
 
-class ImuCapture extends $pb.GeneratedMessage {
-  factory ImuCapture({
+class AccelerationCapture extends $pb.GeneratedMessage {
+  factory AccelerationCapture({
     $fixnum.Int64? epochMicroSeconds,
-    $core.double? x,
-    $core.double? y,
-    $core.double? z,
-    $core.double? w,
+    Acceleration? acceleration,
   }) {
     final $result = create();
     if (epochMicroSeconds != null) {
       $result.epochMicroSeconds = epochMicroSeconds;
     }
-    if (x != null) {
-      $result.x = x;
-    }
-    if (y != null) {
-      $result.y = y;
-    }
-    if (z != null) {
-      $result.z = z;
-    }
-    if (w != null) {
-      $result.w = w;
+    if (acceleration != null) {
+      $result.acceleration = acceleration;
     }
     return $result;
   }
-  ImuCapture._() : super();
-  factory ImuCapture.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ImuCapture.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  AccelerationCapture._() : super();
+  factory AccelerationCapture.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AccelerationCapture.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ImuCapture', package: const $pb.PackageName(_omitMessageNames ? '' : 'street_manata'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AccelerationCapture', package: const $pb.PackageName(_omitMessageNames ? '' : 'street_manata'), createEmptyInstance: create)
     ..aInt64(1, _omitFieldNames ? '' : 'epochMicroSeconds')
-    ..a<$core.double>(2, _omitFieldNames ? '' : 'x', $pb.PbFieldType.OF)
-    ..a<$core.double>(3, _omitFieldNames ? '' : 'y', $pb.PbFieldType.OF)
-    ..a<$core.double>(4, _omitFieldNames ? '' : 'z', $pb.PbFieldType.OF)
-    ..a<$core.double>(5, _omitFieldNames ? '' : 'w', $pb.PbFieldType.OF)
+    ..aOM<Acceleration>(2, _omitFieldNames ? '' : 'acceleration', subBuilder: Acceleration.create)
     ..hasRequiredFields = false
   ;
 
@@ -279,22 +648,22 @@ class ImuCapture extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  ImuCapture clone() => ImuCapture()..mergeFromMessage(this);
+  AccelerationCapture clone() => AccelerationCapture()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ImuCapture copyWith(void Function(ImuCapture) updates) => super.copyWith((message) => updates(message as ImuCapture)) as ImuCapture;
+  AccelerationCapture copyWith(void Function(AccelerationCapture) updates) => super.copyWith((message) => updates(message as AccelerationCapture)) as AccelerationCapture;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static ImuCapture create() => ImuCapture._();
-  ImuCapture createEmptyInstance() => create();
-  static $pb.PbList<ImuCapture> createRepeated() => $pb.PbList<ImuCapture>();
+  static AccelerationCapture create() => AccelerationCapture._();
+  AccelerationCapture createEmptyInstance() => create();
+  static $pb.PbList<AccelerationCapture> createRepeated() => $pb.PbList<AccelerationCapture>();
   @$core.pragma('dart2js:noInline')
-  static ImuCapture getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ImuCapture>(create);
-  static ImuCapture? _defaultInstance;
+  static AccelerationCapture getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AccelerationCapture>(create);
+  static AccelerationCapture? _defaultInstance;
 
   @$pb.TagNumber(1)
   $fixnum.Int64 get epochMicroSeconds => $_getI64(0);
@@ -306,40 +675,147 @@ class ImuCapture extends $pb.GeneratedMessage {
   void clearEpochMicroSeconds() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.double get x => $_getN(1);
+  Acceleration get acceleration => $_getN(1);
   @$pb.TagNumber(2)
-  set x($core.double v) { $_setFloat(1, v); }
+  set acceleration(Acceleration v) { setField(2, v); }
   @$pb.TagNumber(2)
-  $core.bool hasX() => $_has(1);
+  $core.bool hasAcceleration() => $_has(1);
   @$pb.TagNumber(2)
-  void clearX() => clearField(2);
+  void clearAcceleration() => clearField(2);
+  @$pb.TagNumber(2)
+  Acceleration ensureAcceleration() => $_ensure(1);
+}
 
-  @$pb.TagNumber(3)
-  $core.double get y => $_getN(2);
-  @$pb.TagNumber(3)
-  set y($core.double v) { $_setFloat(2, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasY() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearY() => clearField(3);
+class AngularVelocityCapture extends $pb.GeneratedMessage {
+  factory AngularVelocityCapture({
+    $fixnum.Int64? epochMicroSeconds,
+    AngularVelocity? angularVelocity,
+  }) {
+    final $result = create();
+    if (epochMicroSeconds != null) {
+      $result.epochMicroSeconds = epochMicroSeconds;
+    }
+    if (angularVelocity != null) {
+      $result.angularVelocity = angularVelocity;
+    }
+    return $result;
+  }
+  AngularVelocityCapture._() : super();
+  factory AngularVelocityCapture.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AngularVelocityCapture.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
-  @$pb.TagNumber(4)
-  $core.double get z => $_getN(3);
-  @$pb.TagNumber(4)
-  set z($core.double v) { $_setFloat(3, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasZ() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearZ() => clearField(4);
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AngularVelocityCapture', package: const $pb.PackageName(_omitMessageNames ? '' : 'street_manata'), createEmptyInstance: create)
+    ..aInt64(1, _omitFieldNames ? '' : 'epochMicroSeconds')
+    ..aOM<AngularVelocity>(2, _omitFieldNames ? '' : 'angularVelocity', subBuilder: AngularVelocity.create)
+    ..hasRequiredFields = false
+  ;
 
-  @$pb.TagNumber(5)
-  $core.double get w => $_getN(4);
-  @$pb.TagNumber(5)
-  set w($core.double v) { $_setFloat(4, v); }
-  @$pb.TagNumber(5)
-  $core.bool hasW() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearW() => clearField(5);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AngularVelocityCapture clone() => AngularVelocityCapture()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AngularVelocityCapture copyWith(void Function(AngularVelocityCapture) updates) => super.copyWith((message) => updates(message as AngularVelocityCapture)) as AngularVelocityCapture;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static AngularVelocityCapture create() => AngularVelocityCapture._();
+  AngularVelocityCapture createEmptyInstance() => create();
+  static $pb.PbList<AngularVelocityCapture> createRepeated() => $pb.PbList<AngularVelocityCapture>();
+  @$core.pragma('dart2js:noInline')
+  static AngularVelocityCapture getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AngularVelocityCapture>(create);
+  static AngularVelocityCapture? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get epochMicroSeconds => $_getI64(0);
+  @$pb.TagNumber(1)
+  set epochMicroSeconds($fixnum.Int64 v) { $_setInt64(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasEpochMicroSeconds() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearEpochMicroSeconds() => clearField(1);
+
+  @$pb.TagNumber(2)
+  AngularVelocity get angularVelocity => $_getN(1);
+  @$pb.TagNumber(2)
+  set angularVelocity(AngularVelocity v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasAngularVelocity() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearAngularVelocity() => clearField(2);
+  @$pb.TagNumber(2)
+  AngularVelocity ensureAngularVelocity() => $_ensure(1);
+}
+
+class MagneticFieldCapture extends $pb.GeneratedMessage {
+  factory MagneticFieldCapture({
+    $fixnum.Int64? epochMicroSeconds,
+    MagneticField? magneticField,
+  }) {
+    final $result = create();
+    if (epochMicroSeconds != null) {
+      $result.epochMicroSeconds = epochMicroSeconds;
+    }
+    if (magneticField != null) {
+      $result.magneticField = magneticField;
+    }
+    return $result;
+  }
+  MagneticFieldCapture._() : super();
+  factory MagneticFieldCapture.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory MagneticFieldCapture.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'MagneticFieldCapture', package: const $pb.PackageName(_omitMessageNames ? '' : 'street_manata'), createEmptyInstance: create)
+    ..aInt64(1, _omitFieldNames ? '' : 'epochMicroSeconds')
+    ..aOM<MagneticField>(2, _omitFieldNames ? '' : 'magneticField', subBuilder: MagneticField.create)
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  MagneticFieldCapture clone() => MagneticFieldCapture()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  MagneticFieldCapture copyWith(void Function(MagneticFieldCapture) updates) => super.copyWith((message) => updates(message as MagneticFieldCapture)) as MagneticFieldCapture;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static MagneticFieldCapture create() => MagneticFieldCapture._();
+  MagneticFieldCapture createEmptyInstance() => create();
+  static $pb.PbList<MagneticFieldCapture> createRepeated() => $pb.PbList<MagneticFieldCapture>();
+  @$core.pragma('dart2js:noInline')
+  static MagneticFieldCapture getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<MagneticFieldCapture>(create);
+  static MagneticFieldCapture? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get epochMicroSeconds => $_getI64(0);
+  @$pb.TagNumber(1)
+  set epochMicroSeconds($fixnum.Int64 v) { $_setInt64(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasEpochMicroSeconds() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearEpochMicroSeconds() => clearField(1);
+
+  @$pb.TagNumber(2)
+  MagneticField get magneticField => $_getN(1);
+  @$pb.TagNumber(2)
+  set magneticField(MagneticField v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasMagneticField() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearMagneticField() => clearField(2);
+  @$pb.TagNumber(2)
+  MagneticField ensureMagneticField() => $_ensure(1);
 }
 
 class CameraSpecification extends $pb.GeneratedMessage {
@@ -644,7 +1120,10 @@ class GeoCapture extends $pb.GeneratedMessage {
   factory GeoCapture({
     $core.String? device,
     $core.Iterable<GpsCapture>? gps,
-    $core.Iterable<ImuCapture>? imu,
+    $core.Iterable<OrientationCapture>? orientation,
+    $core.Iterable<AccelerationCapture>? acceleration,
+    $core.Iterable<AngularVelocityCapture>? angularVelocity,
+    $core.Iterable<MagneticFieldCapture>? magneticField,
     $core.Iterable<PhotoCapture>? photos,
     $core.Iterable<VideoCapture>? videos,
     $core.String? description,
@@ -657,8 +1136,17 @@ class GeoCapture extends $pb.GeneratedMessage {
     if (gps != null) {
       $result.gps.addAll(gps);
     }
-    if (imu != null) {
-      $result.imu.addAll(imu);
+    if (orientation != null) {
+      $result.orientation.addAll(orientation);
+    }
+    if (acceleration != null) {
+      $result.acceleration.addAll(acceleration);
+    }
+    if (angularVelocity != null) {
+      $result.angularVelocity.addAll(angularVelocity);
+    }
+    if (magneticField != null) {
+      $result.magneticField.addAll(magneticField);
     }
     if (photos != null) {
       $result.photos.addAll(photos);
@@ -681,11 +1169,14 @@ class GeoCapture extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'GeoCapture', package: const $pb.PackageName(_omitMessageNames ? '' : 'street_manata'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'device')
     ..pc<GpsCapture>(2, _omitFieldNames ? '' : 'gps', $pb.PbFieldType.PM, subBuilder: GpsCapture.create)
-    ..pc<ImuCapture>(3, _omitFieldNames ? '' : 'imu', $pb.PbFieldType.PM, subBuilder: ImuCapture.create)
-    ..pc<PhotoCapture>(4, _omitFieldNames ? '' : 'photos', $pb.PbFieldType.PM, subBuilder: PhotoCapture.create)
-    ..pc<VideoCapture>(5, _omitFieldNames ? '' : 'videos', $pb.PbFieldType.PM, subBuilder: VideoCapture.create)
-    ..aOS(6, _omitFieldNames ? '' : 'description')
-    ..pPS(7, _omitFieldNames ? '' : 'tags')
+    ..pc<OrientationCapture>(3, _omitFieldNames ? '' : 'orientation', $pb.PbFieldType.PM, subBuilder: OrientationCapture.create)
+    ..pc<AccelerationCapture>(4, _omitFieldNames ? '' : 'acceleration', $pb.PbFieldType.PM, subBuilder: AccelerationCapture.create)
+    ..pc<AngularVelocityCapture>(5, _omitFieldNames ? '' : 'angularVelocity', $pb.PbFieldType.PM, subBuilder: AngularVelocityCapture.create)
+    ..pc<MagneticFieldCapture>(6, _omitFieldNames ? '' : 'magneticField', $pb.PbFieldType.PM, subBuilder: MagneticFieldCapture.create)
+    ..pc<PhotoCapture>(7, _omitFieldNames ? '' : 'photos', $pb.PbFieldType.PM, subBuilder: PhotoCapture.create)
+    ..pc<VideoCapture>(8, _omitFieldNames ? '' : 'videos', $pb.PbFieldType.PM, subBuilder: VideoCapture.create)
+    ..aOS(9, _omitFieldNames ? '' : 'description')
+    ..pPS(10, _omitFieldNames ? '' : 'tags')
     ..hasRequiredFields = false
   ;
 
@@ -723,25 +1214,34 @@ class GeoCapture extends $pb.GeneratedMessage {
   $core.List<GpsCapture> get gps => $_getList(1);
 
   @$pb.TagNumber(3)
-  $core.List<ImuCapture> get imu => $_getList(2);
+  $core.List<OrientationCapture> get orientation => $_getList(2);
 
   @$pb.TagNumber(4)
-  $core.List<PhotoCapture> get photos => $_getList(3);
+  $core.List<AccelerationCapture> get acceleration => $_getList(3);
 
   @$pb.TagNumber(5)
-  $core.List<VideoCapture> get videos => $_getList(4);
+  $core.List<AngularVelocityCapture> get angularVelocity => $_getList(4);
 
   @$pb.TagNumber(6)
-  $core.String get description => $_getSZ(5);
-  @$pb.TagNumber(6)
-  set description($core.String v) { $_setString(5, v); }
-  @$pb.TagNumber(6)
-  $core.bool hasDescription() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearDescription() => clearField(6);
+  $core.List<MagneticFieldCapture> get magneticField => $_getList(5);
 
   @$pb.TagNumber(7)
-  $core.List<$core.String> get tags => $_getList(6);
+  $core.List<PhotoCapture> get photos => $_getList(6);
+
+  @$pb.TagNumber(8)
+  $core.List<VideoCapture> get videos => $_getList(7);
+
+  @$pb.TagNumber(9)
+  $core.String get description => $_getSZ(8);
+  @$pb.TagNumber(9)
+  set description($core.String v) { $_setString(8, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasDescription() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearDescription() => clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.List<$core.String> get tags => $_getList(9);
 }
 
 

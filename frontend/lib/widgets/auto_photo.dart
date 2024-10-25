@@ -7,9 +7,9 @@ import 'geo_photo_marker_layer.dart';
 import '../utils/recorder.dart';
 
 class AutoPhotoWidget extends StatefulWidget {
-  final Recorder geoCamera;
+  final Recorder recorder;
 
-  const AutoPhotoWidget({super.key, required this.geoCamera});
+  const AutoPhotoWidget({super.key, required this.recorder});
 
   @override
   _AutoPhotoWidgetState createState() => _AutoPhotoWidgetState();
@@ -56,7 +56,7 @@ class _AutoPhotoWidgetState extends State<AutoPhotoWidget> {
                 child: SizedBox(
                     width: 100,
                     child: Column(children: [
-                      CameraPreview(widget.geoCamera.cameraController)
+                      CameraPreview(widget.recorder.cameraController)
                     ]))),
           )),
     ];
@@ -76,15 +76,15 @@ class _AutoPhotoWidgetState extends State<AutoPhotoWidget> {
                     heroTag: 'auto_photo',
                     // Provide an onPressed callback.
                     onPressed: () async {
-                      if (widget.geoCamera.isRecording) {
-                        await widget.geoCamera.stopContinuousRecording();
+                      if (widget.recorder.isRecording) {
+                        await widget.recorder.stopContinuousRecording();
                         setState(() {
                           //widget.geoCamera.disableContiniousMode();
                           buttonText = 'Erfassung starten';
                         });
                       } else {
                         //widget.geoCamera.enableContiniousMode();
-                        await widget.geoCamera.startContinuousRecording();
+                        await widget.recorder.startContinuousRecording();
                         setState(() {
                           setState(() => buttonText = 'Erfassung stoppen');
                         });
