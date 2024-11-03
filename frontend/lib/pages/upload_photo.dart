@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:street_manta_client/protobufs/geo_capture.pb.dart';
 import 'dart:io';
@@ -7,11 +9,10 @@ import '../api/capture.dart';
 class UploadGeoPhotoScreen extends StatefulWidget {
   UploadGeoPhotoScreen({
     super.key,
-    required this.photoCapture,
+    required this.singlePhotoCapture,
   });
 
-  PhotoCapture photoCapture;
-  //final GeoPhotoUpload geoPhoto;
+  GeoCapture singlePhotoCapture;
 
   @override
   UploadGeoPhotoScreenState createState() => UploadGeoPhotoScreenState();
@@ -19,13 +20,13 @@ class UploadGeoPhotoScreen extends StatefulWidget {
 
 // A widget that displays the picture taken by the user.
 class UploadGeoPhotoScreenState extends State<UploadGeoPhotoScreen> {
-  late PhotoCapture photoCapture;
+  late GeoCapture singlePhotoCapture;
   bool waitingForApiCall = false;
 
   @override
   void initState() {
     super.initState();
-    photoCapture = widget.photoCapture;
+    singlePhotoCapture = widget.singlePhotoCapture;
   }
 
   @override
@@ -35,8 +36,9 @@ class UploadGeoPhotoScreenState extends State<UploadGeoPhotoScreen> {
       // The image is stored as a file on the device. Use the `Image.file`
       // constructor with the given path to display the image.
       body: Column(children: <Widget>[
+        //TODO: Fix this
         Flexible(
-          child: Image.file(File(photoCapture.file)),
+          child: Image.memory(Uint8List.fromList(singlePhotoCapture.photos[0].data)),
         ),
         const TextField(
           decoration: InputDecoration(hintText: 'Description'),
@@ -54,8 +56,7 @@ class UploadGeoPhotoScreenState extends State<UploadGeoPhotoScreen> {
   }
 
   void _uploadPhotoCapture() async {
-    var geoCapture = GeoCapture(photos: [photoCapture]);
-    var response = await uploadGeoCapture(geoCapture);
+    var response = await uploadGeoCapture(singlePhotoCapture);
     if (!mounted) return;
     if (response.statusCode == 200) {
       Navigator.pop(context);

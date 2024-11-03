@@ -13,4 +13,6 @@ dependencies = [
     "httpx",
     "python-multipart",
     "protobuf",
+    "rosbags",
+    "scipy",
 ]

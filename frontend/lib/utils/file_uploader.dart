@@ -14,8 +14,8 @@ import '../models/geo_photo.dart';
 
 Logger logger = Logger();
 
-class ZipUploader {
-  static final ZipUploader _instance = ZipUploader._internal();
+class FileUploader {
+  static final FileUploader _instance = FileUploader._internal();
 
   late Directory uploadDirectory;
   bool _isUploadDirectoryInitialized = false;
@@ -25,11 +25,11 @@ class ZipUploader {
   final HashMap<int, Function> _registeredCallbacks = HashMap();
   List<FileSystemEntity> filesQueuedForUpload = [];
 
-  ZipUploader._internal() {
+  FileUploader._internal() {
     enableAutoUpload();
   }
 
-  factory ZipUploader() {
+  factory FileUploader() {
     return _instance;
   }
 
@@ -44,7 +44,7 @@ class ZipUploader {
   Future<void> reloadListOfQueuedFiles() async {
     filesQueuedForUpload = (await getUploadDirectory())
         .listSync()
-        .where((element) => element.path.split('.').last == 'zip')
+        .where((element) => element.path.split('.').last == 'cap')
         .toList();
     _registeredCallbacks.forEach((key, callback) {
       callback();
@@ -122,7 +122,7 @@ class ZipUploader {
             try {
               logger.i('Uploading file: ${file.path}');
               lockFile.createSync(exclusive: true);
-              await uploadGeoCaptureZip(file.path);
+              await uploadGeoCaptureFile(file.path);
               await file.delete();
             } catch (err) {
               logger.e('Error uploading file: ${file.path}');

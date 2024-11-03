@@ -47,6 +47,7 @@ api_router = APIRouter(prefix="/api")
 
 def get_fs():
     fs_dir = Path(f"{DATASTORE_PATH}")
+    print(f"Using datastore path: {fs_dir}")
     fs_dir.mkdir(parents=True, exist_ok=True)
     fs = OSFS(str(fs_dir))
     try:
@@ -170,38 +171,38 @@ async def upload_geo_capture(
     fs: FS = Depends(get_fs),
 ) -> str:
     geo_capture_bytes = await geo_capture.read()
-    fs.opendir("zipped").writebytes(capture_id, geo_capture_bytes)
-    zf = zipfile.ZipFile(io.BytesIO(geo_capture_bytes))
-    protobuf = [
-        zip_info.filename
-        for zip_info in zf.infolist()
-        if zip_info.filename.endswith(".pb")
-    ]
-    assert len(protobuf) == 1
+    fs.opendir("captures").writebytes(f"{capture_id}.cap", geo_capture_bytes)
+    print(f'wrote capture file: {capture_id}.cap')
+    #TODO: Implement this with new GeoCapture structure
+    # zf = zipfile.ZipFile(io.BytesIO(geo_capture_bytes))
+    # protobuf = [
+    #     zip_info.filename
+    #     for zip_info in zf.infolist()
+    #     if zip_info.filename.endswith(".pb")
+    # ]
+    # assert len(protobuf) == 1
     geo_capture = GeoCapture()
-    geo_capture.ParseFromString(zf.read(protobuf[0]))
-    for photo_capture in geo_capture.photos:
-        photo_path = Path(photo_capture.file)
-        image_bytes = zf.read(photo_path.name)
-        save_image_from_bytes(image_bytes, photo_path.stem, fs)
+    geo_capture.ParseFromString(geo_capture_bytes)
+    for i, photo_capture in enumerate(geo_capture.photos):
+        image_bytes = photo_capture.data
+        photo_id = f"{capture_id}_{i}"
+        save_image_from_bytes(image_bytes, photo_id, fs)
         geophoto = models.GeoPhotoCreate(
-            image_id=photo_path.stem,
-            latitude=photo_capture.gps_position.latitude,
-            longitude=photo_capture.gps_position.longitude,
-            elevation=photo_capture.gps_position.elevation,
-            pitch=photo_capture.orientation.pitch,
-            roll=photo_capture.orientation.roll,
-            yaw=photo_capture.orientation.yaw,
+            image_id=photo_id,
+            latitude=photo_capture.gps.position.latitude,
+            longitude=photo_capture.gps.position.longitude,
+            elevation=photo_capture.gps.position.elevation,
+            pitch=photo_capture.orientation.orientation.pitch,
+            roll=photo_capture.orientation.orientation.roll,
+            yaw=photo_capture.orientation.orientation.yaw,
             description=geo_capture.description,
         )
         db_interface.create_geophoto(db=db, geophoto=geophoto, user=user)
-        photo_capture.file = photo_path.stem
-    for video_capture in geo_capture.videos:
-        video_capture.file = Path(video_capture.file).name
-        video_bytes = zf.read(video_capture.file)
-        video_capture.file = f"{str(Path(video_capture.file).name)}"
-        fs.opendir('videos').writebytes(video_capture.file, video_bytes)
-    fs.writebytes(f"{capture_id}.pb", geo_capture.SerializeToString())
+    for i, video_capture in enumerate(geo_capture.videos):
+        video_bytes = video_capture.data
+        video_id = f"{capture_id}_{i}"
+        fs.opendir('videos').writebytes(video_id, video_bytes)
+    # fs.writebytes(f"{capture_id}.pb", geo_capture.SerializeToString())
     return capture_id
 
 

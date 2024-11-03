@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:street_manta_client/utils/zip_uploader.dart';
+import 'package:street_manta_client/utils/file_uploader.dart';
 
 import '../globals.dart';
 import '../widgets/footer.dart';
@@ -21,18 +21,18 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    ZipUploader().registerCallback(widget, () {
+    FileUploader().registerCallback(widget, () {
       setState(() {
-        filesQueuedForUpload = ZipUploader().filesQueuedForUpload.length;
+        filesQueuedForUpload = FileUploader().filesQueuedForUpload.length;
       });
     });
-    ZipUploader().reloadListOfQueuedFiles();
+    FileUploader().reloadListOfQueuedFiles();
   }
 
   @override
   void dispose() {
     //_serverUrlController.dispose();
-    ZipUploader().unregisterCallback(widget);
+    FileUploader().unregisterCallback(widget);
     super.dispose();
   }
 
@@ -81,6 +81,16 @@ class _SettingsPageState extends State<SettingsPage> {
                           title: Text(
                               'Anzahl Dateien in Uploadwarteschlange: $filesQueuedForUpload'),
                         ),
+                        // ElevatedButton(
+                        //   onPressed: () {
+                        //     var res = LowLevelCamera().helloWorld();
+                        //     res.then((value) {
+                        //       ScaffoldMessenger.of(context).showSnackBar(
+                        //           SnackBar(content: Text(value)));
+                        //     });
+                        //   },
+                        //   child: const Text('Test API'),
+                        // ),
                       ],
                     ),
                   )),

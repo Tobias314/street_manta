@@ -43,7 +43,7 @@ def create_database(path: Path, overwrite: bool = False):
     with contextlib.contextmanager(get_fs)() as fs:
          fs.makedir("images", recreate=True)
          fs.makedir("videos", recreate=True)
-         fs.makedir("zipped", recreate=True)
+         fs.makedir("captures", recreate=True)
 
 
 def create_example_database(path: Path, overwrite: bool = False):

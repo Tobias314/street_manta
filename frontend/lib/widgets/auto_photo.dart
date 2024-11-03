@@ -77,14 +77,14 @@ class _AutoPhotoWidgetState extends State<AutoPhotoWidget> {
                     // Provide an onPressed callback.
                     onPressed: () async {
                       if (widget.recorder.isRecording) {
-                        await widget.recorder.stopContinuousRecording();
+                        await widget.recorder.stopChunkedGeoCapture();
                         setState(() {
                           //widget.geoCamera.disableContiniousMode();
                           buttonText = 'Erfassung starten';
                         });
                       } else {
                         //widget.geoCamera.enableContiniousMode();
-                        await widget.recorder.startContinuousRecording();
+                        await widget.recorder.startChunkedGeoCapture();
                         setState(() {
                           setState(() => buttonText = 'Erfassung stoppen');
                         });

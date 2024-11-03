@@ -7,4 +7,4 @@ echo "use --overwrite to overwrite existing database"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 echo "Datastore path: $DATASTORE_PATH"
-(cd $SCRIPT_DIR &&python -m app.tools.create_db $@)
+(cd $SCRIPT_DIR && python -m street_manta.tools.create_db $@)

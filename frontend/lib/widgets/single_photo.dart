@@ -30,7 +30,7 @@ class _SinglePhotoWidgetState extends State<SinglePhotoWidget> {
                 try {
                   // Attempt to take a picture and get the file `image`
                   // where it was saved.
-                  final photoCapture = await widget.recorder.takeSinglePhotoCapture();
+                  final singlePhotoCapture = await widget.recorder.takeSinglePhotoCapture();
 
                   if (!context.mounted) return;
 
@@ -38,7 +38,7 @@ class _SinglePhotoWidgetState extends State<SinglePhotoWidget> {
                   await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => UploadGeoPhotoScreen(
-                        photoCapture: photoCapture,
+                        singlePhotoCapture: singlePhotoCapture,
                       ),
                     ),
                   );

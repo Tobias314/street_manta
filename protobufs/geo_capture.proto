@@ -38,29 +38,54 @@ message MagneticField {
   float z = 3;
 }
 
-message OrientationCapture {
+message OrientationReading {
   int64 epoch_micro_seconds = 1;
   Orientation orientation = 2;
 }
 
-message GpsCapture {
+message GpsReading {
   int64 epoch_micro_seconds = 1;
   GpsPosition position = 2;
 }
 
-message AccelerationCapture {
+message AccelerationReading {
   int64 epoch_micro_seconds = 1;
   Acceleration acceleration = 2;
 }
 
-message AngularVelocityCapture {
+message AngularVelocityReading {
   int64 epoch_micro_seconds = 1;
   AngularVelocity angular_velocity = 2;
 }
 
-message MagneticFieldCapture {
+message MagneticFieldReading {
   int64 epoch_micro_seconds = 1;
   MagneticField magnetic_field = 2;
+}
+
+message OrientationCapture {
+  repeated OrientationReading readings = 1;
+  optional string identifier = 2;
+}
+
+message GpsCapture {
+  repeated GpsReading readings = 1;
+  optional string identifier = 2;
+}
+
+message AccelerationCapture {
+  repeated AccelerationReading readings = 1;
+  optional string identifier = 2;
+}
+
+message AngularVelocityCapture {
+  repeated AngularVelocityReading readings = 1;
+  optional string identifier = 2;
+}
+
+message MagneticFieldCapture {
+  repeated MagneticFieldReading readings = 1;
+  optional string identifier = 2;
 }
 
 message CameraSpecification {
@@ -71,18 +96,22 @@ message CameraSpecification {
 
 message PhotoCapture {
   int64 epoch_micro_seconds = 1;
-  string file = 2;
-  optional CameraSpecification camera_specification = 3;
-  optional GpsPosition gps_position = 4;
-  optional Orientation orientation = 5;
+  string format = 2;
+  bytes data = 3;
+  GpsReading gps = 4;
+  OrientationReading orientation = 5;
+  optional CameraSpecification camera_specification = 6;
+  optional string identifier = 7;
 }
 
 message VideoCapture {
   int64 start_epoch_micro_seconds = 1;
   int64 end_epoch_micro_seconds = 2;
-  string file = 3;
-  optional int64 fps = 4;
-  optional CameraSpecification camera_specification = 5;
+  string format = 3;
+  bytes data = 4;
+  optional int64 fps = 5;
+  optional CameraSpecification camera_specification = 6;
+  optional string identifier = 7;
 }
 
 message GeoCapture {
@@ -96,4 +125,8 @@ message GeoCapture {
   repeated VideoCapture videos = 8;
   optional string description = 9;
   repeated string tags = 10;
+  string trace_identifier = 11;
+  int64 timestamp_epoch_micro_seconds = 12;
+  int64 chunk_index = 13;
+  bool is_last_chunk = 14;
 }

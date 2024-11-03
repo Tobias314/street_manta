@@ -7,13 +7,13 @@ import 'package:workmanager/workmanager.dart';
 
 import 'constants.dart';
 import 'pages/login.dart';
-import 'utils/zip_uploader.dart';
+import 'utils/file_uploader.dart';
 
 var logger = Logger();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  var uploader = ZipUploader();
+  var uploader = FileUploader();
   if (Constants.isMobileApp) {
     uploader.enableAutoUpload();
     Workmanager().initialize(
@@ -59,7 +59,7 @@ void callbackDispatcher() {
     //     await SharedPreferences.getInstance(); //Initialize dependency
 
     try {
-      var uploader = ZipUploader();
+      var uploader = FileUploader();
       await uploader.triggerUpload();
     } catch (err) {
       Logger().e(err
