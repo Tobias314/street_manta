@@ -31,7 +31,7 @@ const double MIN_CAPTURE_DISTANCE_METER = 10.0;
 //   return videoCapture;
 // }
 
-Logger logger = Logger();
+  Logger logger = Logger();
 
 class Recorder {
   Recorder(this.cameraController);

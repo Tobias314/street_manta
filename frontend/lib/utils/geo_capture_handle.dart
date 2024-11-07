@@ -6,12 +6,16 @@ import 'package:camera/camera.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quick_video_encoder/flutter_quick_video_encoder.dart';
+import 'package:logger/logger.dart';
 import 'package:mutex/mutex.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:street_manta_client/protobufs/geo_capture.pb.dart';
 import 'package:path/path.dart' as pathlib;
 import 'package:uuid/uuid.dart';
 
 import '../api/capture.dart';
+
+Logger logger = Logger();
 
 final encoderMutex = Mutex();
 
@@ -36,10 +40,16 @@ class GeoCaptureHandle {
   }
 
   Future<void> processFrames() async {
+    encoderMutex.acquire();
+    var tempDir = await getTemporaryDirectory();
     String videoEncoderTmpPath =
-        pathlib.join(Directory.systemTemp.path, '${Uuid().v4()}.mp4');
+        pathlib.join(tempDir.path, '${Uuid().v4()}.mp4');
     bool isEncoderInitialized = false;
-    while (isOpen && frames.isNotEmpty) {
+    while (isOpen || frames.isNotEmpty) {
+      if (frames.isEmpty) {
+        await Future.delayed(Duration(milliseconds: 100));
+        continue;
+      }
       var frame = frames.removeFirst();
       if (!isEncoderInitialized) {
         await FlutterQuickVideoEncoder.setup(
@@ -54,8 +64,9 @@ class GeoCaptureHandle {
           profileLevel: ProfileLevel.any,
         );
       }
-      FlutterQuickVideoEncoder.appendVideoFrame(frame.planes[0].bytes);
+      await FlutterQuickVideoEncoder.appendVideoFrame(frame.planes[0].bytes);
     }
+    await FlutterQuickVideoEncoder.finish();
     encoderMutex.release();
     var file = File(videoEncoderTmpPath);
     Uint8List bytes = await file.readAsBytes();
@@ -64,6 +75,7 @@ class GeoCaptureHandle {
   }
 
   Future<GeoCapture> close() async {
+    logger.d('Closing GeoCaptureHandle');
     isOpen = false;
     while (pendingFutures.isNotEmpty) {
       await pendingFutures.removeFirst();
