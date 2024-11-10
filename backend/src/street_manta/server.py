@@ -183,6 +183,8 @@ async def upload_geo_capture(
     # assert len(protobuf) == 1
     geo_capture = GeoCapture()
     geo_capture.ParseFromString(geo_capture_bytes)
+    for i, video in enumerate(geo_capture.videos):
+        fs.opendir("captures").writebytes(f"{capture_id}_{i}.mp4", video.data)
     for i, photo_capture in enumerate(geo_capture.photos):
         image_bytes = photo_capture.data
         photo_id = f"{capture_id}_{i}"

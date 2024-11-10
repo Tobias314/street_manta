@@ -70,7 +70,8 @@ dependencies:
   device_info_plus: ^11.0.0
   fixnum: ^1.1.0
   flutter_archive: ^6.0.3
-  flutter_quick_video_encoder: ^1.7.2
+  flutter_quick_video_encoder:
+    path: ./plugins/flutter_quick_video_encoder
   mutex: ^3.1.0
 dev_dependencies:
   drift_dev: ^2.18.0

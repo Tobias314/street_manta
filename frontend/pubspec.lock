@@ -460,10 +460,9 @@ packages:
   flutter_quick_video_encoder:
     dependency: "direct main"
     description:
-      name: flutter_quick_video_encoder
-      sha256: "7e36d4e0172efec2237478270751b1aff5556c866316feac514b1137ce5f8501"
-      url: "https://pub.dev"
-    source: hosted
+      path: "plugins/flutter_quick_video_encoder"
+      relative: true
+    source: path
     version: "1.7.2"
   flutter_rotation_sensor:
     dependency: transitive
