@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_quick_video_encoder/flutter_quick_video_encoder.dart';
 import 'package:logger/logger.dart';
 import 'package:mutex/mutex.dart';
 import 'package:path_provider/path_provider.dart';

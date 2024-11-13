@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
-import 'package:flutter_quick_video_encoder/flutter_quick_video_encoder.dart';
 import 'package:logger/logger.dart';
 import 'package:mutex/mutex.dart';
 import 'package:path_provider/path_provider.dart';
@@ -13,7 +12,6 @@ import 'package:uuid/uuid.dart';
 import '../api/capture.dart';
 import '../globals.dart';
 import 'geo_capture_handle.dart';
-import 'video_encoder.dart';
 import 'file_uploader.dart';
 import 'package:motion_sensors/motion_sensors.dart';
 import 'package:geolocator/geolocator.dart';
@@ -112,6 +110,7 @@ class Recorder {
       //await cameraController.startVideoRecording();
       var camera_platform = CameraPlatform.instance as AndroidCamera;
       camera_platform.startChunkableVideoRecording(cameraController.cameraId);
+      //camera_platform.startVideoRecording(cameraController.cameraId);
       //currentGeoCaptureHandle!.pendingFutures
       //    .add(currentGeoCaptureHandle!.processFrames());
       // await cameraController.startImageStream((cameraFrame) {

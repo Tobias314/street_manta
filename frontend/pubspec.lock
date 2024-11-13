@@ -457,13 +457,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.23"
-  flutter_quick_video_encoder:
-    dependency: "direct main"
-    description:
-      path: "plugins/flutter_quick_video_encoder"
-      relative: true
-    source: path
-    version: "1.7.2"
   flutter_rotation_sensor:
     dependency: transitive
     description:
