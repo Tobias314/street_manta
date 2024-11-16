@@ -103,24 +103,17 @@ class Recorder {
           Duration(
               milliseconds: (globals.geoCaptureChunkLengthSeconds * 1000)
                   .toInt()), (timer) {
-        //_chunkCurrentGeoCapture(); //TODO: implement this once chunking is supported
+        var oldGeoCaptureHandle = currentGeoCaptureHandle;
+        int lastStartEpoch = currentCaptureStartEpoch;
+        currentChunkIndex++;
+        _initNewChunk();
+        chunkQueue.add(_closeGeoCaptureHandle(oldGeoCaptureHandle!,
+            pathlib.join(uploadDirectory.path, '${Uuid().v4()}.cap'), lastStartEpoch));
       });
       await cameraController.setExposureMode(ExposureMode.locked);
       currentCaptureStartEpoch = DateTime.now().microsecondsSinceEpoch;
-      //await cameraController.startVideoRecording();
       var camera_platform = CameraPlatform.instance as AndroidCamera;
       camera_platform.startChunkableVideoRecording(cameraController.cameraId);
-      //camera_platform.startVideoRecording(cameraController.cameraId);
-      //currentGeoCaptureHandle!.pendingFutures
-      //    .add(currentGeoCaptureHandle!.processFrames());
-      // await cameraController.startImageStream((cameraFrame) {
-      //   var frameTime = DateTime.now().millisecondsSinceEpoch;
-      //   if (frameTime - lastFrameTime >= 100) {
-      //     logger.d('${frameTime} Adding frame to current video capture');
-      //     currentGeoCaptureHandle!.addFrame(cameraFrame);
-      //   }
-      //   lastFrameTime = frameTime;
-      // });
       logger.i('Started continuous recording');
     } else {
       logger.i('Cannot start continuous recording, already running!');
@@ -130,29 +123,14 @@ class Recorder {
 
   Future<void> stopChunkedGeoCapture() async {
     if (isRecording) {
-      continuousUploadTimer!.cancel();
-      //_chunkCurrentGeoCapture(); //TODO: uncomment this once chunking is supported
-     // await cameraController.stopImageStream();
-      int frameEndEpoch = DateTime.now().microsecondsSinceEpoch;
-      //var videoFile = await cameraController.stopVideoRecording();
-      var camera_platform = CameraPlatform.instance as AndroidCamera;
-      var videoFile = await camera_platform.stopChunkableVideoRecording(cameraController.cameraId);
-      Uint8List bytes = await videoFile.readAsBytes();
-      currentGeoCaptureHandle!.geoCapture.videos.add(VideoCapture(
-          startEpochMicroSeconds: Int64(currentCaptureStartEpoch),
-          endEpochMicroSeconds: Int64(frameEndEpoch),
-          format: 'mp4',
-          data: bytes,
-          fps: Int64(30)));
-      await File(videoFile.path).delete();
-      var geoCapture = await currentGeoCaptureHandle!.close();
-      File uploadGeoCaptureFile = File(pathlib.join(uploadDirectory.path, '${Uuid().v4()}.cap'));
-      await uploadGeoCaptureFile.writeAsBytes(geoCapture.writeToBuffer());
+      continuousUploadTimer!
+          .cancel();
+      chunkQueue.add(_closeGeoCaptureHandle(currentGeoCaptureHandle!,
+          pathlib.join(uploadDirectory.path, '${Uuid().v4()}.cap'), currentCaptureStartEpoch));
       logger.i('Stopped continuous recording');
-      for (var chunkFuture in chunkQueue) {
-        await chunkFuture;
+      while (chunkQueue.isNotEmpty) {
+        await chunkQueue.removeFirst();
       }
-      await uploader.triggerUpload();
     } else {
       logger.i('Cannot stop continuous recording, not running!');
     }
@@ -179,32 +157,27 @@ class Recorder {
     return bytes!;
   }
 
-  Future<void> _writeGeoCaptureChunk(GeoCaptureHandle geoCaptureHandle,
-      List<CameraImage> videoFrames, String outputFilePath) async {
+  Future<void> _closeGeoCaptureHandle(
+      GeoCaptureHandle geoCaptureHandle, String outputFilePath, int videoStartEpoch) async {
+    logger.d('Finishing off GeoCapture...');
+    var camera_platform = CameraPlatform.instance as AndroidCamera;
+    var videoFile =
+        await camera_platform.chunkVideoRecording(cameraController.cameraId);
+    Uint8List bytes = await videoFile.readAsBytes();
+    geoCaptureHandle.geoCapture.videos.add(VideoCapture(
+        startEpochMicroSeconds: Int64(videoStartEpoch),
+        endEpochMicroSeconds: Int64(DateTime.now().microsecondsSinceEpoch),
+        format: 'mp4',
+        data: bytes,
+        fps: Int64(30)));
+    await File(videoFile.path).delete();
     logger.d('Writing new GeoCapture chunk...');
     logger.d('Closing GeoCapture handle (Encoding video)...');
     await geoCaptureHandle.close();
     logger.d('Done closing...');
     File file = File(outputFilePath);
     await file.writeAsBytes(geoCaptureHandle.geoCapture.writeToBuffer());
-  }
-
-  void _chunkCurrentGeoCapture() {
-    logger.d('Trigger Chunking...');
-    if (currentGeoCaptureHandle != null) {
-      logger.d('Chunking current GeoCapture');
-      var geoCaptureToEncode = currentGeoCaptureHandle!;
-      var videoFramesToEncode = currentVideoFrames;
-      currentChunkIndex++;
-      _initNewChunk();
-      chunkQueue.add(_writeGeoCaptureChunk(
-          geoCaptureToEncode,
-          videoFramesToEncode,
-          pathlib.join(uploadDirectory.path, '${Uuid().v4()}.cap')));
-      //String zipFilePath =
-      //    pathlib.join(uploadDirectory.path, '${Uuid().v4()}.zip');
-      //await zipGeoCapture(await endGeoCapture(), zipFilePath);
-    }
+    await uploader.triggerUpload();
   }
 
   // Future<void> _startVideoCapture() async {

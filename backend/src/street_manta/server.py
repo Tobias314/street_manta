@@ -183,8 +183,6 @@ async def upload_geo_capture(
     # assert len(protobuf) == 1
     geo_capture = GeoCapture()
     geo_capture.ParseFromString(geo_capture_bytes)
-    for i, video in enumerate(geo_capture.videos):
-        fs.opendir("captures").writebytes(f"{capture_id}_{i}.mp4", video.data)
     for i, photo_capture in enumerate(geo_capture.photos):
         image_bytes = photo_capture.data
         photo_id = f"{capture_id}_{i}"
@@ -200,10 +198,8 @@ async def upload_geo_capture(
             description=geo_capture.description,
         )
         db_interface.create_geophoto(db=db, geophoto=geophoto, user=user)
-    for i, video_capture in enumerate(geo_capture.videos):
-        video_bytes = video_capture.data
-        video_id = f"{capture_id}_{i}"
-        fs.opendir('videos').writebytes(video_id, video_bytes)
+    for i, video in enumerate(geo_capture.videos):
+        fs.opendir("videos").writebytes(f"{capture_id}_{i}.mp4", video.data)
     # fs.writebytes(f"{capture_id}.pb", geo_capture.SerializeToString())
     return capture_id
 

@@ -4,7 +4,7 @@ class Globals {
   static Globals? _singleton;
   static const int IN_APP_UPLOAD_PERIOD_SECONDS = 60;
   late SharedPreferences preferences;
-  static const double GEO_CAPTURE_CHUNK_LENGTH_SECONDS = 60;
+  static const double GEO_CAPTURE_CHUNK_LENGTH_SECONDS = 10;
 
   static Future<Globals> getInstance() async {
     if (_singleton == null) {

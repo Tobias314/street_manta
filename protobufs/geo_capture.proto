@@ -106,10 +106,10 @@ message PhotoCapture {
 
 message VideoCapture {
   int64 start_epoch_micro_seconds = 1;
-  int64 end_epoch_micro_seconds = 2;
   string format = 3;
   bytes data = 4;
   optional int64 fps = 5;
+  optional int64 end_epoch_micro_seconds = 2;
   optional CameraSpecification camera_specification = 6;
   optional string identifier = 7;
 }
