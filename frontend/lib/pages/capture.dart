@@ -28,7 +28,7 @@ class _CapturePageState extends State<CapturePage> {
 
   Future<Recorder> _initializationFuture() async {
     var availableCameraDescriptors = await availableCameras();
-    var recorder = Recorder(CameraController(availableCameraDescriptors.first, ResolutionPreset.max));
+    var recorder = Recorder(CameraController(availableCameraDescriptors.first, ResolutionPreset.max, fps: 10, videoBitrate: 10000000));
     await recorder.initialize();
     return recorder;
   }

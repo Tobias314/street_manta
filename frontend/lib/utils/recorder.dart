@@ -136,7 +136,7 @@ class Recorder {
       int frameEndEpoch = DateTime.now().microsecondsSinceEpoch;
       //var videoFile = await cameraController.stopVideoRecording();
       var camera_platform = CameraPlatform.instance as AndroidCamera;
-      var videoFile = await camera_platform.stopVideoRecording(cameraController.cameraId);
+      var videoFile = await camera_platform.stopChunkableVideoRecording(cameraController.cameraId);
       Uint8List bytes = await videoFile.readAsBytes();
       currentGeoCaptureHandle!.geoCapture.videos.add(VideoCapture(
           startEpochMicroSeconds: Int64(currentCaptureStartEpoch),
