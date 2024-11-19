@@ -171,18 +171,11 @@ async def upload_geo_capture(
     fs: FS = Depends(get_fs),
 ) -> str:
     geo_capture_bytes = await geo_capture.read()
-    fs.opendir("captures").writebytes(f"{capture_id}.cap", geo_capture_bytes)
-    print(f'wrote capture file: {capture_id}.cap')
-    #TODO: Implement this with new GeoCapture structure
-    # zf = zipfile.ZipFile(io.BytesIO(geo_capture_bytes))
-    # protobuf = [
-    #     zip_info.filename
-    #     for zip_info in zf.infolist()
-    #     if zip_info.filename.endswith(".pb")
-    # ]
-    # assert len(protobuf) == 1
     geo_capture = GeoCapture()
     geo_capture.ParseFromString(geo_capture_bytes)
+    trace_dir = fs.opendir("captures").makedir(geo_capture.trace_identifier, recreate=True)
+    trace_dir.writebytes(f"{geo_capture.chunk_index}.cap", geo_capture_bytes)
+    print(f'wrote capture file: {capture_id}.cap')
     for i, photo_capture in enumerate(geo_capture.photos):
         image_bytes = photo_capture.data
         photo_id = f"{capture_id}_{i}"
@@ -198,9 +191,9 @@ async def upload_geo_capture(
             description=geo_capture.description,
         )
         db_interface.create_geophoto(db=db, geophoto=geophoto, user=user)
+    video_fs = fs.opendir("videos").makedir(geo_capture.trace_identifier, recreate=True)
     for i, video in enumerate(geo_capture.videos):
-        fs.opendir("videos").writebytes(f"{capture_id}_{i}.mp4", video.data)
-    # fs.writebytes(f"{capture_id}.pb", geo_capture.SerializeToString())
+        video_fs.writebytes(f"{video.identifier}_{geo_capture.chunk_index}.{video.format}", video.data)
     return capture_id
 
 
