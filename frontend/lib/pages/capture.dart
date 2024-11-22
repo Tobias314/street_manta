@@ -2,9 +2,10 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import '../constants.dart';
+import '../globals.dart';
 import '../utils/recorder.dart';
 import '../widgets/menu_drawer.dart';
-import '../widgets/auto_photo.dart';
+import '../widgets/continuous_capture.dart';
 import '../widgets/single_photo.dart';
 
 Logger logger = Logger();
@@ -28,7 +29,11 @@ class _CapturePageState extends State<CapturePage> {
 
   Future<Recorder> _initializationFuture() async {
     var availableCameraDescriptors = await availableCameras();
-    var recorder = Recorder(CameraController(availableCameraDescriptors.first, ResolutionPreset.max, fps: 10, videoBitrate: 10000000));
+    var videoBitrate =
+        await Globals.getInstance().then((value) => value.videoBitrate);
+    var recorder = Recorder(CameraController(
+        availableCameraDescriptors.first, ResolutionPreset.max,
+        fps: 10, videoBitrate: videoBitrate));
     await recorder.initialize();
     return recorder;
   }

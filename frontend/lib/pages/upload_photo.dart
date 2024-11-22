@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:street_manta_client/protobufs/geo_capture.pb.dart';
-import 'dart:io';
 import '../api/capture.dart';
 
 // A screen that allows users to take a picture using a given camera.

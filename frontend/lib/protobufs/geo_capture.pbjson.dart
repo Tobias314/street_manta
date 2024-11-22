@@ -334,6 +334,7 @@ const VideoCapture$json = {
     {'1': 'data', '3': 4, '4': 1, '5': 12, '10': 'data'},
     {'1': 'fps', '3': 5, '4': 1, '5': 3, '9': 0, '10': 'fps', '17': true},
     {'1': 'end_epoch_micro_seconds', '3': 2, '4': 1, '5': 3, '9': 1, '10': 'endEpochMicroSeconds', '17': true},
+    {'1': 'frame_epochs_micro_seconds', '3': 8, '4': 3, '5': 3, '10': 'frameEpochsMicroSeconds'},
     {'1': 'camera_specification', '3': 6, '4': 1, '5': 11, '6': '.street_manata.CameraSpecification', '9': 2, '10': 'cameraSpecification', '17': true},
     {'1': 'identifier', '3': 7, '4': 1, '5': 9, '9': 3, '10': 'identifier', '17': true},
   ],
@@ -350,11 +351,12 @@ final $typed_data.Uint8List videoCaptureDescriptor = $convert.base64Decode(
     'CgxWaWRlb0NhcHR1cmUSOQoZc3RhcnRfZXBvY2hfbWljcm9fc2Vjb25kcxgBIAEoA1IWc3Rhcn'
     'RFcG9jaE1pY3JvU2Vjb25kcxIWCgZmb3JtYXQYAyABKAlSBmZvcm1hdBISCgRkYXRhGAQgASgM'
     'UgRkYXRhEhUKA2ZwcxgFIAEoA0gAUgNmcHOIAQESOgoXZW5kX2Vwb2NoX21pY3JvX3NlY29uZH'
-    'MYAiABKANIAVIUZW5kRXBvY2hNaWNyb1NlY29uZHOIAQESWgoUY2FtZXJhX3NwZWNpZmljYXRp'
-    'b24YBiABKAsyIi5zdHJlZXRfbWFuYXRhLkNhbWVyYVNwZWNpZmljYXRpb25IAlITY2FtZXJhU3'
-    'BlY2lmaWNhdGlvbogBARIjCgppZGVudGlmaWVyGAcgASgJSANSCmlkZW50aWZpZXKIAQFCBgoE'
-    'X2Zwc0IaChhfZW5kX2Vwb2NoX21pY3JvX3NlY29uZHNCFwoVX2NhbWVyYV9zcGVjaWZpY2F0aW'
-    '9uQg0KC19pZGVudGlmaWVy');
+    'MYAiABKANIAVIUZW5kRXBvY2hNaWNyb1NlY29uZHOIAQESOwoaZnJhbWVfZXBvY2hzX21pY3Jv'
+    'X3NlY29uZHMYCCADKANSF2ZyYW1lRXBvY2hzTWljcm9TZWNvbmRzEloKFGNhbWVyYV9zcGVjaW'
+    'ZpY2F0aW9uGAYgASgLMiIuc3RyZWV0X21hbmF0YS5DYW1lcmFTcGVjaWZpY2F0aW9uSAJSE2Nh'
+    'bWVyYVNwZWNpZmljYXRpb26IAQESIwoKaWRlbnRpZmllchgHIAEoCUgDUgppZGVudGlmaWVyiA'
+    'EBQgYKBF9mcHNCGgoYX2VuZF9lcG9jaF9taWNyb19zZWNvbmRzQhcKFV9jYW1lcmFfc3BlY2lm'
+    'aWNhdGlvbkINCgtfaWRlbnRpZmllcg==');
 
 @$core.Deprecated('Use geoCaptureDescriptor instead')
 const GeoCapture$json = {

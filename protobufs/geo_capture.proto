@@ -110,6 +110,7 @@ message VideoCapture {
   bytes data = 4;
   optional int64 fps = 5;
   optional int64 end_epoch_micro_seconds = 2;
+  repeated int64 frame_epochs_micro_seconds = 8;
   optional CameraSpecification camera_specification = 6;
   optional string identifier = 7;
 }

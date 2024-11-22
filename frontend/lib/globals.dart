@@ -4,7 +4,8 @@ class Globals {
   static Globals? _singleton;
   static const int IN_APP_UPLOAD_PERIOD_SECONDS = 60;
   late SharedPreferences preferences;
-  static const double GEO_CAPTURE_CHUNK_LENGTH_SECONDS = 10;
+  static const double GEO_CAPTURE_CHUNK_LENGTH_SECONDS = 30;
+static const int VIDEO_BITRATE = 8000000;
 
   static Future<Globals> getInstance() async {
     if (_singleton == null) {
@@ -30,6 +31,10 @@ class Globals {
 
   double get geoCaptureChunkLengthSeconds {
     return GEO_CAPTURE_CHUNK_LENGTH_SECONDS;
+  }
+
+  int get videoBitrate {
+    return VIDEO_BITRATE;
   }
 
   Globals._internal();

@@ -114,7 +114,7 @@ def save_image_from_bytes(
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         scaling_factor = 100 / max(img.shape[:2])
         thumbnail = cv2.resize(img, None, fx=scaling_factor, fy=scaling_factor)
-        thumbnail_bytes = cv2.imencode(".png", thumbnail)[1].tobytes()
-        fs.opendir("images").writebytes(f"{image_id}_thumbnail.png", thumbnail_bytes)
+        thumbnail_bytes = cv2.imencode(".jpg", thumbnail)[1].tobytes()
+        fs.opendir("images").writebytes(f"{image_id}_thumbnail.jpg", thumbnail_bytes)
         logger.info(f"Saved thumbnail with {image_id}")
     return image_id

@@ -1,6 +1,3 @@
 [submodule "frontend/plugins/flutter_camera"]
 	path = frontend/plugins/flutter_camera
 	url = git@github.com:Tobias314/flutter_camera.git
-[submodule "frontend/plugins/flutter_quick_video_encoder"]
-	path = frontend/plugins/flutter_quick_video_encoder
-	url = git@github.com:Tobias314/flutter_quick_video_encoder.git

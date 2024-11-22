@@ -20,6 +20,7 @@ class FileUploader {
   late Directory uploadDirectory;
   bool _isUploadDirectoryInitialized = false;
   bool isUploading = false;
+  bool isDone = true;
   Timer? _uploadTimer;
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   final HashMap<int, Function> _registeredCallbacks = HashMap();
@@ -101,6 +102,7 @@ class FileUploader {
             NotificationDetails(android: androidNotificationDetails);
         do {
           if (filesQueuedForUpload.isNotEmpty) {
+            isDone = false;
             await flutterLocalNotificationsPlugin.show(
                 0,
                 'StreetManta Upload',
@@ -134,8 +136,14 @@ class FileUploader {
             }
             await reloadListOfQueuedFiles();
           } else {
-            await flutterLocalNotificationsPlugin.show(0, 'StreetManta Upload',
-                'Done uploading images.', notificationDetails);
+            if (!isDone) {
+              isDone = true;
+              await flutterLocalNotificationsPlugin.show(
+                  0,
+                  'StreetManta Upload',
+                  'Done uploading images.',
+                  notificationDetails);
+            }
           }
         } while (filesQueuedForUpload.isNotEmpty);
       }

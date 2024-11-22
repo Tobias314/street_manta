@@ -148,8 +148,8 @@ async def fetch_image(
     user: Annotated[models.User, Depends(get_current_user)],
     fs: FS = Depends(get_fs),
 ) -> str:
-    image_bytes = fs.opendir("images").readbytes(f"{image_id}.png")
-    return Response(content=image_bytes, media_type="image/png")
+    image_bytes = fs.opendir("images").readbytes(f"{image_id}.jpg")
+    return Response(content=image_bytes, media_type="image/jpeg")
 
 
 @api_router.get("/geophoto/fetch_thumbnail/{image_id}")
@@ -158,8 +158,8 @@ async def fetch_thumbnail(
     user: Annotated[models.User, Depends(get_current_user)],
     fs: FS = Depends(get_fs),
 ) -> str:
-    image_bytes = fs.opendir("images").readbytes(f"{image_id}_thumbnail.png")
-    return Response(content=image_bytes, media_type="image/png")
+    image_bytes = fs.opendir("images").readbytes(f"{image_id}_thumbnail.jpg")
+    return Response(content=image_bytes, media_type="image/jpeg")
 
 
 @api_router.post("/geo_capture/upload/{capture_id}")
@@ -176,9 +176,10 @@ async def upload_geo_capture(
     trace_dir = fs.opendir("captures").makedir(geo_capture.trace_identifier, recreate=True)
     trace_dir.writebytes(f"{geo_capture.chunk_index}.cap", geo_capture_bytes)
     print(f'wrote capture file: {capture_id}.cap')
+    chunk_index = geo_capture.chunk_index
     for i, photo_capture in enumerate(geo_capture.photos):
         image_bytes = photo_capture.data
-        photo_id = f"{capture_id}_{i}"
+        photo_id = f"{capture_id}_{chunk_index}_{photo_capture.identifier}"
         save_image_from_bytes(image_bytes, photo_id, fs)
         geophoto = models.GeoPhotoCreate(
             image_id=photo_id,
@@ -193,7 +194,7 @@ async def upload_geo_capture(
         db_interface.create_geophoto(db=db, geophoto=geophoto, user=user)
     video_fs = fs.opendir("videos").makedir(geo_capture.trace_identifier, recreate=True)
     for i, video in enumerate(geo_capture.videos):
-        video_fs.writebytes(f"{video.identifier}_{geo_capture.chunk_index}.{video.format}", video.data)
+        video_fs.writebytes(f"{chunk_index}_{video.identifier}.{video.format}", video.data)
     return capture_id
 
 

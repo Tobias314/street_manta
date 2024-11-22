@@ -1,18 +1,10 @@
 import 'dart:collection';
-import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
-import 'package:fixnum/fixnum.dart';
-import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:mutex/mutex.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:street_manta_client/protobufs/geo_capture.pb.dart';
-import 'package:path/path.dart' as pathlib;
-import 'package:uuid/uuid.dart';
 
-import '../api/capture.dart';
 
 Logger logger = Logger();
 

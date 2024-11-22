@@ -1,7 +1,5 @@
 import 'dart:io';
-import 'package:flutter_archive/flutter_archive.dart';
 import 'package:logger/logger.dart';
-import 'package:path/path.dart';
 import 'package:street_manta_client/protobufs/geo_capture.pb.dart';
 import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;

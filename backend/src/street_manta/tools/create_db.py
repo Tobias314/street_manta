@@ -50,7 +50,7 @@ def create_example_database(path: Path, overwrite: bool = False):
     create_database(path=path, overwrite=overwrite)
     print("Adding example GeoPhotos to database...")
     db = SessionLocal()
-    tester_user = asyncio.run(create_user(email="test", password="test", db=db))
+    tester_user = asyncio.run(create_user(email="", password="", db=db))
     with contextlib.contextmanager(get_fs)() as fs:
         for i in range(5):
             img = (np.arange(1000000).reshape(1000, 1000) / 1000000 * 255).astype(

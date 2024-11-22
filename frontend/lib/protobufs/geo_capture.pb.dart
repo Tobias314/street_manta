@@ -1335,6 +1335,7 @@ class VideoCapture extends $pb.GeneratedMessage {
     $fixnum.Int64? fps,
     CameraSpecification? cameraSpecification,
     $core.String? identifier,
+    $core.Iterable<$fixnum.Int64>? frameEpochsMicroSeconds,
   }) {
     final $result = create();
     if (startEpochMicroSeconds != null) {
@@ -1358,6 +1359,9 @@ class VideoCapture extends $pb.GeneratedMessage {
     if (identifier != null) {
       $result.identifier = identifier;
     }
+    if (frameEpochsMicroSeconds != null) {
+      $result.frameEpochsMicroSeconds.addAll(frameEpochsMicroSeconds);
+    }
     return $result;
   }
   VideoCapture._() : super();
@@ -1372,6 +1376,7 @@ class VideoCapture extends $pb.GeneratedMessage {
     ..aInt64(5, _omitFieldNames ? '' : 'fps')
     ..aOM<CameraSpecification>(6, _omitFieldNames ? '' : 'cameraSpecification', subBuilder: CameraSpecification.create)
     ..aOS(7, _omitFieldNames ? '' : 'identifier')
+    ..p<$fixnum.Int64>(8, _omitFieldNames ? '' : 'frameEpochsMicroSeconds', $pb.PbFieldType.K6)
     ..hasRequiredFields = false
   ;
 
@@ -1460,6 +1465,9 @@ class VideoCapture extends $pb.GeneratedMessage {
   $core.bool hasIdentifier() => $_has(6);
   @$pb.TagNumber(7)
   void clearIdentifier() => clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.List<$fixnum.Int64> get frameEpochsMicroSeconds => $_getList(7);
 }
 
 class GeoCapture extends $pb.GeneratedMessage {
