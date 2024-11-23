@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:street_manta_client/utils/file_uploader.dart';
 
 import '../globals.dart';
@@ -77,20 +78,63 @@ class _SettingsPageState extends State<SettingsPage> {
                               globals.backendUrl = text.trim(),
                         ),
                         const SizedBox(height: 20),
+                        TextField(
+                          controller: TextEditingController(
+                              text: globals.videoExposureOffset.toString()),
+                          decoration: const InputDecoration(
+                            labelText: 'Video Exposure Offset (EV)',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.video_camera_back_outlined),
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          onSubmitted: (text) =>
+                              globals.videoExposureOffset = double.parse(
+                            text.trim(),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        TextField(
+                          controller: TextEditingController(
+                              text: globals.videoFps.toString()),
+                          decoration: const InputDecoration(
+                            labelText: 'Video FPS',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.video_camera_back_outlined),
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          onSubmitted: (text) => globals.videoFps = int.parse(
+                            text.trim(),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        TextField(
+                          controller: TextEditingController(
+                              text: globals.videoBitrate.toString()),
+                          decoration: const InputDecoration(
+                            labelText: 'Video Bitrate',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.video_camera_back_outlined),
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          onSubmitted: (text) =>
+                              globals.videoBitrate = int.parse(
+                            text.trim(),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
                         ListTile(
                           title: Text(
                               'Anzahl Dateien in Uploadwarteschlange: $filesQueuedForUpload'),
                         ),
-                        // ElevatedButton(
-                        //   onPressed: () {
-                        //     var res = LowLevelCamera().helloWorld();
-                        //     res.then((value) {
-                        //       ScaffoldMessenger.of(context).showSnackBar(
-                        //           SnackBar(content: Text(value)));
-                        //     });
-                        //   },
-                        //   child: const Text('Test API'),
-                        // ),
                       ],
                     ),
                   )),

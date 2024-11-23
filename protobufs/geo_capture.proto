@@ -117,13 +117,13 @@ message VideoCapture {
 
 message GeoCapture {
   string device = 1;
-  repeated GpsCapture gps = 2;
-  repeated OrientationCapture orientation = 3;
-  repeated AccelerationCapture acceleration = 4;
-  repeated AngularVelocityCapture angular_velocity = 5;
-  repeated MagneticFieldCapture magnetic_field = 6;
+  optional GpsCapture gps = 2;
+  optional OrientationCapture orientation = 3;
+  optional AccelerationCapture acceleration = 4;
+  optional AngularVelocityCapture angular_velocity = 5;
+  optional MagneticFieldCapture magnetic_field = 6;
   repeated PhotoCapture photos = 7;
-  repeated VideoCapture videos = 8;
+  optional VideoCapture video = 8;
   optional string description = 9;
   repeated string tags = 10;
   string trace_identifier = 11;

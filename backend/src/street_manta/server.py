@@ -193,7 +193,8 @@ async def upload_geo_capture(
         )
         db_interface.create_geophoto(db=db, geophoto=geophoto, user=user)
     video_fs = fs.opendir("videos").makedir(geo_capture.trace_identifier, recreate=True)
-    for i, video in enumerate(geo_capture.videos):
+    video = geo_capture.video
+    if video is not None:
         video_fs.writebytes(f"{chunk_index}_{video.identifier}.{video.format}", video.data)
     return capture_id
 

@@ -363,14 +363,14 @@ const GeoCapture$json = {
   '1': 'GeoCapture',
   '2': [
     {'1': 'device', '3': 1, '4': 1, '5': 9, '10': 'device'},
-    {'1': 'gps', '3': 2, '4': 3, '5': 11, '6': '.street_manata.GpsCapture', '10': 'gps'},
-    {'1': 'orientation', '3': 3, '4': 3, '5': 11, '6': '.street_manata.OrientationCapture', '10': 'orientation'},
-    {'1': 'acceleration', '3': 4, '4': 3, '5': 11, '6': '.street_manata.AccelerationCapture', '10': 'acceleration'},
-    {'1': 'angular_velocity', '3': 5, '4': 3, '5': 11, '6': '.street_manata.AngularVelocityCapture', '10': 'angularVelocity'},
-    {'1': 'magnetic_field', '3': 6, '4': 3, '5': 11, '6': '.street_manata.MagneticFieldCapture', '10': 'magneticField'},
+    {'1': 'gps', '3': 2, '4': 1, '5': 11, '6': '.street_manata.GpsCapture', '9': 0, '10': 'gps', '17': true},
+    {'1': 'orientation', '3': 3, '4': 1, '5': 11, '6': '.street_manata.OrientationCapture', '9': 1, '10': 'orientation', '17': true},
+    {'1': 'acceleration', '3': 4, '4': 1, '5': 11, '6': '.street_manata.AccelerationCapture', '9': 2, '10': 'acceleration', '17': true},
+    {'1': 'angular_velocity', '3': 5, '4': 1, '5': 11, '6': '.street_manata.AngularVelocityCapture', '9': 3, '10': 'angularVelocity', '17': true},
+    {'1': 'magnetic_field', '3': 6, '4': 1, '5': 11, '6': '.street_manata.MagneticFieldCapture', '9': 4, '10': 'magneticField', '17': true},
     {'1': 'photos', '3': 7, '4': 3, '5': 11, '6': '.street_manata.PhotoCapture', '10': 'photos'},
-    {'1': 'videos', '3': 8, '4': 3, '5': 11, '6': '.street_manata.VideoCapture', '10': 'videos'},
-    {'1': 'description', '3': 9, '4': 1, '5': 9, '9': 0, '10': 'description', '17': true},
+    {'1': 'video', '3': 8, '4': 1, '5': 11, '6': '.street_manata.VideoCapture', '9': 5, '10': 'video', '17': true},
+    {'1': 'description', '3': 9, '4': 1, '5': 9, '9': 6, '10': 'description', '17': true},
     {'1': 'tags', '3': 10, '4': 3, '5': 9, '10': 'tags'},
     {'1': 'trace_identifier', '3': 11, '4': 1, '5': 9, '10': 'traceIdentifier'},
     {'1': 'timestamp_epoch_micro_seconds', '3': 12, '4': 1, '5': 3, '10': 'timestampEpochMicroSeconds'},
@@ -378,24 +378,32 @@ const GeoCapture$json = {
     {'1': 'is_last_chunk', '3': 14, '4': 1, '5': 8, '10': 'isLastChunk'},
   ],
   '8': [
+    {'1': '_gps'},
+    {'1': '_orientation'},
+    {'1': '_acceleration'},
+    {'1': '_angular_velocity'},
+    {'1': '_magnetic_field'},
+    {'1': '_video'},
     {'1': '_description'},
   ],
 };
 
 /// Descriptor for `GeoCapture`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List geoCaptureDescriptor = $convert.base64Decode(
-    'CgpHZW9DYXB0dXJlEhYKBmRldmljZRgBIAEoCVIGZGV2aWNlEisKA2dwcxgCIAMoCzIZLnN0cm'
-    'VldF9tYW5hdGEuR3BzQ2FwdHVyZVIDZ3BzEkMKC29yaWVudGF0aW9uGAMgAygLMiEuc3RyZWV0'
-    'X21hbmF0YS5PcmllbnRhdGlvbkNhcHR1cmVSC29yaWVudGF0aW9uEkYKDGFjY2VsZXJhdGlvbh'
-    'gEIAMoCzIiLnN0cmVldF9tYW5hdGEuQWNjZWxlcmF0aW9uQ2FwdHVyZVIMYWNjZWxlcmF0aW9u'
-    'ElAKEGFuZ3VsYXJfdmVsb2NpdHkYBSADKAsyJS5zdHJlZXRfbWFuYXRhLkFuZ3VsYXJWZWxvY2'
-    'l0eUNhcHR1cmVSD2FuZ3VsYXJWZWxvY2l0eRJKCg5tYWduZXRpY19maWVsZBgGIAMoCzIjLnN0'
-    'cmVldF9tYW5hdGEuTWFnbmV0aWNGaWVsZENhcHR1cmVSDW1hZ25ldGljRmllbGQSMwoGcGhvdG'
-    '9zGAcgAygLMhsuc3RyZWV0X21hbmF0YS5QaG90b0NhcHR1cmVSBnBob3RvcxIzCgZ2aWRlb3MY'
-    'CCADKAsyGy5zdHJlZXRfbWFuYXRhLlZpZGVvQ2FwdHVyZVIGdmlkZW9zEiUKC2Rlc2NyaXB0aW'
-    '9uGAkgASgJSABSC2Rlc2NyaXB0aW9uiAEBEhIKBHRhZ3MYCiADKAlSBHRhZ3MSKQoQdHJhY2Vf'
-    'aWRlbnRpZmllchgLIAEoCVIPdHJhY2VJZGVudGlmaWVyEkEKHXRpbWVzdGFtcF9lcG9jaF9taW'
-    'Nyb19zZWNvbmRzGAwgASgDUhp0aW1lc3RhbXBFcG9jaE1pY3JvU2Vjb25kcxIfCgtjaHVua19p'
-    'bmRleBgNIAEoA1IKY2h1bmtJbmRleBIiCg1pc19sYXN0X2NodW5rGA4gASgIUgtpc0xhc3RDaH'
-    'Vua0IOCgxfZGVzY3JpcHRpb24=');
+    'CgpHZW9DYXB0dXJlEhYKBmRldmljZRgBIAEoCVIGZGV2aWNlEjAKA2dwcxgCIAEoCzIZLnN0cm'
+    'VldF9tYW5hdGEuR3BzQ2FwdHVyZUgAUgNncHOIAQESSAoLb3JpZW50YXRpb24YAyABKAsyIS5z'
+    'dHJlZXRfbWFuYXRhLk9yaWVudGF0aW9uQ2FwdHVyZUgBUgtvcmllbnRhdGlvbogBARJLCgxhY2'
+    'NlbGVyYXRpb24YBCABKAsyIi5zdHJlZXRfbWFuYXRhLkFjY2VsZXJhdGlvbkNhcHR1cmVIAlIM'
+    'YWNjZWxlcmF0aW9uiAEBElUKEGFuZ3VsYXJfdmVsb2NpdHkYBSABKAsyJS5zdHJlZXRfbWFuYX'
+    'RhLkFuZ3VsYXJWZWxvY2l0eUNhcHR1cmVIA1IPYW5ndWxhclZlbG9jaXR5iAEBEk8KDm1hZ25l'
+    'dGljX2ZpZWxkGAYgASgLMiMuc3RyZWV0X21hbmF0YS5NYWduZXRpY0ZpZWxkQ2FwdHVyZUgEUg'
+    '1tYWduZXRpY0ZpZWxkiAEBEjMKBnBob3RvcxgHIAMoCzIbLnN0cmVldF9tYW5hdGEuUGhvdG9D'
+    'YXB0dXJlUgZwaG90b3MSNgoFdmlkZW8YCCABKAsyGy5zdHJlZXRfbWFuYXRhLlZpZGVvQ2FwdH'
+    'VyZUgFUgV2aWRlb4gBARIlCgtkZXNjcmlwdGlvbhgJIAEoCUgGUgtkZXNjcmlwdGlvbogBARIS'
+    'CgR0YWdzGAogAygJUgR0YWdzEikKEHRyYWNlX2lkZW50aWZpZXIYCyABKAlSD3RyYWNlSWRlbn'
+    'RpZmllchJBCh10aW1lc3RhbXBfZXBvY2hfbWljcm9fc2Vjb25kcxgMIAEoA1IadGltZXN0YW1w'
+    'RXBvY2hNaWNyb1NlY29uZHMSHwoLY2h1bmtfaW5kZXgYDSABKANSCmNodW5rSW5kZXgSIgoNaX'
+    'NfbGFzdF9jaHVuaxgOIAEoCFILaXNMYXN0Q2h1bmtCBgoEX2dwc0IOCgxfb3JpZW50YXRpb25C'
+    'DwoNX2FjY2VsZXJhdGlvbkITChFfYW5ndWxhcl92ZWxvY2l0eUIRCg9fbWFnbmV0aWNfZmllbG'
+    'RCCAoGX3ZpZGVvQg4KDF9kZXNjcmlwdGlvbg==');
 

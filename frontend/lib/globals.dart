@@ -4,8 +4,10 @@ class Globals {
   static Globals? _singleton;
   static const int IN_APP_UPLOAD_PERIOD_SECONDS = 60;
   late SharedPreferences preferences;
-  static const double GEO_CAPTURE_CHUNK_LENGTH_SECONDS = 30;
-static const int VIDEO_BITRATE = 8000000;
+  static const double GEO_CAPTURE_CHUNK_LENGTH_SECONDS = 10;
+  static const int DEFAULT_VIDEO_FPS = 30;
+  static const int DEFAULT_VIDEO_BITRATE = 8000000;
+  static const double DEFAULT_VIDEO_EXPOSURE_OFFSET = -0.5; //in EV
 
   static Future<Globals> getInstance() async {
     if (_singleton == null) {
@@ -16,6 +18,18 @@ static const int VIDEO_BITRATE = 8000000;
             'backendUrl',
             const String.fromEnvironment('BACKEND_URL',
                 defaultValue: 'http://localhost:8080'));
+      }
+      if (_singleton!.preferences.getDouble('videoExposureOffset') == null) {
+        _singleton!.preferences.setDouble(
+            'videoExposureOffset', DEFAULT_VIDEO_EXPOSURE_OFFSET); 
+      }
+      if (_singleton!.preferences.getInt('videoFps') == null) {
+        _singleton!.preferences.setInt(
+            'videoFps', DEFAULT_VIDEO_FPS);
+      }
+      if (_singleton!.preferences.getInt('videoBitrate') == null) {
+        _singleton!.preferences.setInt(
+            'videoBitrate', DEFAULT_VIDEO_BITRATE);
       }
     }
     return _singleton!;
@@ -33,8 +47,28 @@ static const int VIDEO_BITRATE = 8000000;
     return GEO_CAPTURE_CHUNK_LENGTH_SECONDS;
   }
 
+  double get videoExposureOffset {
+    return preferences.getDouble('videoExposureOffset')!;
+  }
+
+  set videoExposureOffset(double videoExposureOffset) {
+    preferences.setDouble('videoExposureOffset', videoExposureOffset);
+  }
+
+  int get videoFps {
+    return preferences.getInt('videoFps')!;
+  }
+
+  set videoFps(int videoFps) {
+    preferences.setInt('videoFps', videoBitrate);
+  }
+
   int get videoBitrate {
-    return VIDEO_BITRATE;
+    return preferences.getInt('videoBitrate')!;
+  }
+
+  set videoBitrate(int videoBitrate) {
+    preferences.setInt('videoBitrate', videoBitrate);
   }
 
   Globals._internal();

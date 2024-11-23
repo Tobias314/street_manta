@@ -1,3 +1,5 @@
+import 'package:street_manta_client/api/capture.dart';
+
 import 'marker_popup.dart';
 
 import 'package:flutter/material.dart';
@@ -60,7 +62,13 @@ class GeoPhotoMarkerLayerState extends State<GeoPhotoMarkerLayer> {
                   isFetching = false;
                 })
               })
-          .catchError((error) => print(error));
+          .catchError((error) => {
+                setState(() {
+                  logger.w('Could not fetch geophoto positions: $error');
+                  markers = _createMarkerLayer([]);
+                  isFetching = false;
+                })
+              });
     }
     return markers;
   }

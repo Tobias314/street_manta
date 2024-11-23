@@ -1,6 +1,7 @@
 from tempfile import TemporaryDirectory
 from pathlib import Path
 import zipfile
+from typing import List
 
 import numpy as np
 import cv2
@@ -29,16 +30,18 @@ from rosbags.typesys.stores.ros2_humble import (
 from .protobufs.geo_capture_pb2 import GeoCapture
 
 
-def capture_to_rosbag(capture_path: Path, output_path, rosbag_version: int = 1, image_format='jpeg') -> None:
-    zf = zipfile.ZipFile(capture_path)
-    protobuf = [
-        zip_info.filename
-        for zip_info in zf.infolist()
-        if zip_info.filename.endswith(".pb")
-    ]
-    assert len(protobuf) == 1
-    geo_capture = GeoCapture()
-    geo_capture.ParseFromString(zf.read(protobuf[0]))
+def capture_to_rosbag(
+    capture_paths: List[Path], output_path, rosbag_version: int = 1, image_format="jpeg"
+) -> None:
+    # zf = zipfile.ZipFile(capture_path)
+    # protobuf = [
+    #     zip_info.filename
+    #     for zip_info in zf.infolist()
+    #     if zip_info.filename.endswith(".pb")
+    # ]
+    # assert len(protobuf) == 1
+    # geo_capture = GeoCapture()
+    # geo_capture.ParseFromString(zf.read(protobuf[0]))
 
     FRAMEID = "map"
     """Iterate over IMAGES and save to output bag."""
@@ -61,40 +64,53 @@ def capture_to_rosbag(capture_path: Path, output_path, rosbag_version: int = 1, 
         Writer = Writer2
     else:
         raise ValueError(f"Unknown rosbag version {rosbag_version}")
-    timestamp = geo_capture.videos[0].start_epoch_micro_seconds * 10**3
-    with TemporaryDirectory() as tmp_dir:
-        with Writer(output_path) as writer:
-            img_conn = writer.add_connection(
-                "/cam0/compressed_image", image_msg_type, typestore=typestore
-            )
-            videos_dir = Path(tmp_dir) / "videos"
-            videos_dir.mkdir(exist_ok=True)
-            frame_index = 0
-            for i, video_capture in enumerate(geo_capture.videos):
-                fps = video_capture.fps
-                if fps is None or fps <= 0:
-                    fps = 30
-                frame_step_time = 1 / fps * 10**9
-                name = Path(video_capture.file).name
-                zf.extract(name, videos_dir)
-                video_path = videos_dir / f"{i}.mp4"
-                (videos_dir / name).rename(video_path)
-                cap = cv2.VideoCapture(video_path)
+    # timestamp = geo_capture.videos[0].start_epoch_micro_seconds * 10**3
+    # with TemporaryDirectory() as tmp_dir:
+    with Writer(output_path) as writer:
+        img_conn = writer.add_connection(
+            "/cam0/compressed_image", image_msg_type, typestore=typestore
+        )
+        imu_conn = writer.add_connection("/imu", imu_msg_type, typestore=typestore)
+        global_video_frame_index = 0
+        global_imu_message_index = 0
+        for capture_path in capture_paths:
+            geo_capture = GeoCapture()
+            with open(capture_path, "rb") as f:
+                geo_capture.ParseFromString(f.read())
+            video = geo_capture.video
+            with TemporaryDirectory() as tmp_dir:
+                video_file_path = Path(tmp_dir) / "video.mp4"
+                with open(video_file_path, "wb") as f:
+                    f.write(video.data)
+                # fps = video_capture.fps
+                # if fps is None or fps <= 0:
+                #     fps = 30
+                # frame_step_time = 1 / fps * 10**9
+                # name = Path(video_capture.file).name
+                # zf.extract(name, videos_dir)
+                # video_path = videos_dir / f"{i}.mp4"
+                # (videos_dir / name).rename(video_path)
+                cap = cv2.VideoCapture(video_file_path)
+                chunk_frame_index = 0
                 while cap.isOpened():
                     ret, frame = cap.read()
                     # if frame is read correctly ret is True
                     if not ret:
-                        print("Can't receive frame (stream end?). Exiting ...")
                         break
 
                     # print(frame.shape)
                     # print(frame_index, timestamp)
-
-                    img_bytes = np.ascontiguousarray(cv2.imencode(f".{image_format}", frame)[1])
-                    #print(img_bytes.shape)
+                    timestamp = (
+                        video.frame_epochs_micro_seconds[chunk_frame_index] * 10**3
+                    )  # + chunk_frame_index * 33 * 10**6
+                    print(f"frame {chunk_frame_index} timestamp {timestamp}")
+                    img_bytes = np.ascontiguousarray(
+                        cv2.imencode(f".{image_format}", frame)[1]
+                    )
+                    # print(img_bytes.shape)
                     if rosbag_version == 1:
                         header = Header1(
-                            seq=frame_index,
+                            seq=global_video_frame_index,
                             stamp=Time1(
                                 sec=int(timestamp // 10**9),
                                 nanosec=int(timestamp % 10**9),
@@ -129,34 +145,38 @@ def capture_to_rosbag(capture_path: Path, output_path, rosbag_version: int = 1, 
                         int(timestamp),
                         serialized_data,
                     )
-                    frame_index += 1
-                    timestamp += frame_step_time
-
-            imu_conn = writer.add_connection("/imu", imu_msg_type, typestore=typestore)
+                    global_video_frame_index += 1
+                    chunk_frame_index += 1
             lin_acc = geo_capture.acceleration
             linear_acceleration_epochs = np.array(
-                [a.epoch_micro_seconds for a in lin_acc]
+                [a.epoch_micro_seconds for a in lin_acc.readings]
             )
+            print(linear_acceleration_epochs)
             linear_accelerations = np.array(
                 [
                     (a.acceleration.x, a.acceleration.y, a.acceleration.z)
-                    for a in lin_acc
+                    for a in lin_acc.readings
                 ]
             )
             ang_vel = geo_capture.angular_velocity
-            angular_velocity_epochs = np.array([a.epoch_micro_seconds for a in ang_vel])
+            angular_velocity_epochs = np.array(
+                [a.epoch_micro_seconds for a in ang_vel.readings]
+            )
+            print(angular_velocity_epochs)
             angular_velocities = np.array(
                 [
                     (a.angular_velocity.x, a.angular_velocity.y, a.angular_velocity.z)
-                    for a in ang_vel
+                    for a in ang_vel.readings
                 ]
             )
             orientation = geo_capture.orientation
-            orientation_epochs = np.array([o.epoch_micro_seconds for o in orientation])
+            orientation_epochs = np.array(
+                [o.epoch_micro_seconds for o in orientation.readings]
+            )
             orientations_euler = np.array(
                 [
                     (o.orientation.pitch, o.orientation.roll, o.orientation.yaw)
-                    for o in orientation
+                    for o in orientation.readings
                 ]
             )
             orientations_quat = Rotation.from_euler("xyz", orientations_euler).as_quat()
@@ -190,18 +210,16 @@ def capture_to_rosbag(capture_path: Path, output_path, rosbag_version: int = 1, 
             orientations_quat_interpolated = interp1d(
                 orientation_epochs, orientations_quat, axis=0
             )(all_epochs)
-            for frame_index, (epoch, acc, ang, ori) in enumerate(
-                zip(
-                    all_epochs,
-                    linear_accelerations_interpolated,
-                    angular_velocities_interpolated,
-                    orientations_quat_interpolated,
-                )
+            for epoch, acc, ang, ori in zip(
+                all_epochs,
+                linear_accelerations_interpolated,
+                angular_velocities_interpolated,
+                orientations_quat_interpolated,
             ):
                 epoch *= 10**3
                 if rosbag_version == 1:
                     header = Header1(
-                        seq=frame_index,
+                        seq=global_imu_message_index,
                         stamp=Time1(
                             sec=int(timestamp // 10**9), nanosec=int(timestamp % 10**9)
                         ),
@@ -230,4 +248,5 @@ def capture_to_rosbag(capture_path: Path, output_path, rosbag_version: int = 1, 
                     int(epoch),
                     typestore.serialize_cdr(msg, imu_msg_type),
                 )
+                global_imu_message_index += 1
     return geo_capture

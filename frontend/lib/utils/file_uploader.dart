@@ -146,6 +146,8 @@ class FileUploader {
             }
           }
         } while (filesQueuedForUpload.isNotEmpty);
+      } else {
+        logger.i('No wifi available, skipping upload');
       }
     }
     isUploading = false;

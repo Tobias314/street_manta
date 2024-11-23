@@ -1473,13 +1473,13 @@ class VideoCapture extends $pb.GeneratedMessage {
 class GeoCapture extends $pb.GeneratedMessage {
   factory GeoCapture({
     $core.String? device,
-    $core.Iterable<GpsCapture>? gps,
-    $core.Iterable<OrientationCapture>? orientation,
-    $core.Iterable<AccelerationCapture>? acceleration,
-    $core.Iterable<AngularVelocityCapture>? angularVelocity,
-    $core.Iterable<MagneticFieldCapture>? magneticField,
+    GpsCapture? gps,
+    OrientationCapture? orientation,
+    AccelerationCapture? acceleration,
+    AngularVelocityCapture? angularVelocity,
+    MagneticFieldCapture? magneticField,
     $core.Iterable<PhotoCapture>? photos,
-    $core.Iterable<VideoCapture>? videos,
+    VideoCapture? video,
     $core.String? description,
     $core.Iterable<$core.String>? tags,
     $core.String? traceIdentifier,
@@ -1492,25 +1492,25 @@ class GeoCapture extends $pb.GeneratedMessage {
       $result.device = device;
     }
     if (gps != null) {
-      $result.gps.addAll(gps);
+      $result.gps = gps;
     }
     if (orientation != null) {
-      $result.orientation.addAll(orientation);
+      $result.orientation = orientation;
     }
     if (acceleration != null) {
-      $result.acceleration.addAll(acceleration);
+      $result.acceleration = acceleration;
     }
     if (angularVelocity != null) {
-      $result.angularVelocity.addAll(angularVelocity);
+      $result.angularVelocity = angularVelocity;
     }
     if (magneticField != null) {
-      $result.magneticField.addAll(magneticField);
+      $result.magneticField = magneticField;
     }
     if (photos != null) {
       $result.photos.addAll(photos);
     }
-    if (videos != null) {
-      $result.videos.addAll(videos);
+    if (video != null) {
+      $result.video = video;
     }
     if (description != null) {
       $result.description = description;
@@ -1538,13 +1538,13 @@ class GeoCapture extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'GeoCapture', package: const $pb.PackageName(_omitMessageNames ? '' : 'street_manata'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'device')
-    ..pc<GpsCapture>(2, _omitFieldNames ? '' : 'gps', $pb.PbFieldType.PM, subBuilder: GpsCapture.create)
-    ..pc<OrientationCapture>(3, _omitFieldNames ? '' : 'orientation', $pb.PbFieldType.PM, subBuilder: OrientationCapture.create)
-    ..pc<AccelerationCapture>(4, _omitFieldNames ? '' : 'acceleration', $pb.PbFieldType.PM, subBuilder: AccelerationCapture.create)
-    ..pc<AngularVelocityCapture>(5, _omitFieldNames ? '' : 'angularVelocity', $pb.PbFieldType.PM, subBuilder: AngularVelocityCapture.create)
-    ..pc<MagneticFieldCapture>(6, _omitFieldNames ? '' : 'magneticField', $pb.PbFieldType.PM, subBuilder: MagneticFieldCapture.create)
+    ..aOM<GpsCapture>(2, _omitFieldNames ? '' : 'gps', subBuilder: GpsCapture.create)
+    ..aOM<OrientationCapture>(3, _omitFieldNames ? '' : 'orientation', subBuilder: OrientationCapture.create)
+    ..aOM<AccelerationCapture>(4, _omitFieldNames ? '' : 'acceleration', subBuilder: AccelerationCapture.create)
+    ..aOM<AngularVelocityCapture>(5, _omitFieldNames ? '' : 'angularVelocity', subBuilder: AngularVelocityCapture.create)
+    ..aOM<MagneticFieldCapture>(6, _omitFieldNames ? '' : 'magneticField', subBuilder: MagneticFieldCapture.create)
     ..pc<PhotoCapture>(7, _omitFieldNames ? '' : 'photos', $pb.PbFieldType.PM, subBuilder: PhotoCapture.create)
-    ..pc<VideoCapture>(8, _omitFieldNames ? '' : 'videos', $pb.PbFieldType.PM, subBuilder: VideoCapture.create)
+    ..aOM<VideoCapture>(8, _omitFieldNames ? '' : 'video', subBuilder: VideoCapture.create)
     ..aOS(9, _omitFieldNames ? '' : 'description')
     ..pPS(10, _omitFieldNames ? '' : 'tags')
     ..aOS(11, _omitFieldNames ? '' : 'traceIdentifier')
@@ -1585,25 +1585,73 @@ class GeoCapture extends $pb.GeneratedMessage {
   void clearDevice() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.List<GpsCapture> get gps => $_getList(1);
+  GpsCapture get gps => $_getN(1);
+  @$pb.TagNumber(2)
+  set gps(GpsCapture v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasGps() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearGps() => clearField(2);
+  @$pb.TagNumber(2)
+  GpsCapture ensureGps() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  $core.List<OrientationCapture> get orientation => $_getList(2);
+  OrientationCapture get orientation => $_getN(2);
+  @$pb.TagNumber(3)
+  set orientation(OrientationCapture v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasOrientation() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearOrientation() => clearField(3);
+  @$pb.TagNumber(3)
+  OrientationCapture ensureOrientation() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  $core.List<AccelerationCapture> get acceleration => $_getList(3);
+  AccelerationCapture get acceleration => $_getN(3);
+  @$pb.TagNumber(4)
+  set acceleration(AccelerationCapture v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasAcceleration() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearAcceleration() => clearField(4);
+  @$pb.TagNumber(4)
+  AccelerationCapture ensureAcceleration() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $core.List<AngularVelocityCapture> get angularVelocity => $_getList(4);
+  AngularVelocityCapture get angularVelocity => $_getN(4);
+  @$pb.TagNumber(5)
+  set angularVelocity(AngularVelocityCapture v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasAngularVelocity() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearAngularVelocity() => clearField(5);
+  @$pb.TagNumber(5)
+  AngularVelocityCapture ensureAngularVelocity() => $_ensure(4);
 
   @$pb.TagNumber(6)
-  $core.List<MagneticFieldCapture> get magneticField => $_getList(5);
+  MagneticFieldCapture get magneticField => $_getN(5);
+  @$pb.TagNumber(6)
+  set magneticField(MagneticFieldCapture v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasMagneticField() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearMagneticField() => clearField(6);
+  @$pb.TagNumber(6)
+  MagneticFieldCapture ensureMagneticField() => $_ensure(5);
 
   @$pb.TagNumber(7)
   $core.List<PhotoCapture> get photos => $_getList(6);
 
   @$pb.TagNumber(8)
-  $core.List<VideoCapture> get videos => $_getList(7);
+  VideoCapture get video => $_getN(7);
+  @$pb.TagNumber(8)
+  set video(VideoCapture v) { setField(8, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasVideo() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearVideo() => clearField(8);
+  @$pb.TagNumber(8)
+  VideoCapture ensureVideo() => $_ensure(7);
 
   @$pb.TagNumber(9)
   $core.String get description => $_getSZ(8);
