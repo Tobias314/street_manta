@@ -57,10 +57,7 @@ class Recorder {
     videoBitrate = globals.videoBitrate;
     fps = globals.videoFps;
     exposureOffset = globals.videoExposureOffset.toDouble();
-    CameraController(cameraDescriptor, ResolutionPreset.max,
-        fps: fps, videoBitrate: videoBitrate);
-    cameraController =
-        CameraController(cameraDescriptor, ResolutionPreset.high);
+    cameraController = CameraController(cameraDescriptor, ResolutionPreset.high, fps: fps, videoBitrate: videoBitrate);
     tempDir = await (await getTemporaryDirectory()).createTemp();
     uploadDirectory = await uploader.getUploadDirectory();
     globals = await Globals.getInstance();

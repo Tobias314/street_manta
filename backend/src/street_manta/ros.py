@@ -43,23 +43,22 @@ def capture_to_rosbag(
     # geo_capture = GeoCapture()
     # geo_capture.ParseFromString(zf.read(protobuf[0]))
 
-    FRAMEID = "map"
+    COORDINATE_FRAME_ID_VIDEO = "map"
+    COORDINATE_FRAME_ID_IMU = "imu_coordinate_frame"
     """Iterate over IMAGES and save to output bag."""
     # timestamps = list(range(images.shape[0]))
     if rosbag_version == 1:
         typestore = get_typestore(Stores.ROS1_NOETIC)
         image_msg_type = CompressedImage1.__msgtype__
-        imu_msg_type = Imu1.__msgtype__
         Vector3 = Vector3_1
         Quaternion = Quaternion_1
-        Imu = Imu1
+        imu_msg_type = Imu1.__msgtype__
         Writer = Writer1
     elif rosbag_version == 2:
         typestore = get_typestore(Stores.ROS2_HUMBLE)
         image_msg_type = CompressedImage2.__msgtype__
         Vector3 = Vector3_2
         Quaternion = Quaternion_2
-        Imu = Imu2
         imu_msg_type = Imu2.__msgtype__
         Writer = Writer2
     else:
@@ -72,7 +71,9 @@ def capture_to_rosbag(
         )
         imu_conn = writer.add_connection("/imu", imu_msg_type, typestore=typestore)
         global_video_frame_index = 0
+        video_timestamp = 0
         global_imu_message_index = 0
+        imu_timestamp = 0
         for capture_path in capture_paths:
             geo_capture = GeoCapture()
             with open(capture_path, "rb") as f:
@@ -100,10 +101,12 @@ def capture_to_rosbag(
 
                     # print(frame.shape)
                     # print(frame_index, timestamp)
-                    timestamp = (
+                    new_timestamp = (
                         video.frame_epochs_micro_seconds[chunk_frame_index] * 10**3
                     )  # + chunk_frame_index * 33 * 10**6
-                    print(f"frame {chunk_frame_index} timestamp {timestamp}")
+                    print(f"frame {chunk_frame_index} timestamp {new_timestamp}")
+                    assert new_timestamp >= video_timestamp
+                    video_timestamp = new_timestamp
                     img_bytes = np.ascontiguousarray(
                         cv2.imencode(f".{image_format}", frame)[1]
                     )
@@ -112,10 +115,10 @@ def capture_to_rosbag(
                         header = Header1(
                             seq=global_video_frame_index,
                             stamp=Time1(
-                                sec=int(timestamp // 10**9),
-                                nanosec=int(timestamp % 10**9),
+                                sec=int(video_timestamp // 10**9),
+                                nanosec=int(video_timestamp % 10**9),
                             ),
-                            frame_id=FRAMEID,
+                            frame_id=COORDINATE_FRAME_ID_VIDEO,
                         )
                         msg = CompressedImage1(
                             header,
@@ -126,10 +129,10 @@ def capture_to_rosbag(
                     elif rosbag_version == 2:
                         header = Header2(
                             stamp=Time2(
-                                sec=int(timestamp // 10**9),
-                                nanosec=int(timestamp % 10**9),
+                                sec=int(video_timestamp // 10**9),
+                                nanosec=int(video_timestamp % 10**9),
                             ),
-                            frame_id=FRAMEID,
+                            frame_id=COORDINATE_FRAME_ID_VIDEO,
                         )
                         msg = CompressedImage2(
                             header,
@@ -142,7 +145,7 @@ def capture_to_rosbag(
 
                     writer.write(
                         img_conn,
-                        int(timestamp),
+                        int(video_timestamp),
                         serialized_data,
                     )
                     global_video_frame_index += 1
@@ -200,6 +203,7 @@ def capture_to_rosbag(
                 ]
             )
             all_epochs = all_epochs[(all_epochs > min_epoch) & (all_epochs < max_epoch)]
+            all_epochs = np.sort(all_epochs)
 
             linear_accelerations_interpolated = interp1d(
                 linear_acceleration_epochs, linear_accelerations, axis=0
@@ -217,36 +221,50 @@ def capture_to_rosbag(
                 orientations_quat_interpolated,
             ):
                 epoch *= 10**3
+                assert epoch >= imu_timestamp
+                imu_timestamp = epoch
                 if rosbag_version == 1:
                     header = Header1(
                         seq=global_imu_message_index,
                         stamp=Time1(
-                            sec=int(timestamp // 10**9), nanosec=int(timestamp % 10**9)
+                            sec=int(epoch // 10**9), nanosec=int(epoch % 10**9)
                         ),
-                        frame_id=FRAMEID,
+                        frame_id=COORDINATE_FRAME_ID_IMU,
                     )
+                    msg = Imu1(
+                        header,
+                        linear_acceleration=Vector3(*acc),
+                        linear_acceleration_covariance=np.zeros(9, dtype=np.float64),
+                        angular_velocity=Vector3(*ang),
+                        angular_velocity_covariance=np.zeros(9, dtype=np.float64),
+                        orientation=Quaternion(*ori),
+                        orientation_covariance=np.zeros(9, dtype=np.float64),
+                    )
+                    serialized_data = typestore.serialize_ros1(msg, imu_msg_type)
                 elif rosbag_version == 2:
                     header = Header2(
                         stamp=Time2(
-                            sec=int(timestamp // 10**9), nanosec=int(timestamp % 10**9)
+                            sec=int(epoch // 10**9), nanosec=int(epoch % 10**9)
                         ),
-                        frame_id=FRAMEID,
+                        frame_id=COORDINATE_FRAME_ID_IMU,
                     )
+                    msg = Imu2(
+                        header,
+                        linear_acceleration=Vector3(*acc),
+                        linear_acceleration_covariance=np.zeros(9),
+                        angular_velocity=Vector3(*ang),
+                        angular_velocity_covariance=np.zeros(9),
+                        orientation=Quaternion(*ori),
+                        orientation_covariance=np.zeros(9),
+                    )
+                    serialized_data = typestore.serialize_cdr(msg, imu_msg_type)
                 else:
                     raise AttributeError(f"Unknown rosbag version {rosbag_version}")
-                msg = Imu(
-                    header,
-                    linear_acceleration=Vector3(*acc),
-                    linear_acceleration_covariance=np.zeros(9),
-                    angular_velocity=Vector3(*ang),
-                    angular_velocity_covariance=np.zeros(9),
-                    orientation=Quaternion(*ori),
-                    orientation_covariance=np.zeros(9),
-                )
+
                 writer.write(
                     imu_conn,
                     int(epoch),
-                    typestore.serialize_cdr(msg, imu_msg_type),
+                    serialized_data
                 )
                 global_imu_message_index += 1
     return geo_capture

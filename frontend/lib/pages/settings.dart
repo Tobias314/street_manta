@@ -86,10 +86,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.video_camera_back_outlined),
                           ),
-                          keyboardType: TextInputType.emailAddress,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
+                          keyboardType: TextInputType.number,
                           onSubmitted: (text) =>
                               globals.videoExposureOffset = double.parse(
                             text.trim(),
@@ -104,7 +101,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.video_camera_back_outlined),
                           ),
-                          keyboardType: TextInputType.emailAddress,
+                          keyboardType: TextInputType.number,
                           inputFormatters: <TextInputFormatter>[
                             FilteringTextInputFormatter.digitsOnly
                           ],
@@ -121,7 +118,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.video_camera_back_outlined),
                           ),
-                          keyboardType: TextInputType.emailAddress,
+                          keyboardType: TextInputType.number,
                           inputFormatters: <TextInputFormatter>[
                             FilteringTextInputFormatter.digitsOnly
                           ],
