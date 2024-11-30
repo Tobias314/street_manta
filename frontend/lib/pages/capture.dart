@@ -2,7 +2,6 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import '../constants.dart';
-import '../globals.dart';
 import '../utils/recorder.dart';
 import '../widgets/menu_drawer.dart';
 import '../widgets/continuous_capture.dart';

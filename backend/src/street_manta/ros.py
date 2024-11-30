@@ -1,6 +1,5 @@
 from tempfile import TemporaryDirectory
 from pathlib import Path
-import zipfile
 from typing import List
 
 import numpy as np
@@ -67,9 +66,9 @@ def capture_to_rosbag(
     # with TemporaryDirectory() as tmp_dir:
     with Writer(output_path) as writer:
         img_conn = writer.add_connection(
-            "/cam0/compressed_image", image_msg_type, typestore=typestore
+            "/cam0/color/compressed_image", image_msg_type, typestore=typestore
         )
-        imu_conn = writer.add_connection("/imu", imu_msg_type, typestore=typestore)
+        imu_conn = writer.add_connection("/cam0/imu", imu_msg_type, typestore=typestore)
         global_video_frame_index = 0
         video_timestamp = 0
         global_imu_message_index = 0

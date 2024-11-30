@@ -38,8 +38,6 @@ dependencies:
     path: ./plugins/flutter_camera/packages/camera
   camera_android:
     path: ./plugins/flutter_camera/packages/camera_android
-  motion_sensors:
-    path: ./plugins/motion_sensors
   #flutter_compass:
   #  path: ./plugins/flutter_compass
   http: ^1.2.1
@@ -47,7 +45,8 @@ dependencies:
   permission_handler: ^11.3.1
   flutter_map: ^7.0.0
   latlong2: ^0.9.1
-  #sensors_plus: ^5.0.1
+  sensors_plus: 
+    path: ./plugins/sensors_plus
   http_parser: ^4.0.2
   flutter_map_marker_popup: ^7.0.0
   flutter_map_location_marker: ^10.0.0-beta.0

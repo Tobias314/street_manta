@@ -11,13 +11,13 @@ import 'package:uuid/uuid.dart';
 import '../globals.dart';
 import 'geo_capture_handle.dart';
 import 'file_uploader.dart';
-import 'package:motion_sensors/motion_sensors.dart';
 import 'package:geolocator/geolocator.dart';
 import '../protobufs/geo_capture.pb.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:path/path.dart' as pathlib;
 import 'package:camera_android/camera_android.dart';
 import 'package:camera_platform_interface/camera_platform_interface.dart';
+import 'package:sensors_plus/sensors_plus.dart' as sensors;
 
 Logger logger = Logger();
 
@@ -48,8 +48,7 @@ class Recorder {
   late int fps;
   late double exposureOffset;
 
-  //IMU
-  MotionSensors motionSensors = MotionSensors();
+  //IMU;
   OrientationReading? lastOrientationReading;
 
   Future<CameraController> initialize() async {
@@ -57,11 +56,12 @@ class Recorder {
     videoBitrate = globals.videoBitrate;
     fps = globals.videoFps;
     exposureOffset = globals.videoExposureOffset.toDouble();
-    cameraController = CameraController(cameraDescriptor, ResolutionPreset.high, fps: fps, videoBitrate: videoBitrate);
+    cameraController = CameraController(cameraDescriptor, ResolutionPreset.high,
+        fps: fps, videoBitrate: videoBitrate);
     tempDir = await (await getTemporaryDirectory()).createTemp();
     uploadDirectory = await uploader.getUploadDirectory();
     globals = await Globals.getInstance();
-    await _loadGeolocator();
+    await _loadMotionSensors();
     await cameraController.initialize();
     deviceModel = await getDeviceModel();
     if (!cameraController.value.isInitialized) {
@@ -79,8 +79,9 @@ class Recorder {
     currentGeoCaptureHandle!.geoCapture.gps = GpsCapture();
     currentGeoCaptureHandle!.geoCapture.orientation = OrientationCapture();
     currentGeoCaptureHandle!.geoCapture.acceleration = AccelerationCapture();
-    currentGeoCaptureHandle!.geoCapture.angularVelocity = AngularVelocityCapture();
-    currentGeoCaptureHandle!.geoCapture.magneticField =MagneticFieldCapture();
+    currentGeoCaptureHandle!.geoCapture.angularVelocity =
+        AngularVelocityCapture();
+    currentGeoCaptureHandle!.geoCapture.magneticField = MagneticFieldCapture();
     currentGeoCaptureHandle!.geoCapture.chunkIndex = Int64(currentChunkIndex);
   }
 
@@ -211,50 +212,6 @@ class Recorder {
     }
   }
 
-  void _handleAbsoluteOrientationEvent(AbsoluteOrientationEvent event) {
-    lastOrientationReading = OrientationReading(
-        epochMicroSeconds: Int64(DateTime.now().microsecondsSinceEpoch),
-        orientation:
-            Orientation(pitch: event.pitch, roll: event.roll, yaw: event.yaw));
-    if (isRecording) {
-      currentGeoCaptureHandle?.geoCapture.orientation.readings
-          .add(lastOrientationReading!);
-    }
-  }
-
-  void _handleAccelerometerEvent(AccelerometerEvent event) {
-    if (isRecording) {
-      var acceleration = Acceleration(x: event.x, y: event.y, z: event.z);
-      var accelerationReading = AccelerationReading(
-          epochMicroSeconds: Int64(DateTime.now().microsecondsSinceEpoch),
-          acceleration: acceleration);
-      currentGeoCaptureHandle?.geoCapture.acceleration.readings
-          .add(accelerationReading);
-    }
-  }
-
-  void _handleGyroscopeEvent(GyroscopeEvent event) {
-    if (isRecording) {
-      var angularVelocity = AngularVelocity(x: event.x, y: event.y, z: event.z);
-      var angularVelocityCapture = AngularVelocityReading(
-          epochMicroSeconds: Int64(DateTime.now().microsecondsSinceEpoch),
-          angularVelocity: angularVelocity);
-      currentGeoCaptureHandle?.geoCapture.angularVelocity.readings
-          .add(angularVelocityCapture);
-    }
-  }
-
-  void _handleMagnetometerEvent(MagnetometerEvent event) {
-    if (isRecording) {
-      var magneticField = MagneticField(x: event.x, y: event.y, z: event.z);
-      var magneticFieldCapture = MagneticFieldReading(
-          epochMicroSeconds: Int64(DateTime.now().microsecondsSinceEpoch),
-          magneticField: magneticField);
-      currentGeoCaptureHandle?.geoCapture.magneticField.readings
-          .add(magneticFieldCapture);
-    }
-  }
-
   GpsPosition _gpsPositionsToProtobuf(Position position) {
     return GpsPosition(
       latitude: position.latitude,
@@ -271,7 +228,7 @@ class Recorder {
 
   /// When the location services are not enabled or permissions
   /// are denied the `Future` will return an error.
-  Future<void> _loadGeolocator() async {
+  Future<void> _loadMotionSensors() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -310,16 +267,72 @@ class Recorder {
     Geolocator.getPositionStream(locationSettings: locationSettings)
         .listen(_handlePositionUpdate);
 
-    //await motionSensors.setSensorUpdateInterval(
-    //     MotionSensors.TYPE_ABSOLUTE_ORIENTATION, 1000);
-    motionSensors.absoluteOrientation.listen(_handleAbsoluteOrientationEvent);
-    //  await motionSensors.setSensorUpdateInterval(
-    //      MotionSensors.TYPE_ACCELEROMETER, 1000);
-    motionSensors.accelerometer.listen((_handleAccelerometerEvent));
-    //  await motionSensors.setSensorUpdateInterval(MotionSensors.TYPE_GYROSCOPE, 1000);
-    motionSensors.gyroscope.listen((_handleGyroscopeEvent));
-    // await motionSensors.setSensorUpdateInterval(
-    //      MotionSensors.TYPE_MAGNETIC_FIELD, 1000);
-    motionSensors.magnetometer.listen((_handleMagnetometerEvent));
+    sensors.accelerometerEventStream().listen(
+      (sensors.AccelerometerEvent event) {
+        if (isRecording) {
+          var acceleration = Acceleration(x: event.x, y: event.y, z: event.z);
+          var accelerationReading = AccelerationReading(
+              epochMicroSeconds: Int64(event.timestamp.microsecondsSinceEpoch),
+              acceleration: acceleration);
+          currentGeoCaptureHandle?.geoCapture.acceleration.readings
+              .add(accelerationReading);
+        }
+      },
+      onError: (error) {
+        logger.e('Accelerations Sensor Error: $error');
+      },
+      cancelOnError: true,
+    );
+    sensors.gyroscopeEventStream().listen(
+      (sensors.GyroscopeEvent event) {
+        if (isRecording) {
+          var angularVelocity =
+              AngularVelocity(x: event.x, y: event.y, z: event.z);
+          var angularVelocityCapture = AngularVelocityReading(
+              epochMicroSeconds: Int64(event.timestamp.microsecondsSinceEpoch),
+              angularVelocity: angularVelocity);
+          currentGeoCaptureHandle?.geoCapture.angularVelocity.readings
+              .add(angularVelocityCapture);
+        }
+      },
+      onError: (error) {
+        logger.e('Gyroscope Error: $error');
+      },
+      cancelOnError: true,
+    );
+    sensors.magnetometerEventStream().listen(
+      (sensors.MagnetometerEvent event) {
+        if (isRecording) {
+          var magneticField = MagneticField(x: event.x, y: event.y, z: event.z);
+          var magneticFieldCapture = MagneticFieldReading(
+              epochMicroSeconds: Int64(event.timestamp.microsecondsSinceEpoch),
+              magneticField: magneticField);
+          currentGeoCaptureHandle?.geoCapture.magneticField.readings
+              .add(magneticFieldCapture);
+        }
+      },
+      onError: (error) {
+        logger.e('Magnetometer Error: $error');
+      },
+      cancelOnError: true,
+    );
+
+    sensors.orientationEventStream().listen(
+      (sensors.OrientationEvent event) {
+        if (isRecording) {
+          var orientation =
+              Orientation(pitch: event.pitch, roll: event.roll, yaw: event.yaw);
+          var orientationReading = OrientationReading(
+              epochMicroSeconds: Int64(event.timestamp.microsecondsSinceEpoch),
+              orientation: orientation);
+          currentGeoCaptureHandle?.geoCapture.orientation.readings
+              .add(orientationReading);
+        }
+      },
+      onError: (error) {
+        logger.e('Orientation Error: $error');
+      },
+      cancelOnError: true,
+    );
   }
 }
