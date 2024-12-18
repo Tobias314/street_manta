@@ -39,7 +39,7 @@ class Sensors extends SensorsPlatform {
   static const MethodChannel _methodChannel =
       MethodChannel('dev.fluttercommunity.plus/sensors/method');
   static const EventChannel _orientationEventChannel =
-      EventChannel('dev.fluttercommunity.plus/sensors/accelerometer');
+      EventChannel('dev.fluttercommunity.plus/sensors/orientation');
   Stream<OrientationEvent>? _orientationEvents;
 
   /// Returns a broadcast stream of events from the device accelerometer at the

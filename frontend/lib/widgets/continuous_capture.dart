@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
+import 'package:street_manta_client/globals.dart';
 import 'geo_photo_marker_layer.dart';
 
 import '../utils/recorder.dart';
@@ -56,7 +57,7 @@ class _AutoPhotoWidgetState extends State<AutoPhotoWidget> {
                 child: SizedBox(
                     width: 100,
                     child: Column(children: [
-                      CameraPreview(widget.recorder.cameraController)
+                      CameraPreview(widget.recorder.cameraController!)
                     ]))),
           )),
     ];
@@ -84,7 +85,8 @@ class _AutoPhotoWidgetState extends State<AutoPhotoWidget> {
                         });
                       } else {
                         //widget.geoCamera.enableContiniousMode();
-                        await widget.recorder.startGeoCapture();
+                        var globals = await Globals.getInstance();
+                        await widget.recorder.startGeoCapture(globals.geoCaptureChunkLengthSeconds);
                         setState(() {
                           setState(() => buttonText = 'Erfassung stoppen');
                         });

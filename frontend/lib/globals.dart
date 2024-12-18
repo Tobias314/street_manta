@@ -8,6 +8,8 @@ class Globals {
   static const int DEFAULT_VIDEO_FPS = 30;
   static const int DEFAULT_VIDEO_BITRATE = 12000000;
   static const double DEFAULT_VIDEO_EXPOSURE_OFFSET = -1.0; //in EV
+  static const double IMU_CALIBRATION_CHUNK_LENGTH_SECONDS = 60;
+  static const int IMU_CALIBRATION_LENGTH_SECONDS = 900;
 
   static Future<Globals> getInstance() async {
     if (_singleton == null) {

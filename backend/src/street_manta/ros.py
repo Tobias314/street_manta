@@ -1,6 +1,7 @@
 from tempfile import TemporaryDirectory
 from pathlib import Path
 from typing import List
+from logging import Logger
 
 import numpy as np
 import cv2
@@ -28,6 +29,7 @@ from rosbags.typesys.stores.ros2_humble import (
 
 from .protobufs.geo_capture_pb2 import GeoCapture
 
+logger = Logger(__name__)
 
 def capture_to_rosbag(
     capture_paths: List[Path], output_path, rosbag_version: int = 1, image_format="jpeg"
@@ -74,6 +76,7 @@ def capture_to_rosbag(
         global_imu_message_index = 0
         imu_timestamp = 0
         for capture_path in capture_paths:
+            print(f"processing: {capture_path}")
             geo_capture = GeoCapture()
             with open(capture_path, "rb") as f:
                 geo_capture.ParseFromString(f.read())
@@ -103,7 +106,7 @@ def capture_to_rosbag(
                     new_timestamp = (
                         video.frame_epochs_micro_seconds[chunk_frame_index] * 10**3
                     )  # + chunk_frame_index * 33 * 10**6
-                    print(f"frame {chunk_frame_index} timestamp {new_timestamp}")
+                    #print(f"frame {chunk_frame_index} timestamp {new_timestamp}")
                     assert new_timestamp >= video_timestamp
                     video_timestamp = new_timestamp
                     img_bytes = np.ascontiguousarray(
@@ -153,7 +156,7 @@ def capture_to_rosbag(
             linear_acceleration_epochs = np.array(
                 [a.epoch_micro_seconds for a in lin_acc.readings]
             )
-            print(linear_acceleration_epochs)
+            #print(linear_acceleration_epochs)
             linear_accelerations = np.array(
                 [
                     (a.acceleration.x, a.acceleration.y, a.acceleration.z)
@@ -164,7 +167,7 @@ def capture_to_rosbag(
             angular_velocity_epochs = np.array(
                 [a.epoch_micro_seconds for a in ang_vel.readings]
             )
-            print(angular_velocity_epochs)
+            #print(angular_velocity_epochs)
             angular_velocities = np.array(
                 [
                     (a.angular_velocity.x, a.angular_velocity.y, a.angular_velocity.z)
@@ -181,7 +184,9 @@ def capture_to_rosbag(
                     for o in orientation.readings
                 ]
             )
-            orientations_quat = Rotation.from_euler("xyz", orientations_euler).as_quat()
+            if len(linear_acceleration_epochs)==0 or len(angular_velocity_epochs) == 0 or len(orientation_epochs)==0:
+                logger.warning(f"No imu epochs found in {capture_path}, skipping!")
+                continue
 
             min_epoch = max(
                 linear_acceleration_epochs.min(),
@@ -193,14 +198,20 @@ def capture_to_rosbag(
                 angular_velocity_epochs.max(),
                 orientation_epochs.max(),
             )
+            
+            orientations_quat = Rotation.from_euler("xyz", orientations_euler, degrees=True).as_quat()
 
-            all_epochs = np.concatenate(
-                [
-                    linear_acceleration_epochs,
-                    angular_velocity_epochs,
-                    orientation_epochs,
-                ]
-            )
+            # Merging all epochs might result in very small steps between individual timestamps, which might be problematic
+            # Therefore, we only merge the epochs of the linear acceleration for now.
+            # TODO: think about a better way to merge the epochs
+            # all_epochs = np.concatenate(
+            #     [
+            #         linear_acceleration_epochs,
+            #         angular_velocity_epochs,
+            #         orientation_epochs,
+            #     ]
+            # )
+            all_epochs = linear_acceleration_epochs
             all_epochs = all_epochs[(all_epochs > min_epoch) & (all_epochs < max_epoch)]
             all_epochs = np.sort(all_epochs)
 
@@ -220,7 +231,9 @@ def capture_to_rosbag(
                 orientations_quat_interpolated,
             ):
                 epoch *= 10**3
-                assert epoch >= imu_timestamp
+                if epoch <= imu_timestamp:
+                    logger.warning(f"Skipping imu timestamp {epoch} since it is <= the last timestamp ({imu_timestamp})")
+                    continue
                 imu_timestamp = epoch
                 if rosbag_version == 1:
                     header = Header1(

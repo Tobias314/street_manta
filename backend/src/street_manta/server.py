@@ -174,12 +174,13 @@ async def upload_geo_capture(
     geo_capture = GeoCapture()
     geo_capture.ParseFromString(geo_capture_bytes)
     trace_dir = fs.opendir("captures").makedir(geo_capture.trace_identifier, recreate=True)
-    trace_dir.writebytes(f"{geo_capture.chunk_index}.cap", geo_capture_bytes)
-    print(f'wrote capture file: {capture_id}.cap')
     chunk_index = geo_capture.chunk_index
+    chunk_index_str = f"{chunk_index:05d}"
+    trace_dir.writebytes(f"{chunk_index_str}.cap", geo_capture_bytes)
+    print(f'wrote capture file: {capture_id}.cap')
     for i, photo_capture in enumerate(geo_capture.photos):
         image_bytes = photo_capture.data
-        photo_id = f"{capture_id}_{chunk_index}_{photo_capture.identifier}"
+        photo_id = f"{capture_id}_{chunk_index_str}_{photo_capture.identifier}"
         save_image_from_bytes(image_bytes, photo_id, fs)
         geophoto = models.GeoPhotoCreate(
             image_id=photo_id,
@@ -195,7 +196,7 @@ async def upload_geo_capture(
     video_fs = fs.opendir("videos").makedir(geo_capture.trace_identifier, recreate=True)
     video = geo_capture.video
     if video is not None:
-        video_fs.writebytes(f"{chunk_index}_{video.identifier}.{video.format}", video.data)
+        video_fs.writebytes(f"{chunk_index_str}_{video.identifier}.{video.format}", video.data)
     return capture_id
 
 

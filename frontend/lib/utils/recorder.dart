@@ -22,7 +22,7 @@ import 'package:sensors_plus/sensors_plus.dart' as sensors;
 Logger logger = Logger();
 
 class Recorder {
-  Recorder(this.cameraDescriptor);
+  Recorder();
 
   late Globals globals;
 
@@ -39,8 +39,8 @@ class Recorder {
   int currentCaptureStartEpoch = 0;
 
   //Camera
-  final CameraDescription cameraDescriptor;
-  late CameraController cameraController;
+  CameraDescription? cameraDescriptor = null;
+  CameraController? cameraController;
   late Directory uploadDirectory;
   String? videoEncoderTmpPath;
   String cameraIdentifier = 'cam0';
@@ -51,23 +51,31 @@ class Recorder {
   //IMU;
   OrientationReading? lastOrientationReading;
 
-  Future<CameraController> initialize() async {
+  Future<CameraController> initializeWithCamera(
+      CameraDescription camera) async {
+    cameraDescriptor = camera;
     globals = await Globals.getInstance();
     videoBitrate = globals.videoBitrate;
     fps = globals.videoFps;
     exposureOffset = globals.videoExposureOffset.toDouble();
-    cameraController = CameraController(cameraDescriptor, ResolutionPreset.high,
+    cameraController = CameraController(
+        cameraDescriptor!, ResolutionPreset.high,
         fps: fps, videoBitrate: videoBitrate);
     tempDir = await (await getTemporaryDirectory()).createTemp();
-    uploadDirectory = await uploader.getUploadDirectory();
-    globals = await Globals.getInstance();
-    await _loadMotionSensors();
-    await cameraController.initialize();
-    deviceModel = await getDeviceModel();
-    if (!cameraController.value.isInitialized) {
+    await cameraController!.initialize();
+    if (!cameraController!.value.isInitialized) {
       throw 'Error initializing camera';
     }
-    return cameraController;
+    uploadDirectory = await uploader.getUploadDirectory();
+    await _loadMotionSensors();
+    deviceModel = await getDeviceModel();
+    return cameraController!;
+  }
+
+  Future<void> initializeWithoutCamera() async {
+    uploadDirectory = await uploader.getUploadDirectory();
+    await _loadMotionSensors();
+    deviceModel = await getDeviceModel();
   }
 
   _initNewChunk() {
@@ -93,23 +101,24 @@ class Recorder {
         pathlib.join(uploadDirectory.path, '${Uuid().v4()}.cap')));
   }
 
-  Future<void> startGeoCapture() async {
+  Future<void> startGeoCapture(double geoCaptureChunkLengthSeconds) async {
     if (!isRecording) {
       currentChunkIndex = -1; // Start at -1 so that the first chunk is 0
       currentGeoCaptureHandle = GeoCaptureHandle();
       traceIdentifier = Uuid().v4();
       _initNewChunk();
       continuousUploadTimer = Timer.periodic(
-          Duration(
-              milliseconds: (globals.geoCaptureChunkLengthSeconds * 1000)
-                  .toInt()), (timer) {
+          Duration(milliseconds: (geoCaptureChunkLengthSeconds * 1000).toInt()),
+          (timer) {
         _chunkCurrentGeoCapture();
       });
-      await cameraController.setExposureMode(ExposureMode.locked);
-      await cameraController.setExposureOffset(exposureOffset);
+      if (cameraController != null) {
+        await cameraController!.setExposureMode(ExposureMode.locked);
+        await cameraController!.setExposureOffset(exposureOffset);
+        var cameraPlatform = CameraPlatform.instance as AndroidCamera;
+        cameraPlatform.startChunkableVideoRecording(cameraController!.cameraId);
+      }
       currentCaptureStartEpoch = DateTime.now().microsecondsSinceEpoch;
-      var cameraPlatform = CameraPlatform.instance as AndroidCamera;
-      cameraPlatform.startChunkableVideoRecording(cameraController.cameraId);
       logger.i('Started continuous recording');
     } else {
       logger.i('Cannot start continuous recording, already running!');
@@ -121,8 +130,10 @@ class Recorder {
     if (isRecording) {
       continuousUploadTimer!.cancel();
       _chunkCurrentGeoCapture();
-      (CameraPlatform.instance as AndroidCamera)
-          .stopChunkableVideoRecording(cameraController.cameraId);
+      if (cameraController != null) {
+        (CameraPlatform.instance as AndroidCamera)
+            .stopChunkableVideoRecording(cameraController!.cameraId);
+      }
       logger.i('Stopped continuous recording');
       while (chunkQueue.isNotEmpty) {
         await chunkQueue.removeFirst();
@@ -146,21 +157,23 @@ class Recorder {
   Future<void> _closeCurrentGeoCaptureHandle(
       GeoCaptureHandle geoCaptureHandle, String outputFilePath) async {
     logger.d('Finishing off GeoCapture...');
-    var cameraPlatform = CameraPlatform.instance as AndroidCamera;
-    var videoChunk =
-        await cameraPlatform.chunkVideoRecording(cameraController.cameraId);
-    var videoFile = File(videoChunk.path);
-    Uint8List bytes = await videoFile.readAsBytes();
-    geoCaptureHandle.geoCapture.video = VideoCapture(
-        startEpochMicroSeconds: Int64(videoChunk.timestamps.first),
-        endEpochMicroSeconds: Int64(videoChunk.timestamps.last),
-        frameEpochsMicroSeconds:
-            videoChunk.timestamps.map((e) => Int64(e)).toList(),
-        format: 'mp4',
-        identifier: cameraIdentifier,
-        data: bytes,
-        fps: Int64(fps));
-    await File(videoFile.path).delete();
+    if (cameraController != null) {
+      var cameraPlatform = CameraPlatform.instance as AndroidCamera;
+      var videoChunk =
+          await cameraPlatform.chunkVideoRecording(cameraController!.cameraId);
+      var videoFile = File(videoChunk.path);
+      Uint8List bytes = await videoFile.readAsBytes();
+      geoCaptureHandle.geoCapture.video = VideoCapture(
+          startEpochMicroSeconds: Int64(videoChunk.timestamps.first),
+          endEpochMicroSeconds: Int64(videoChunk.timestamps.last),
+          frameEpochsMicroSeconds:
+              videoChunk.timestamps.map((e) => Int64(e)).toList(),
+          format: 'mp4',
+          identifier: cameraIdentifier,
+          data: bytes,
+          fps: Int64(fps));
+      await File(videoFile.path).delete();
+    }
     logger.d('Writing new GeoCapture chunk...');
     logger.d('Closing GeoCapture handle (Encoding video)...');
     await geoCaptureHandle.close();
@@ -172,17 +185,20 @@ class Recorder {
 
   void dispose() {
     stopGeoCapture();
-    cameraController.dispose();
+    cameraController?.dispose();
   }
 
   Future<GeoCapture> takeSinglePhotoCapture() async {
+    if (cameraController == null) {
+      throw 'Camera not initialized';
+    }
     logger.i('Taking photo capture');
-    final imageFile = await cameraController.takePicture();
+    final imageFile = await cameraController!.takePicture();
     var gpsPositionProto =
         _gpsPositionsToProtobuf(await Geolocator.getCurrentPosition());
     var time = Int64(DateTime.now().microsecondsSinceEpoch);
     var cameraSpecification =
-        CameraSpecification(cameraIndex: cameraController.cameraId);
+        CameraSpecification(cameraIndex: cameraController!.cameraId);
     var photoCapture = PhotoCapture(
         epochMicroSeconds: time,
         cameraSpecification: cameraSpecification,
@@ -274,7 +290,7 @@ class Recorder {
           var accelerationReading = AccelerationReading(
               epochMicroSeconds: Int64(event.timestamp.microsecondsSinceEpoch),
               acceleration: acceleration);
-          currentGeoCaptureHandle?.geoCapture.acceleration.readings
+          currentGeoCaptureHandle!.geoCapture.acceleration.readings
               .add(accelerationReading);
         }
       },
@@ -291,7 +307,7 @@ class Recorder {
           var angularVelocityCapture = AngularVelocityReading(
               epochMicroSeconds: Int64(event.timestamp.microsecondsSinceEpoch),
               angularVelocity: angularVelocity);
-          currentGeoCaptureHandle?.geoCapture.angularVelocity.readings
+          currentGeoCaptureHandle!.geoCapture.angularVelocity.readings
               .add(angularVelocityCapture);
         }
       },
@@ -307,7 +323,7 @@ class Recorder {
           var magneticFieldCapture = MagneticFieldReading(
               epochMicroSeconds: Int64(event.timestamp.microsecondsSinceEpoch),
               magneticField: magneticField);
-          currentGeoCaptureHandle?.geoCapture.magneticField.readings
+          currentGeoCaptureHandle!.geoCapture.magneticField.readings
               .add(magneticFieldCapture);
         }
       },
@@ -325,7 +341,7 @@ class Recorder {
           var orientationReading = OrientationReading(
               epochMicroSeconds: Int64(event.timestamp.microsecondsSinceEpoch),
               orientation: orientation);
-          currentGeoCaptureHandle?.geoCapture.orientation.readings
+          currentGeoCaptureHandle!.geoCapture.orientation.readings
               .add(orientationReading);
         }
       },

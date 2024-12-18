@@ -105,6 +105,7 @@ class SensorsPlugin : FlutterPlugin {
             sensorsManager,
             Sensor.TYPE_ORIENTATION
         )
+        orientationChannel.setStreamHandler(orientationStreamHandler)
     }
 
     private fun teardownEventChannels() {

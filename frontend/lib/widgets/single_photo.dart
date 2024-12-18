@@ -16,7 +16,7 @@ class _SinglePhotoWidgetState extends State<SinglePhotoWidget> {
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
-      Column(children: [CameraPreview(widget.recorder.cameraController)]),
+      Column(children: [CameraPreview(widget.recorder.cameraController!)]),
       Positioned.fill(
           bottom: 200,
           child: Align(
