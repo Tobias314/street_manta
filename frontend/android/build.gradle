@@ -13,7 +13,7 @@ subprojects {
                 project.plugins.hasPlugin("com.android.library")) {
             project.android {
                 ndkVersion = "27.1.12297006"
-                compileSdkVersion 34
+                compileSdkVersion 35
                 buildToolsVersion "34.0.0"
                 defaultConfig {
                     multiDexEnabled true

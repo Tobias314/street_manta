@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/home/redpielabs/programs/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/home/redpielabs/Android/Sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/home/redpielabs/dev/redpielabs/street_manta/frontend/android/app/.cxx/Debug/582c483x/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/home/redpielabs/Android/Sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/home/redpielabs/dev/redpielabs/street_manta/frontend/android/app/.cxx/Debug/582c483x/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}

@@ -1,0 +1,2 @@
+/home/redpielabs/dev/redpielabs/street_manta/frontend/android/app/.cxx/Debug/582c483x/x86/CMakeFiles/edit_cache.dir
+/home/redpielabs/dev/redpielabs/street_manta/frontend/android/app/.cxx/Debug/582c483x/x86/CMakeFiles/rebuild_cache.dir

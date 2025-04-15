@@ -1,0 +1,1 @@
+/home/redpielabs/dev/redpielabs/street_manta/frontend/build/app/intermediates/cxx/Debug/582c483x/obj/arm64-v8a

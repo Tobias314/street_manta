@@ -53,7 +53,11 @@ dependencies:
   path: ^1.9.0
   path_provider: ^2.1.4
   uuid: ^4.4.0
-  workmanager: any
+  workmanager:
+      git:
+        url: https://github.com/fluttercommunity/flutter_workmanager.git
+        path: workmanager
+        ref: main
   logger: ^2.3.0
   shared_preferences: ^2.3.2
   connectivity_plus: ^6.0.3

@@ -45,6 +45,8 @@ Both the Android app and the web app are built from the same codebase using Flut
 
 To build the app we provide an example using Visual Studio Code (vscode) under Ubuntu, however, you can obviously choose any other IDE or editor of your liking. In vscode you can simply install the "Flutter" extension to get language support and integrated support for the most important build tools. If required, this will also suggest you to install the required flutter and dart tools (make sure to also add them to your PATH in case you also want to call them from a shell).
 
+If things are not set up automatically you could look [here](https://docs.flutter.dev/get-started/install/linux).
+
 ### Web App
 Building and running the web app should work out of the box from within vscode as long as either the Chrome or Chromium browser is installed on your system (your might have to set the `CHROME_EXECUTABLE` environment variable accordingly). In that case you can select Chrome as Flutter device (e.g. by pressing Ctrl+Shift+P and then select "Flutter: Select Dive" followed by selecting Chrome). You are then able to run the app by clicking the arrow symbol that appears in the top right corner of vscode when you have the frontend/lib/main.dart file open.
 
