@@ -1,3 +1,4 @@
+import 'package:sensors_plus/src/orientation_interface.dart';
 import 'package:sensors_plus_platform_interface/sensors_plus_platform_interface.dart';
 
 import 'src/sensors.dart';

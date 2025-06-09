@@ -3,8 +3,10 @@ import 'dart:developer' as developer;
 import 'dart:js_interop';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:sensors_plus/src/orientation_interface.dart';
 import 'package:sensors_plus/src/web_sensors_interop.dart';
 import 'package:sensors_plus_platform_interface/sensors_plus_platform_interface.dart';
+
 
 /// The sensors plugin.
 class WebSensorsPlugin extends SensorsPlatform {
@@ -288,6 +290,14 @@ class WebSensorsPlugin extends SensorsPlatform {
   }) {
     // The Barometer API does not exist and so is not supported by any modern browser.
     // Therefore, we simply return an empty stream.
+    return const Stream.empty();
+  }
+
+  @override
+  Stream<OrientationEvent> orientationEventStream({
+    Duration samplingPeriod = SensorInterval.normalInterval,
+  }) {
+    // Not implemented yet!
     return const Stream.empty();
   }
 }

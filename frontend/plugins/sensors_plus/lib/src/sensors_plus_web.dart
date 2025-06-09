@@ -1,3 +1,4 @@
+import 'package:sensors_plus/src/orientation_interface.dart';
 import 'package:sensors_plus_platform_interface/sensors_plus_platform_interface.dart';
 
 import 'web_sensors.dart';
@@ -75,4 +76,13 @@ Stream<BarometerEvent> barometerEventStream({
   Duration samplingPeriod = SensorInterval.normalInterval,
 }) {
   return _sensors.barometerEventStream(samplingPeriod: samplingPeriod);
+}
+
+/// Returns a broadcast stream of orientation events at the
+/// given sampling frequency.
+@override
+Stream<OrientationEvent> orientationEventStream({
+  Duration samplingPeriod = SensorInterval.normalInterval,
+}) {
+  return _sensors.orientationEventStream(samplingPeriod: samplingPeriod);
 }

@@ -1,26 +1,7 @@
+import 'package:sensors_plus/src/orientation_interface.dart';
 import 'package:sensors_plus_platform_interface/sensors_plus_platform_interface.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
-
-class OrientationEvent {
-
-  OrientationEvent(this.yaw, this.pitch, this.roll, this.timestamp);
-
-  /// The yaw of the device in radians.
-  final double yaw;
-
-  /// The pitch of the device in radians.
-  final double pitch;
-
-  /// The roll of the device in radians.
-  final double roll;
-
-  /// timestamp of the event
-  final DateTime timestamp;
-
-  @override
-  String toString() => '[Orientation (yaw: $yaw, pitch: $pitch, roll: $roll)]';
-}
 
 /// The Sensors implementation.
 class Sensors extends SensorsPlatform {
@@ -118,8 +99,7 @@ class Sensors extends SensorsPlatform {
     Duration samplingPeriod = SensorInterval.normalInterval,
   }) {
     var microseconds = samplingPeriod.inMicroseconds;
-    _methodChannel
-        .invokeMethod('setOrientationSamplingPeriod', microseconds);
+    _methodChannel.invokeMethod('setOrientationSamplingPeriod', microseconds);
     if (microseconds >= 1 && microseconds <= 3) {
       logger.warning('The SamplingPeriod is currently set to $microsecondsμs, '
           'which is a reserved value in Android. Please consider changing it '
@@ -134,7 +114,9 @@ class Sensors extends SensorsPlatform {
         _orientationEventChannel.receiveBroadcastStream().map((dynamic event) {
       final list = event.cast<double>();
       return OrientationEvent(
-        list[0]!,list[1]!,list[2]!,
+        list[0]!,
+        list[1]!,
+        list[2]!,
         DateTime.fromMicrosecondsSinceEpoch(list[3]!.toInt()),
       );
     });

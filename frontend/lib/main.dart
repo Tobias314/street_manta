@@ -19,7 +19,7 @@ Future<void> main() async {
     Workmanager().initialize(
         callbackDispatcher, // The top level function, aka callbackDispatcher
         isInDebugMode:
-            true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+            false // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
         );
     Workmanager().registerPeriodicTask(
       "StreetMantaBackground",
@@ -30,7 +30,7 @@ Future<void> main() async {
     // Initialize Notifications
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
         FlutterLocalNotificationsPlugin();
-// initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
+    // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/launcher_icon');
     const DarwinInitializationSettings initializationSettingsDarwin =
@@ -54,9 +54,6 @@ void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     logger.i(
         "Native called background task: $task"); //simpleTask will be emitted here.
-    // int? totalExecutions;
-    // final _sharedPreference =
-    //     await SharedPreferences.getInstance(); //Initialize dependency
 
     try {
       var uploader = FileUploader();

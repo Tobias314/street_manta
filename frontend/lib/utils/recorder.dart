@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sensors_plus/src/orientation_interface.dart' as sensors;
 import 'package:street_manta_client/utils/device_info.dart';
 import 'package:uuid/uuid.dart';
 import '../globals.dart';
