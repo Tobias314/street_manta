@@ -336,12 +336,13 @@ class Recorder {
 
     sensors.orientationEventStream().listen(
       (sensors.OrientationEvent event) {
+        var orientation =
+            Orientation(pitch: event.pitch, roll: event.roll, yaw: event.yaw);
+        var orientationReading = OrientationReading(
+            epochMicroSeconds: Int64(event.timestamp.microsecondsSinceEpoch),
+            orientation: orientation);
+        lastOrientationReading = orientationReading;
         if (isRecording) {
-          var orientation =
-              Orientation(pitch: event.pitch, roll: event.roll, yaw: event.yaw);
-          var orientationReading = OrientationReading(
-              epochMicroSeconds: Int64(event.timestamp.microsecondsSinceEpoch),
-              orientation: orientation);
           currentGeoCaptureHandle!.geoCapture.orientation.readings
               .add(orientationReading);
         }

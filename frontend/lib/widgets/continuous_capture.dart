@@ -38,7 +38,6 @@ class _AutoPhotoWidgetState extends State<AutoPhotoWidget> {
         )
       ]);
   String buttonText = 'Erfassung starten';
-  //late Future<CameraController> _initializationFuture;
   @override
   void initState() {
     super.initState();
