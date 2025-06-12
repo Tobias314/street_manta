@@ -9,9 +9,9 @@ from sqlalchemy import create_engine, text
 
 from ..server import get_fs
 
-from ..data.models import GeoPhotoCreate
+from ..data.models import GeoCaptureModel
 from ..data.schemas import Base, SessionLocal
-from ..data.db_interface import create_geophoto, save_image_from_bytes
+from ..data.db_interface import init_geocapture, save_image_from_bytes, create_geocapture_from_model
 from ..globals import DATASTORE_PATH
 from ..authentication import create_user
 
@@ -53,23 +53,27 @@ def create_example_database(path: Path, overwrite: bool = False):
     tester_user = asyncio.run(create_user(email="", password="", db=db))
     with contextlib.contextmanager(get_fs)() as fs:
         for i in range(5):
+            capture_id = f"example_capture_{i}"
+            init_geocapture(
+                capture_id=capture_id,
+                fs=fs,
+            )
             img = (np.arange(1000000).reshape(1000, 1000) / 1000000 * 255).astype(
                 np.uint8
             )
-            success, encoded_image = cv2.imencode(".png", img)
+            _, encoded_image = cv2.imencode(".png", img)
             img_bytes = encoded_image.tobytes()
-            save_image_from_bytes(img_bytes, str(i), fs)
-            create_geophoto(
+            save_image_from_bytes(img_bytes, capture_id=capture_id, image_id=0, fs=fs)
+            pos=(51.8268 + i * 0.01, 12.2371 + i * 0.01, 100)
+            create_geocapture_from_model(
                 db=db,
-                geophoto=GeoPhotoCreate(
-                    image_id=str(i),
-                    latitude=51.8268 + i * 0.01,
-                    longitude=12.2371 + i * 0.01,
-                    elevation=100,
-                    pitch=0,
-                    roll=0,
-                    yaw=0,
-                    description="",
+                geocapture=GeoCaptureModel(
+                    capture_id=str(i),
+                    bbox_min=pos,
+                    bbox_max=pos,
+                    positions=[pos],
+                    waypoints=[],
+                    description="example single photo capture",
                 ),
                 user=tester_user,
             )

@@ -33,11 +33,11 @@ class GeoPhotoMarkerLayerState extends State<GeoPhotoMarkerLayer> {
       markers: geophotos
           .map((geophoto) => Marker(
               point: LatLng(geophoto.latitude, geophoto.longitude),
-              child: GeoPhotoMarker(geophoto)))
+              child: GeoCaptureMarker(geophoto)))
           .toList(),
       popupDisplayOptions: PopupDisplayOptions(
-        builder: (BuildContext context, Marker marker) =>
-            GeoPhotoMarkerPopup(((marker.child) as GeoPhotoMarker).geoPhoto),
+        builder: (BuildContext context, Marker marker) => GeoPhotoMarkerPopup(
+            ((marker.child) as GeoCaptureMarker).geoCapture),
       ),
     ));
   }
@@ -55,7 +55,7 @@ class GeoPhotoMarkerLayerState extends State<GeoPhotoMarkerLayer> {
               cameraBounds.south - height / 2, cameraBounds.west - width / 2),
           LatLng(
               cameraBounds.north + height / 2, cameraBounds.east + width / 2));
-      fetchGeoPhotosForRegion(_visibleBounds)
+      fetchGeoCapturesForRegion(_visibleBounds)
           .then((geophotos) => {
                 setState(() {
                   markers = _createMarkerLayer(geophotos);

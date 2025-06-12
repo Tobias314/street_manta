@@ -115,7 +115,7 @@ message VideoCapture {
   optional string identifier = 7;
 }
 
-message GeoCapture {
+message GeoCaptureChunk {
   string device = 1;
   optional GpsCapture gps = 2;
   optional OrientationCapture orientation = 3;
@@ -130,4 +130,5 @@ message GeoCapture {
   int64 timestamp_epoch_micro_seconds = 12;
   int64 chunk_index = 13;
   bool is_last_chunk = 14;
+  int64 version = 15;
 }

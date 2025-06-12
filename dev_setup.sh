@@ -2,6 +2,8 @@
 
 # Allow running the script from any directory
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-cd $SCRIPT_DIR
 
-uv run pytest
+dart pub global activate protoc_plugin
+
+cd $SCRIPT_DIR/frontend
+dart pub get

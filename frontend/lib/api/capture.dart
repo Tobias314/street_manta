@@ -42,13 +42,15 @@ var logger = Logger();
 //   logger.i('GeoCapture zipped to $outputFilePath');
 // }
 
-Future<http.Response> uploadGeoCapture(GeoCapture geoCapture,
+Future<http.Response> uploadGeoCaptureChunk(GeoCaptureChunk geoCapture,
     {int maxAttempts = 4, double initialBackoffSeconds = 0.25}) async {
-  String outputFilePath = p.join((await getTemporaryDirectory()).path, Uuid().v4());
+  String outputFilePath =
+      p.join((await getTemporaryDirectory()).path, Uuid().v4());
   //await zipGeoCapture(geoCapture, zipFilePath);
   File file = File(outputFilePath);
   await file.writeAsBytes(geoCapture.writeToBuffer());
-  return await uploadGeoCaptureFile(outputFilePath, maxAttempts: maxAttempts, initialBackoffSeconds: initialBackoffSeconds);
+  return await uploadGeoCaptureFile(outputFilePath,
+      maxAttempts: maxAttempts, initialBackoffSeconds: initialBackoffSeconds);
 }
 
 Future<http.Response> uploadGeoCaptureFile(String geoCaptureZipFilePath,
@@ -72,7 +74,7 @@ Future<http.Response> uploadGeoCaptureFile(String geoCaptureZipFilePath,
     var request = http.MultipartRequest(
         "POST",
         Uri.parse(
-            '${globals.backendUrl}/api/geo_capture/upload/${Uuid().v4()}'));
+            '${globals.backendUrl}/api/geocaptures/${Uuid().v4()}'));
     request.files.add(multipartFile);
     request.headers['Authorization'] = 'Bearer ${await getUserToken()}';
     var streamedResponse = await request.send();

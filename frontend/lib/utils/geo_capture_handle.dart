@@ -5,13 +5,12 @@ import 'package:logger/logger.dart';
 import 'package:mutex/mutex.dart';
 import 'package:street_manta_client/protobufs/geo_capture.pb.dart';
 
-
 Logger logger = Logger();
 
 final encoderMutex = Mutex();
 
 class GeoCaptureHandle {
-  late GeoCapture geoCapture;
+  late GeoCaptureChunk geoCapture;
   bool isOpen = true;
   Queue<CameraImage> frames = Queue();
   Queue<Future> pendingFutures = Queue();
@@ -19,7 +18,7 @@ class GeoCaptureHandle {
   int frameEndEpoch = 0;
 
   GeoCaptureHandle() {
-    geoCapture = GeoCapture();
+    geoCapture = GeoCaptureChunk();
   }
 
   // void addFrame(CameraImage frame) {
@@ -85,7 +84,7 @@ class GeoCaptureHandle {
   //   await file.delete();
   // }
 
-  Future<GeoCapture> close() async {
+  Future<GeoCaptureChunk> close() async {
     logger.d('Closing GeoCaptureHandle');
     isOpen = false;
     while (pendingFutures.isNotEmpty) {

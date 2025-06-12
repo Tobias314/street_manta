@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# Should be called from the root directory of the project
+# Allow running the script from any directory
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR/..
 
 # Flutter/Dart
 rm -rf frontend/lib/protobufs

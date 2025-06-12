@@ -11,6 +11,8 @@ class Globals {
   static const double IMU_CALIBRATION_CHUNK_LENGTH_SECONDS = 60;
   static const int IMU_CALIBRATION_LENGTH_SECONDS = 900;
 
+  static const int GEO_CAPTURE_FORMAT_VERSION = 1;
+
   static Future<Globals> getInstance() async {
     if (_singleton == null) {
       _singleton = Globals._internal();
@@ -22,16 +24,14 @@ class Globals {
                 defaultValue: 'http://localhost:8080'));
       }
       if (_singleton!.preferences.getDouble('videoExposureOffset') == null) {
-        _singleton!.preferences.setDouble(
-            'videoExposureOffset', DEFAULT_VIDEO_EXPOSURE_OFFSET); 
+        _singleton!.preferences
+            .setDouble('videoExposureOffset', DEFAULT_VIDEO_EXPOSURE_OFFSET);
       }
       if (_singleton!.preferences.getInt('videoFps') == null) {
-        _singleton!.preferences.setInt(
-            'videoFps', DEFAULT_VIDEO_FPS);
+        _singleton!.preferences.setInt('videoFps', DEFAULT_VIDEO_FPS);
       }
       if (_singleton!.preferences.getInt('videoBitrate') == null) {
-        _singleton!.preferences.setInt(
-            'videoBitrate', DEFAULT_VIDEO_BITRATE);
+        _singleton!.preferences.setInt('videoBitrate', DEFAULT_VIDEO_BITRATE);
       }
     }
     return _singleton!;
@@ -71,6 +71,10 @@ class Globals {
 
   set videoBitrate(int videoBitrate) {
     preferences.setInt('videoBitrate', videoBitrate);
+  }
+
+  int get geoCaptureFormatVersion {
+    return GEO_CAPTURE_FORMAT_VERSION;
   }
 
   Globals._internal();

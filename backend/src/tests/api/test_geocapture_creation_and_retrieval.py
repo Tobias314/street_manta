@@ -1,6 +1,9 @@
 from io import BytesIO
 import sys
 from pathlib import Path
+import time
+
+from street_manta.protobufs import geo_capture_pb2
 
 
 sys.path.append("./")
@@ -77,22 +80,80 @@ def upload_image(token: str):
     return response.json()
 
 
-def create_geophoto(
-    img_id: str, token: str, longitude: float = 0.0, latitude: float = 0.0
+def create_single_photo_geocapture(
+    img: np.ndarray = None,
+    longitude: float = 0.0,
+    latitude: float = 0.0,
+    elevation: float = 0.0,
+    roll: float = 0.0,
+    pitch: float = 0.0,
+    yaw: float = 0.0,
+    device: str = "test_device",
+    description: str = "test photo",
+    tags=None,
+    trace_identifier: str = "trace_1",
+    chunk_index: int = 0,
+    is_last_chunk: bool = True,
+    version: int = 1,
 ):
+    if tags is None:
+        tags = []
+    if img is None:
+        img = np.zeros((100, 100, 3), dtype=np.uint8)
+    success, encoded_image = cv2.imencode(".jpg", img)
+    img_bytes = encoded_image.tobytes() if success else b""
+    now_us = int(time.time() * 1e6)
+    gps_reading = geo_capture_pb2.GpsReading(
+        epoch_micro_seconds=now_us,
+        position=geo_capture_pb2.GpsPosition(
+            longitude=longitude,
+            latitude=latitude,
+            elevation=elevation,
+        ),
+    )
+    orientation_reading = geo_capture_pb2.OrientationReading(
+        epoch_micro_seconds=now_us,
+        orientation=geo_capture_pb2.Orientation(
+            roll=roll,
+            pitch=pitch,
+            yaw=yaw,
+        ),
+    )
+    photo = geo_capture_pb2.PhotoCapture(
+        epoch_micro_seconds=now_us,
+        format="jpg",
+        data=img_bytes,
+        gps=gps_reading,
+        orientation=orientation_reading,
+    )
+    chunk = geo_capture_pb2.GeoCaptureChunk(
+        device=device,
+        photos=[photo],
+        description=description,
+        tags=tags,
+        trace_identifier=trace_identifier,
+        timestamp_epoch_micro_seconds=now_us,
+        chunk_index=chunk_index,
+        is_last_chunk=is_last_chunk,
+        version=version,
+    )
+    return chunk
+
+
+def upload_single_photo_geocapture(
+    capture_id: str, token: str, longitude: float = 0.0, latitude: float = 0.0
+):
+    geocapture_chunk = create_single_photo_geocapture(longitude=longitude, latitude=latitude)
     response = client.post(
-        "/api/geophoto/create",
-        json={
-            "latitude": longitude,
-            "longitude": latitude,
-            "elevation": 0,
-            "pitch": 0.0,
-            "roll": 0.0,
-            "yaw": 0.0,
-            "description": "test",
-            "image_id": img_id,
-        },
+        f"/api/geocaptures/upload/{capture_id}",
         headers={"Authorization": f"Bearer {token}"},
+        files={
+            "geocapture": (
+                f"{capture_id}.cap",
+                BytesIO(geocapture_chunk.SerializeToString()),
+                "application/zip",
+            )
+        },
     )
     assert response.status_code == 200
     return response.json()
@@ -110,17 +171,17 @@ def create_user(email: str, password: str):
     client.post("/api/account", json={"email": email, "password": password})
 
 
-def test_end_to_end():
+def test_single_photo_end_to_end():
     create_user("tester@example.com", "password")
     token = get_token("tester@example.com", "password")
-    img_id = upload_image(token=token)
-    create_geophoto(img_id, longitude=0.5, latitude=0.5, token=token)
-    img_id = upload_image(token=token)
-    create_geophoto(img_id, longitude=1.0, latitude=2.0, token=token)
-    img_id = upload_image(token=token)
-    create_geophoto(img_id, longitude=3.0, latitude=3.0, token=token)
+    #img_id = upload_image(token=token)
+    upload_single_photo_geocapture("capture_1", longitude=0.5, latitude=0.5, token=token)
+    #img_id = upload_image(token=token)
+    upload_single_photo_geocapture("capture_2", longitude=1.0, latitude=2.0, token=token)
+    #img_id = upload_image(token=token)
+    upload_single_photo_geocapture("capture_3", longitude=3.0, latitude=3.0, token=token)
     region_res = client.get(
-        "/api/geophoto/get_for_region/0.0,0.0,2.5,2.5",
+        "/api/geocaptures/get_for_region/0.0,0.0,2.5,2.5",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert len(region_res.json()) == 2

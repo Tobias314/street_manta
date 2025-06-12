@@ -27,7 +27,7 @@ from rosbags.typesys.stores.ros2_humble import (
     std_msgs__msg__Header as Header2,
 )
 
-from .protobufs.geo_capture_pb2 import GeoCapture
+from .protobufs.geo_capture_pb2 import GeoCaptureChunk
 
 logger = Logger(__name__)
 
@@ -41,7 +41,7 @@ def capture_to_rosbag(
     #     if zip_info.filename.endswith(".pb")
     # ]
     # assert len(protobuf) == 1
-    # geo_capture = GeoCapture()
+    # geo_capture = GeoCaptureChunk()
     # geo_capture.ParseFromString(zf.read(protobuf[0]))
 
     COORDINATE_FRAME_ID_VIDEO = "map"
@@ -77,7 +77,7 @@ def capture_to_rosbag(
         imu_timestamp = 0
         for capture_path in capture_paths:
             print(f"processing: {capture_path}")
-            geo_capture = GeoCapture()
+            geo_capture = GeoCaptureChunk()
             with open(capture_path, "rb") as f:
                 geo_capture.ParseFromString(f.read())
             video = geo_capture.video

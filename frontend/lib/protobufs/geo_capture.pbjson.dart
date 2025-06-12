@@ -2,12 +2,13 @@
 //  Generated code. Do not modify.
 //  source: protobufs/geo_capture.proto
 //
-// @dart = 2.12
+// @dart = 3.3
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names, library_prefixes
-// ignore_for_file: non_constant_identifier_names, prefer_final_fields
-// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -358,9 +359,9 @@ final $typed_data.Uint8List videoCaptureDescriptor = $convert.base64Decode(
     'EBQgYKBF9mcHNCGgoYX2VuZF9lcG9jaF9taWNyb19zZWNvbmRzQhcKFV9jYW1lcmFfc3BlY2lm'
     'aWNhdGlvbkINCgtfaWRlbnRpZmllcg==');
 
-@$core.Deprecated('Use geoCaptureDescriptor instead')
-const GeoCapture$json = {
-  '1': 'GeoCapture',
+@$core.Deprecated('Use geoCaptureChunkDescriptor instead')
+const GeoCaptureChunk$json = {
+  '1': 'GeoCaptureChunk',
   '2': [
     {'1': 'device', '3': 1, '4': 1, '5': 9, '10': 'device'},
     {'1': 'gps', '3': 2, '4': 1, '5': 11, '6': '.street_manata.GpsCapture', '9': 0, '10': 'gps', '17': true},
@@ -376,6 +377,7 @@ const GeoCapture$json = {
     {'1': 'timestamp_epoch_micro_seconds', '3': 12, '4': 1, '5': 3, '10': 'timestampEpochMicroSeconds'},
     {'1': 'chunk_index', '3': 13, '4': 1, '5': 3, '10': 'chunkIndex'},
     {'1': 'is_last_chunk', '3': 14, '4': 1, '5': 8, '10': 'isLastChunk'},
+    {'1': 'version', '3': 15, '4': 1, '5': 3, '10': 'version'},
   ],
   '8': [
     {'1': '_gps'},
@@ -388,22 +390,23 @@ const GeoCapture$json = {
   ],
 };
 
-/// Descriptor for `GeoCapture`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List geoCaptureDescriptor = $convert.base64Decode(
-    'CgpHZW9DYXB0dXJlEhYKBmRldmljZRgBIAEoCVIGZGV2aWNlEjAKA2dwcxgCIAEoCzIZLnN0cm'
-    'VldF9tYW5hdGEuR3BzQ2FwdHVyZUgAUgNncHOIAQESSAoLb3JpZW50YXRpb24YAyABKAsyIS5z'
-    'dHJlZXRfbWFuYXRhLk9yaWVudGF0aW9uQ2FwdHVyZUgBUgtvcmllbnRhdGlvbogBARJLCgxhY2'
-    'NlbGVyYXRpb24YBCABKAsyIi5zdHJlZXRfbWFuYXRhLkFjY2VsZXJhdGlvbkNhcHR1cmVIAlIM'
-    'YWNjZWxlcmF0aW9uiAEBElUKEGFuZ3VsYXJfdmVsb2NpdHkYBSABKAsyJS5zdHJlZXRfbWFuYX'
-    'RhLkFuZ3VsYXJWZWxvY2l0eUNhcHR1cmVIA1IPYW5ndWxhclZlbG9jaXR5iAEBEk8KDm1hZ25l'
-    'dGljX2ZpZWxkGAYgASgLMiMuc3RyZWV0X21hbmF0YS5NYWduZXRpY0ZpZWxkQ2FwdHVyZUgEUg'
-    '1tYWduZXRpY0ZpZWxkiAEBEjMKBnBob3RvcxgHIAMoCzIbLnN0cmVldF9tYW5hdGEuUGhvdG9D'
-    'YXB0dXJlUgZwaG90b3MSNgoFdmlkZW8YCCABKAsyGy5zdHJlZXRfbWFuYXRhLlZpZGVvQ2FwdH'
-    'VyZUgFUgV2aWRlb4gBARIlCgtkZXNjcmlwdGlvbhgJIAEoCUgGUgtkZXNjcmlwdGlvbogBARIS'
-    'CgR0YWdzGAogAygJUgR0YWdzEikKEHRyYWNlX2lkZW50aWZpZXIYCyABKAlSD3RyYWNlSWRlbn'
-    'RpZmllchJBCh10aW1lc3RhbXBfZXBvY2hfbWljcm9fc2Vjb25kcxgMIAEoA1IadGltZXN0YW1w'
-    'RXBvY2hNaWNyb1NlY29uZHMSHwoLY2h1bmtfaW5kZXgYDSABKANSCmNodW5rSW5kZXgSIgoNaX'
-    'NfbGFzdF9jaHVuaxgOIAEoCFILaXNMYXN0Q2h1bmtCBgoEX2dwc0IOCgxfb3JpZW50YXRpb25C'
-    'DwoNX2FjY2VsZXJhdGlvbkITChFfYW5ndWxhcl92ZWxvY2l0eUIRCg9fbWFnbmV0aWNfZmllbG'
-    'RCCAoGX3ZpZGVvQg4KDF9kZXNjcmlwdGlvbg==');
+/// Descriptor for `GeoCaptureChunk`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List geoCaptureChunkDescriptor = $convert.base64Decode(
+    'Cg9HZW9DYXB0dXJlQ2h1bmsSFgoGZGV2aWNlGAEgASgJUgZkZXZpY2USMAoDZ3BzGAIgASgLMh'
+    'kuc3RyZWV0X21hbmF0YS5HcHNDYXB0dXJlSABSA2dwc4gBARJICgtvcmllbnRhdGlvbhgDIAEo'
+    'CzIhLnN0cmVldF9tYW5hdGEuT3JpZW50YXRpb25DYXB0dXJlSAFSC29yaWVudGF0aW9uiAEBEk'
+    'sKDGFjY2VsZXJhdGlvbhgEIAEoCzIiLnN0cmVldF9tYW5hdGEuQWNjZWxlcmF0aW9uQ2FwdHVy'
+    'ZUgCUgxhY2NlbGVyYXRpb26IAQESVQoQYW5ndWxhcl92ZWxvY2l0eRgFIAEoCzIlLnN0cmVldF'
+    '9tYW5hdGEuQW5ndWxhclZlbG9jaXR5Q2FwdHVyZUgDUg9hbmd1bGFyVmVsb2NpdHmIAQESTwoO'
+    'bWFnbmV0aWNfZmllbGQYBiABKAsyIy5zdHJlZXRfbWFuYXRhLk1hZ25ldGljRmllbGRDYXB0dX'
+    'JlSARSDW1hZ25ldGljRmllbGSIAQESMwoGcGhvdG9zGAcgAygLMhsuc3RyZWV0X21hbmF0YS5Q'
+    'aG90b0NhcHR1cmVSBnBob3RvcxI2CgV2aWRlbxgIIAEoCzIbLnN0cmVldF9tYW5hdGEuVmlkZW'
+    '9DYXB0dXJlSAVSBXZpZGVviAEBEiUKC2Rlc2NyaXB0aW9uGAkgASgJSAZSC2Rlc2NyaXB0aW9u'
+    'iAEBEhIKBHRhZ3MYCiADKAlSBHRhZ3MSKQoQdHJhY2VfaWRlbnRpZmllchgLIAEoCVIPdHJhY2'
+    'VJZGVudGlmaWVyEkEKHXRpbWVzdGFtcF9lcG9jaF9taWNyb19zZWNvbmRzGAwgASgDUhp0aW1l'
+    'c3RhbXBFcG9jaE1pY3JvU2Vjb25kcxIfCgtjaHVua19pbmRleBgNIAEoA1IKY2h1bmtJbmRleB'
+    'IiCg1pc19sYXN0X2NodW5rGA4gASgIUgtpc0xhc3RDaHVuaxIYCgd2ZXJzaW9uGA8gASgDUgd2'
+    'ZXJzaW9uQgYKBF9ncHNCDgoMX29yaWVudGF0aW9uQg8KDV9hY2NlbGVyYXRpb25CEwoRX2FuZ3'
+    'VsYXJfdmVsb2NpdHlCEQoPX21hZ25ldGljX2ZpZWxkQggKBl92aWRlb0IOCgxfZGVzY3JpcHRp'
+    'b24=');
 

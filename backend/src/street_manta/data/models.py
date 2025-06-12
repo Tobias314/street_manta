@@ -15,20 +15,18 @@ class User(BaseModel):
     token_expiry: float = 0
 
 
-class BaseGeoPhoto(BaseModel):
-    image_id: str
-    latitude: float
-    longitude: float
-    elevation: float
-    pitch: float
-    roll: float
-    yaw: float
+class GeoCaptureModel(BaseModel):
+    capture_id: str
+    bbox_min: tuple[float, float, float]  # (latitude_min, longitude_min, elevation_min)
+    bbox_max: tuple[float, float, float]  # (latitude_max, longitude_max, elevation_max)
+    positions: list[tuple[float, float, float]]  # List of (latitude, longitude, elevation) for individual photos
+    waypoints: list[tuple[float, float, float]] | None  # List of (latitude, longitude, elevation) points along a continuous capture (video)
     description: str = ""
 
 
-class GeoPhotoCreate(BaseGeoPhoto):
-    pass
+# class GeoPhotoCreate(BaseGeoPhoto):
+#     pass
 
 
-class GeoPhoto(BaseGeoPhoto):
-    id: int
+# class GeoPhoto(BaseGeoPhoto):
+#     id: int

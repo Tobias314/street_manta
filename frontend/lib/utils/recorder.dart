@@ -189,7 +189,7 @@ class Recorder {
     cameraController?.dispose();
   }
 
-  Future<GeoCapture> takeSinglePhotoCapture() async {
+  Future<GeoCaptureChunk> takeSinglePhotoCapture() async {
     if (cameraController == null) {
       throw 'Camera not initialized';
     }
@@ -208,10 +208,11 @@ class Recorder {
         data: await imageFile.readAsBytes(),
         gps: GpsReading(epochMicroSeconds: time, position: gpsPositionProto),
         orientation: lastOrientationReading!);
-    var capture = GeoCapture();
+    var capture = GeoCaptureChunk();
     capture.photos.add(photoCapture);
     capture.chunkIndex = Int64(0);
     capture.isLastChunk = true;
+    capture.version = Int64(globals.geoCaptureFormatVersion);
     logger.i('Done taking single photo capture');
     return capture;
   }
