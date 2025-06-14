@@ -11,8 +11,8 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from .data.schemas import User, get_db
-from .data import db_interface
-from .data.db_interface import get_user_for_token, update_user
+from .data import storage_interface
+from .data.storage_interface import get_user_for_token, update_user
 
 SALT_CHARACTERS = ascii_uppercase + digits + ascii_lowercase
 
@@ -37,7 +37,7 @@ def is_correct_password_for_user(user: User, password: str) -> bool:
 async def create_user(email: str, password: str, db: Session) -> User:
     password_hash, salt = hash_password_with_random_salt(password)
     user = User(email=email, password_hash=password_hash, salt=salt)
-    db_interface.create_user(user, db)
+    storage_interface.create_user(user, db)
     print(f"created user {email} in DB")
     return user
 

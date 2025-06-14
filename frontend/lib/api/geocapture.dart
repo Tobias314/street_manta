@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
-import '../models/geo_photo.dart';
+import '../models/geocapture.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import '../globals.dart';
@@ -79,9 +79,9 @@ Future<List<GeoCaptureDescriptor>> fetchGeoCapturesForRegion(
     headers: headers,
   );
   if (geoPhotoResponse.statusCode == 200) {
-    var geoPhotosJson = json.decode(geoPhotoResponse.body) as List;
-    return geoPhotosJson.map((geoPhotoJson) {
-      return GeoCaptureDescriptor.fromJson(geoPhotoJson);
+    var geoCapturesJson = json.decode(geoPhotoResponse.body) as List;
+    return geoCapturesJson.map((geoCaptureJson) {
+      return GeoCaptureDescriptor.fromJsonMap(geoCaptureJson);
     }).toList();
   } else {
     throw Exception('Failed to load geo photos');

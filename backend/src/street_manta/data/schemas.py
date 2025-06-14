@@ -53,26 +53,47 @@ class User(Base):
 #     roll = mapped_column(Float)
 #     yaw = mapped_column(Float)
 #     description = mapped_column(String)
-    
+
+
 class GeoCapture(Base):
-    __tablename__ = "geo_photos"
-    id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    capture_id = mapped_column(String)
-    user_id = mapped_column(ForeignKey("users.email"))
-    user = relationship("User")
-    latitude_min = mapped_column(Float)
-    longitude_min = mapped_column(Float)
-    elevation_min = mapped_column(Float)
-    latitude_max = mapped_column(Float)
-    longitude_max = mapped_column(Float)
-    elevation_max = mapped_column(Float)
-    data = mapped_column(String)  # JSON string for additional metadata
-    description = mapped_column(String)
+    __tablename__ = "geocaptures"
+    capture_id: str = mapped_column(String, primary_key=True)
+    user_id: str = mapped_column(ForeignKey("users.email"))
+    user: User = relationship("User")
+    latitude_min: float = mapped_column(Float)
+    longitude_min: float = mapped_column(Float)
+    elevation_min: float = mapped_column(Float)
+    latitude_max: float = mapped_column(Float)
+    longitude_max: float = mapped_column(Float)
+    elevation_max: float = mapped_column(Float)
+    description: str = mapped_column(String)
+
+
+class GeoPhoto(Base):
+    __tablename__ = "geophotos"
+    photo_id: str = mapped_column(String, primary_key=True)
+    capture_id: str = mapped_column(
+        ForeignKey("geocaptures.capture_id"), primary_key=True
+    )
+    capture: GeoCapture = relationship("GeoCapture")
+    latitude: float = mapped_column(Float)
+    longitude: float = mapped_column(Float)
+    elevation: float = mapped_column(Float)
+    data_format: str = mapped_column(String)  # e.g., "jpg", "png"
+
+
+class GeoVideo(Base):
+    __tablename__ = "geovideos"
+    video_id = mapped_column(String, primary_key=True)
+    capture_id = mapped_column(ForeignKey("geocaptures.capture_id"), primary_key=True)
+    capture = relationship("GeoCapture")
+    waypoints = mapped_column(String)  # JSON string for list of GeoPosition
+    data_format = mapped_column(String)  # e.g., "mp4", "avi"
 
 
 class RTreeLocation(Base):
     __tablename__ = "geo_photos_rtree"
-    id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(String, primary_key=True)
     latitude_min = mapped_column(Float)
     latitude_max = mapped_column(Float)
     longitude_min = mapped_column(Float)

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../api/geo_photo.dart';
-import '../models/geo_photo.dart';
+import '../api/geocapture.dart';
+import '../models/geocapture.dart';
 import '../pages/photo_view.dart';
 
 class GeoCaptureMarker extends StatelessWidget {
@@ -57,7 +57,7 @@ class _GeoPhotoMarkerPopupState extends State<GeoPhotoMarkerPopup> {
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    PhotoViewPage(geoPhoto: widget.geoCapture))));
+                    PhotoViewPage(geoCapture: widget.geoCapture))));
   }
 
   Widget _cardDescription(BuildContext context) {

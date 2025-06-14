@@ -19,7 +19,7 @@ from fs.base import FS
 from .utils import register_exception
 
 from .data import models
-from .data import db_interface
+from .data import storage_interface
 from .data.schemas import get_db
 from .globals import DATASTORE_PATH
 from .authentication import (
@@ -28,7 +28,14 @@ from .authentication import (
     is_correct_password_for_user,
     user_generate_token,
 )
-from .data.db_interface import init_geocapture, save_capture_chunk_bytes, save_image_from_bytes
+from .data.storage_interface import (
+    THUMBNAIL_FORMAT,
+    init_geocapture,
+    read_photo_bytes,
+    read_thumbnail_bytes,
+    save_capture_chunk_bytes,
+    write_photo_from_bytes,
+)
 from .protobufs.geo_capture_pb2 import GeoCaptureChunk
 
 logger = logging.getLogger(__name__)
@@ -56,34 +63,34 @@ def get_fs():
         fs.close()
 
 
-def get_image_fs():
-    image_fs_dir = Path(f"{DATASTORE_PATH}/images")
-    image_fs_dir.mkdir(parents=True, exist_ok=True)
-    image_fs = OSFS(str(image_fs_dir))
-    try:
-        yield image_fs
-    finally:
-        image_fs.close()
+# def get_image_fs():
+#     image_fs_dir = Path(f"{DATASTORE_PATH}/images")
+#     image_fs_dir.mkdir(parents=True, exist_ok=True)
+#     image_fs = OSFS(str(image_fs_dir))
+#     try:
+#         yield image_fs
+#     finally:
+#         image_fs.close()
 
 
-def get_video_fs():
-    video_fs_dir = Path(f"{DATASTORE_PATH}/videos")
-    video_fs_dir.mkdir(parents=True, exist_ok=True)
-    video_fs = OSFS(str(video_fs_dir))
-    try:
-        yield video_fs
-    finally:
-        video_fs.close()
+# def get_video_fs():
+#     video_fs_dir = Path(f"{DATASTORE_PATH}/videos")
+#     video_fs_dir.mkdir(parents=True, exist_ok=True)
+#     video_fs = OSFS(str(video_fs_dir))
+#     try:
+#         yield video_fs
+#     finally:
+#         video_fs.close()
 
 
-def get_capture_fs():
-    capture_fs_dir = Path(f"{DATASTORE_PATH}/captures")
-    capture_fs_dir.mkdir(parents=True, exist_ok=True)
-    video_fs = OSFS(str(capture_fs_dir))
-    try:
-        yield video_fs
-    finally:
-        video_fs.close()
+# def get_capture_fs():
+#     capture_fs_dir = Path(f"{DATASTORE_PATH}/captures")
+#     capture_fs_dir.mkdir(parents=True, exist_ok=True)
+#     video_fs = OSFS(str(capture_fs_dir))
+#     try:
+#         yield video_fs
+#     finally:
+#         video_fs.close()
 
 
 @app.get("/")
@@ -108,7 +115,7 @@ async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),
 ) -> Dict[str, str]:
-    user = db_interface.get_user_by_email(form_data.username, db)
+    user = storage_interface.get_user_by_email(form_data.username, db)
     print(user)
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
@@ -121,7 +128,7 @@ async def login(
 
 @api_router.get(
     "/geocaptures_for_region/{lat_min},{lon_min},{lat_max},{lon_max}",
-    response_model=List[models.GeoCaptureModel],
+    response_model=List[models.GeoCaptureDescriptor],
 )
 def get_geocaptures_for_region(
     user: Annotated[models.User, Depends(get_current_user)],
@@ -130,8 +137,8 @@ def get_geocaptures_for_region(
     lat_max: float,
     lon_max: float,
     db: Session = Depends(get_db),
-) -> List[models.GeoCaptureModel]:
-    res = db_interface.get_geocaptures_for_region(
+) -> List[models.GeoCaptureDescriptor]:
+    captures = storage_interface.get_geocaptures_for_region(
         lat_min=lat_min,
         lon_min=lon_min,
         lat_max=lat_max,
@@ -139,27 +146,93 @@ def get_geocaptures_for_region(
         db=db,
         user=user,
     )
-    return res
+
+    return [
+        models.GeoCaptureDescriptor(
+            capture_id=capture.capture_id,
+            bbox_min=models.GeoPosition(
+                latitude=capture.latitude_min,
+                longitude=capture.longitude_min,
+                elevation=capture.elevation_min,
+            ),
+            bbox_max=models.GeoPosition(
+                latitude=capture.latitude_max,
+                longitude=capture.longitude_max,
+                elevation=capture.elevation_max,
+            ),
+            photos=[
+                models.GeoCapturePhoto(
+                    photo_id=photo.photo_id,
+                    position=models.GeoPosition(
+                        latitude=photo.latitude,
+                        longitude=photo.longitude,
+                        elevation=photo.elevation,
+                    ),
+                    url=f"images/{capture.capture_id}/{photo.photo_id}.{photo.data_format}",
+                )
+                for photo in capture.photos
+            ]
+            if capture.photos
+            else [],
+            description=capture.description,
+            video=models.GeoCaptureVideo(
+                video_id=capture.video.video_id,
+                waypoints=capture.video.waypoints,
+                url=f"video/{capture.capture_id}/{capture.video.video_id}.{capture.video.data_format}",
+            )
+            if capture.video
+            else None,
+            thumbnail_url=f"thumbnail.{THUMBNAIL_FORMAT}",
+        )
+        for capture in captures
+    ]
 
 
-@api_router.get("/geocaptures/{capture_id}/images/{image_id}")
-async def fetch_image(
-    image_id: str,
+def get_photo_url(
+    base_url: str, capture_id: str, image_id: str, data_format: str
+) -> str:
+    return f"https://{base_url}/api/geocaptures/{capture_id}/photos/{image_id}.{data_format}"
+
+
+def get_video_url(
+    base_url: str, capture_id: str, video_id: str, data_format: str
+) -> str:
+    return f"https://{base_url}/api/geocaptures/{capture_id}/video/{video_id}.{data_format}"
+
+
+@api_router.get("/geocaptures/{capture_id}/photos/{file_name}")
+async def fetch_photo(
+    capture_id: str,
+    file_name: str,
     user: Annotated[models.User, Depends(get_current_user)],
     fs: FS = Depends(get_fs),
 ) -> str:
-    image_bytes = fs.opendir("images").readbytes(f"{image_id}.jpg")
-    return Response(content=image_bytes, media_type="image/jpeg")
+    image_bytes = fs.opendir("images").readbytes(file_name)
+    return Response(content=image_bytes, media_type=f"image/{Path(file_name).suffix}")
 
 
-@api_router.get("/geocaptures/{capture_id}/thumbnail")
+@api_router.get("/geocaptures/{capture_id}/video/{file_name}")
+async def fetch_video(
+    capture_id: str,
+    file_name: str,
+    user: Annotated[models.User, Depends(get_current_user)],
+    fs: FS = Depends(get_fs),
+) -> str:
+    return Response(
+        content=read_photo_bytes(capture_id, file_name, fs),
+        media_type=f"image/{Path(file_name).suffix}",
+    )
+
+
+@api_router.get("/geocaptures/{capture_id}/thumbnail.jpg")
 async def fetch_thumbnail(
     capture_id: str,
     user: Annotated[models.User, Depends(get_current_user)],
     fs: FS = Depends(get_fs),
 ) -> str:
-    image_bytes = fs.opendir("images").readbytes(f"{capture_id}_thumbnail.jpg")
-    return Response(content=image_bytes, media_type="image/jpeg")
+    return Response(
+        content=read_thumbnail_bytes(capture_id, fs), media_type="image/jpeg"
+    )
 
 
 @api_router.post("/geocaptures/{capture_id}")
@@ -189,10 +262,10 @@ async def upload_geo_capture(
             )
     for i, photo_capture in enumerate(geocapture.photos):
         image_bytes = photo_capture.data
-        save_image_from_bytes(
+        write_photo_from_bytes(
             image_bytes,
             capture_id=capture_id,
-            image_id=photo_capture.identifier,
+            photo_id=photo_capture.identifier,
             fs=fs,
             make_thumbnail=True,
         )
@@ -201,21 +274,21 @@ async def upload_geo_capture(
             photo_capture.gps.position.longitude,
             photo_capture.gps.position.elevation,
         )
-        geophoto_capture = models.GeoCaptureModel(
+        geophoto_capture = models.GeoCaptureDescriptor(
             capture_id=capture_id,
             bbox_min=photo_position,
             bbox_max=photo_position,
             description=geocapture.description,
+            photo_ids=[photo_capture.identifier],
             positions=[photo_position],
-            waypoints=[],
         )
-        db_interface.create_geocapture_from_model(db=db, geocapture=geophoto_capture, user=user)
-    video_fs = fs.opendir("videos").makedir(geocapture.trace_identifier, recreate=True)
+        storage_interface.create_geocapture_from_model(
+            db=db, geocapture=geophoto_capture, user=user
+        )
+    video_fs = fs.opendir(geocapture.capture_id).opendir("videos")
     video = geocapture.video
     if video is not None:
-        video_fs.writebytes(
-            f"{chunk_index_str}_{video.identifier}.{video.format}", video.data
-        )
+        video_fs.writebytes(f"{video.identifier}.{video.format}", video.data)
     return capture_id
 
 

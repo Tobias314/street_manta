@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../api/geo_photo.dart';
-import '../models/geo_photo.dart';
+import '../api/geocapture.dart';
+import '../models/geocapture.dart';
 
 class PhotoViewPage extends StatefulWidget {
   const PhotoViewPage({
     super.key,
-    required this.geoPhoto,
+    required this.geoCapture,
   });
 
-  final GeoPhoto geoPhoto;
+  final GeoCaptureDescriptor geoCapture;
 
   @override
   PhotoViewPageState createState() => PhotoViewPageState();
@@ -28,7 +28,8 @@ class PhotoViewPageState extends State<PhotoViewPage> {
       appBar: AppBar(title: const Text('Fotoansicht')),
       body: Column(children: <Widget>[
         FutureBuilder(
-            future: fetchImage(widget.geoPhoto.imageId),
+            future: fetchImage(widget.geoCapture.captureId,
+                widget.geoCapture.photoIds.first),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return snapshot.data!;
@@ -43,7 +44,7 @@ class PhotoViewPageState extends State<PhotoViewPage> {
               }
             }),
         Text(
-          widget.geoPhoto.description,
+          widget.geoCapture.description,
         ),
       ]),
     );

@@ -1,10 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:street_manta_client/protobufs/geo_capture.pb.dart';
-
-import '../utils/io.dart';
-import 'package:uuid/uuid.dart';
-import 'package:path/path.dart' as pathlib;
+import 'dart:ffi';
 
 class GeoPosition {
   final double latitude;
@@ -42,31 +37,46 @@ class GeoCaptureDescriptor {
   final String captureId;
   final GeoPosition bboxMin;
   final GeoPosition bboxMax;
+  final List<String> photoIds;
   final List<GeoPosition> positions;
-  final List<GeoPosition> waypoints;
+  final String? videoId;
+  final List<GeoPosition>? waypoints;
   final String description;
+
+  GeoPosition get bboxCenter => GeoPosition(
+        latitude: (bboxMin.latitude + bboxMax.latitude) / 2,
+        longitude: (bboxMin.longitude + bboxMax.longitude) / 2,
+        elevation: (bboxMin.elevation + bboxMax.elevation) / 2,
+      );
 
   GeoCaptureDescriptor(
       {required this.captureId,
       required this.bboxMin,
       required this.bboxMax,
+      this.photoIds = const [],
       this.positions = const [],
-      this.waypoints = const [],
+      this.videoId,
+      this.waypoints,
       this.description = ''});
 
   static GeoCaptureDescriptor fromJson(String json) {
-    var data = jsonDecode(json);
+    return GeoCaptureDescriptor.fromJsonMap(jsonDecode(json));
+  }
+
+  static GeoCaptureDescriptor fromJsonMap(Map<String, dynamic> json) {
     return GeoCaptureDescriptor(
-      captureId: data['path'],
-      bboxMin: GeoPosition.fromJson(data['bbox_min']),
-      bboxMax: GeoPosition.fromJson(data['bbox_max']),
-      positions: (data['positions'] as List)
+      captureId: json['capture_id'],
+      bboxMin: GeoPosition.fromJson(json['bbox_min']),
+      bboxMax: GeoPosition.fromJson(json['bbox_max']),
+      photoIds: (json['photo_ids'] as List).map((id) => id.toString()).toList(),
+      positions: (json['positions'] as List)
           .map((pos) => GeoPosition.fromJson(pos))
           .toList(),
-      waypoints: (data['waypoints'] as List)
-          .map((pos) => GeoPosition.fromJson(pos))
+      videoId: json['video_id'],
+      waypoints: (json['waypoints'] as List?)
+          ?.map((pos) => GeoPosition.fromJson(pos))
           .toList(),
-      description: data['description'],
+      description: json['description'] ?? '',
     );
   }
 }

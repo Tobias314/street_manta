@@ -5,8 +5,8 @@ import 'marker_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import '../api/geo_photo.dart';
-import '../models/geo_photo.dart';
+import '../api/geocapture.dart';
+import '../models/geocapture.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 
 class GeoPhotoMarkerLayer extends StatefulWidget {
@@ -27,13 +27,14 @@ class GeoPhotoMarkerLayerState extends State<GeoPhotoMarkerLayer> {
   PopupMarkerLayer markers =
       PopupMarkerLayer(options: PopupMarkerLayerOptions(markers: []));
 
-  PopupMarkerLayer _createMarkerLayer(List<GeoPhoto> geophotos) {
+  PopupMarkerLayer _createMarkerLayer(List<GeoCaptureDescriptor> geoCaptures) {
     return PopupMarkerLayer(
         options: PopupMarkerLayerOptions(
-      markers: geophotos
-          .map((geophoto) => Marker(
-              point: LatLng(geophoto.latitude, geophoto.longitude),
-              child: GeoCaptureMarker(geophoto)))
+      markers: geoCaptures
+          .map((geopgeoCapture) => Marker(
+              point: LatLng(geopgeoCapture.bboxCenter.latitude,
+                  geopgeoCapture.bboxCenter.longitude),
+              child: GeoCaptureMarker(geopgeoCapture)))
           .toList(),
       popupDisplayOptions: PopupDisplayOptions(
         builder: (BuildContext context, Marker marker) => GeoPhotoMarkerPopup(
@@ -56,9 +57,9 @@ class GeoPhotoMarkerLayerState extends State<GeoPhotoMarkerLayer> {
           LatLng(
               cameraBounds.north + height / 2, cameraBounds.east + width / 2));
       fetchGeoCapturesForRegion(_visibleBounds)
-          .then((geophotos) => {
+          .then((geocaptures) => {
                 setState(() {
-                  markers = _createMarkerLayer(geophotos);
+                  markers = _createMarkerLayer(geocaptures);
                   isFetching = false;
                 })
               })

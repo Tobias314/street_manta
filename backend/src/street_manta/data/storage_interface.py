@@ -1,5 +1,4 @@
 from typing import List, Optional
-from uuid import uuid4
 import logging
 import json
 
@@ -10,45 +9,45 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from . import schemas
-from .models import GeoCaptureModel, User
-from ..protobufs.geo_capture_pb2 import PhotoCapture
+from .models import GeoCaptureDescriptor, GeoCapturePhoto, User, GeoPosition
 
 logger = logging.getLogger(__name__)
 
+THUMBNAIL_FORMAT = "jpg"
+
 
 def create_geocapture_from_model(
-    db: Session, geocapture: GeoCaptureModel, user: User
+    db: Session, geocapture: GeoCaptureDescriptor, user: User
 ) -> int:
-    # with db.begin():
-    data = {
-        "positions": geocapture.positions,
-        "waypoints": geocapture.waypoints,
-    }
-    db_geophoto = schemas.GeoCapture(
+    # data = {
+    #     "photo_ids": geocapture.photo_ids,
+    #     "positions": [tuple(pos) for pos in geocapture.positions],
+    #     "video_id": geocapture.video_id,
+    #     "waypoints": [tuple[pos] for pos in geocapture.waypoints],
+    # }
+    db_geocapture = schemas.GeoCapture(
         capture_id=geocapture.capture_id,
         user=user,
-        latitude_min=geocapture.bbox_min[0],
-        longitude_min=geocapture.bbox_min[1],
-        elevation_min=geocapture.bbox_min[2],
-        latitude_max=geocapture.bbox_max[0],
-        longitude_max=geocapture.bbox_max[1],
-        elevation_max=geocapture.bbox_max[2],
-        data=json.dumps(data),
+        latitude_min=geocapture.bbox_min.latitude,
+        longitude_min=geocapture.bbox_min.longitude,
+        elevation_min=geocapture.bbox_min.elevation,
+        latitude_max=geocapture.bbox_max.latitude,
+        longitude_max=geocapture.bbox_max.longitude,
+        elevation_max=geocapture.bbox_max.elevation,
         description=geocapture.description,
     )
-    db.add(db_geophoto)
+    db.add(db_geocapture)
     db.flush()
-    geophoto_id = db_geophoto.id
+    capture_id = db_geocapture.capture_id
     rtree_location = schemas.RTreeLocation(
-        id=geophoto_id,
-        latitude_min=geocapture.bbox_min[0],
-        latitude_max=geocapture.bbox_max[0],
-        longitude_min=geocapture.bbox_min[1],
-        longitude_max=geocapture.bbox_max[1],
+        id=capture_id,
+        latitude_min=geocapture.bbox_min.latitude,
+        latitude_max=geocapture.bbox_max.latitude,
+        longitude_min=geocapture.bbox_min.longitude,
+        longitude_max=geocapture.bbox_max.longitude,
     )
     db.add(rtree_location)
     db.commit()
-    return geophoto_id
 
 
 def create_user(user: schemas.User, db: Session) -> None:
@@ -63,7 +62,7 @@ def get_geocaptures_for_region(
     lon_max: float,
     db: Session,
     user: Optional[schemas.User] = None,
-) -> List[GeoCaptureModel]:
+) -> List[schemas.GeoCapture]:
     query = (
         select(schemas.GeoCapture)
         .where(
@@ -81,25 +80,7 @@ def get_geocaptures_for_region(
     if user:
         query = query.where(schemas.GeoCapture.user_id == user.email)
     captures = [gp[0] for gp in db.execute(query).all()]
-    return [
-        GeoCaptureModel(
-            capture_id=capture.capture_id,
-            bbox_min=(
-                capture.latitude_min,
-                capture.longitude_min,
-                capture.elevation_min,
-            ),
-            bbox_max=(
-                capture.latitude_max,
-                capture.longitude_max,
-                capture.elevation_max,
-            ),
-            positions=json.loads(capture.data)["positions"],
-            waypoints=json.loads(capture.data)["waypoints"],
-            description=capture.description,
-        )
-        for capture in captures
-    ]
+    return captures
 
 
 def get_user_by_email(email: str, db: Session) -> Optional[schemas.User]:
@@ -147,23 +128,48 @@ def save_capture_chunk_bytes(
     print(f"wrote capture file: {capture_id}.cap")
 
 
-def save_image_from_bytes(
+def write_photo_from_bytes(
     image_bytes: bytes,
     capture_id: str,
-    image_id: str,
+    photo_id: str,
+    position: GeoPosition,
+    db: Session,
     fs: FS,
     make_thumbnail: bool = False,
-) -> str:
+    data_format: str = "jpg",
+) -> None:
     nparr = np.frombuffer(image_bytes, np.uint8)
-    fs.opendir(capture_id).opendir("images").writebytes(f"{image_id}.jpg", image_bytes)
-    logger.info(f"Saved image with {image_id}")
+    fs.opendir(capture_id).opendir("images").writebytes(
+        f"{photo_id}.{data_format}", image_bytes
+    )
+    logger.info(f"Saved image with {photo_id}")
     if make_thumbnail:
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         scaling_factor = 100 / max(img.shape[:2])
         thumbnail = cv2.resize(img, None, fx=scaling_factor, fy=scaling_factor)
-        thumbnail_bytes = cv2.imencode(".jpg", thumbnail)[1].tobytes()
-        fs.opendir(capture_id).writebytes("thumbnail.jpg", thumbnail_bytes)
-        logger.info(
-            f"Created and saved thumbnail for capture {capture_id} using image {image_id}"
+        thumbnail_bytes = cv2.imencode(f".{THUMBNAIL_FORMAT}", thumbnail)[1].tobytes()
+        fs.opendir(capture_id).writebytes(
+            f"thumbnail.{THUMBNAIL_FORMAT}", thumbnail_bytes
         )
-    return image_id
+        logger.info(
+            f"Created and saved thumbnail for capture {capture_id} using image {photo_id}"
+        )
+
+    db_geophoto = schemas.GeoPhoto(
+        photo_id=photo_id,
+        capture_id=capture_id,
+        latitude=position.latitude,
+        longitude=position.longitude,
+        elevation=position.elevation,
+        data_format=data_format,
+    )
+    db.add(db_geophoto)
+    db.commit()
+
+
+def read_thumbnail_bytes(capture_id: str, fs: FS) -> bytes:
+    return fs.opendir(capture_id).readbytes(f"thumbnail.{THUMBNAIL_FORMAT}")
+
+
+def read_photo_bytes(capture_id: str, file_name: str, fs: FS) -> bytes:
+    return fs.opendir(capture_id).opendir("images").readbytes(file_name)

@@ -15,12 +15,33 @@ class User(BaseModel):
     token_expiry: float = 0
 
 
-class GeoCaptureModel(BaseModel):
+class GeoPosition(BaseModel):
+    latitude: float
+    longitude: float
+    elevation: float
+    
+    def __iter__(self):
+        return iter((self.latitude, self.longitude, self.elevation))
+    
+class GeoCapturePhoto(BaseModel):
+    photo_id: str
+    position: GeoPosition
+    url: str
+    
+class GeoCaptureVideo(BaseModel):
+    video_id: str
+    waypoints: list[GeoPosition]
+    url: str
+
+class GeoCaptureDescriptor(BaseModel):
     capture_id: str
-    bbox_min: tuple[float, float, float]  # (latitude_min, longitude_min, elevation_min)
-    bbox_max: tuple[float, float, float]  # (latitude_max, longitude_max, elevation_max)
-    positions: list[tuple[float, float, float]]  # List of (latitude, longitude, elevation) for individual photos
-    waypoints: list[tuple[float, float, float]] | None  # List of (latitude, longitude, elevation) points along a continuous capture (video)
+    bbox_min: GeoPosition  # (latitude_min, longitude_min, elevation_min)
+    bbox_max: GeoPosition  # (latitude_max, longitude_max, elevation_max)
+    photos: list[GeoCapturePhoto] = []
+    video: GeoCaptureVideo | None = (
+        None  # Identifier for the video associated with the capture, if any
+    )
+    thumbnail_url: str | None = None  # URL for the thumbnail image of the capture
     description: str = ""
 
 

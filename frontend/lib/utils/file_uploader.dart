@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../api/capture.dart';
-import '../models/geo_photo.dart';
+import '../models/geocapture.dart';
 
 Logger logger = Logger();
 
@@ -149,12 +149,5 @@ class FileUploader {
       }
     }
     isUploading = false;
-  }
-
-  Future<void> queueForUpload(GeoPhotoUpload geoPhoto) async {
-    //TODO: remove or refactor this
-    //TODO: upload directely when executing in the web
-    var uploadDir = await getUploadDirectory();
-    await geoPhoto.saveToDirectory(uploadDir);
   }
 }

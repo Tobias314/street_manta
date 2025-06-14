@@ -9,9 +9,13 @@ from sqlalchemy import create_engine, text
 
 from ..server import get_fs
 
-from ..data.models import GeoCaptureModel
+from ..data.models import GeoCaptureDescriptor, GeoCapturePhoto, GeoPosition
 from ..data.schemas import Base, SessionLocal
-from ..data.db_interface import init_geocapture, save_image_from_bytes, create_geocapture_from_model
+from ..data.storage_interface import (
+    init_geocapture,
+    write_photo_from_bytes,
+    create_geocapture_from_model,
+)
 from ..globals import DATASTORE_PATH
 from ..authentication import create_user
 
@@ -33,7 +37,8 @@ def create_database(path: Path, overwrite: bool = False):
     engine = create_engine(
         f"sqlite:///{str(path)}", connect_args={"check_same_thread": False}
     )
-    Base.metadata.tables["geo_photos"].create(engine)
+    Base.metadata.tables["geocaptures"].create(engine)
+    Base.metadata.tables["geophotos"].create(engine)
     Base.metadata.tables["users"].create(engine)
     with engine.connect() as con:
         statement = text(
@@ -41,16 +46,16 @@ def create_database(path: Path, overwrite: bool = False):
         )
         con.execute(statement)
     with contextlib.contextmanager(get_fs)() as fs:
-         fs.makedir("images", recreate=True)
-         fs.makedir("videos", recreate=True)
-         fs.makedir("captures", recreate=True)
+        fs.makedir("images", recreate=True)
+        fs.makedir("videos", recreate=True)
+        fs.makedir("captures", recreate=True)
 
 
 def create_example_database(path: Path, overwrite: bool = False):
     create_database(path=path, overwrite=overwrite)
     print("Adding example GeoPhotos to database...")
     db = SessionLocal()
-    tester_user = asyncio.run(create_user(email="", password="", db=db))
+    tester_user = asyncio.run(create_user(email="test", password="test", db=db))
     with contextlib.contextmanager(get_fs)() as fs:
         for i in range(5):
             capture_id = f"example_capture_{i}"
@@ -63,16 +68,19 @@ def create_example_database(path: Path, overwrite: bool = False):
             )
             _, encoded_image = cv2.imencode(".png", img)
             img_bytes = encoded_image.tobytes()
-            save_image_from_bytes(img_bytes, capture_id=capture_id, image_id=0, fs=fs)
-            pos=(51.8268 + i * 0.01, 12.2371 + i * 0.01, 100)
+            pos = GeoPosition(
+                latitude=51.8268 + i * 0.01,
+                longitude=12.2371 + i * 0.01,
+                elevation=100.0,
+            )
+            write_photo_from_bytes(img_bytes, capture_id=capture_id, photo_id=0, position=pos, fs=fs, db=db, data_format="png")
             create_geocapture_from_model(
                 db=db,
-                geocapture=GeoCaptureModel(
+                geocapture=GeoCaptureDescriptor(
                     capture_id=str(i),
                     bbox_min=pos,
                     bbox_max=pos,
-                    positions=[pos],
-                    waypoints=[],
+                    photos=[GeoCapturePhoto(photo_id="photo_{0}", position=pos, url=f"images/{capture_id}/0.png")],
                     description="example single photo capture",
                 ),
                 user=tester_user,
@@ -83,10 +91,10 @@ def __main__(args):
     print(os.getcwd())
     p = Path(f"{DATASTORE_PATH}/database.db")
     p.parent.mkdir(parents=True, exist_ok=True)
-    images_dir = p.parent/"images"
+    images_dir = p.parent / "images"
     print("Images dir:", images_dir)
     images_dir.mkdir(parents=True, exist_ok=True)
-    
+
     if args.example:
         create_example_database(p, overwrite=args.overwrite)
     else:
