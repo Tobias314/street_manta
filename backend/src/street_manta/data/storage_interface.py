@@ -19,6 +19,7 @@ THUMBNAIL_FORMAT = "jpg"
 def create_geocapture_from_model(
     db: Session, geocapture: GeoCaptureDescriptor, user: User
 ) -> int:
+    print(f"Creating geocapture {geocapture.capture_id} for user {user.email}")
     # data = {
     #     "photo_ids": geocapture.photo_ids,
     #     "positions": [tuple(pos) for pos in geocapture.positions],
@@ -39,8 +40,9 @@ def create_geocapture_from_model(
     db.add(db_geocapture)
     db.flush()
     capture_id = db_geocapture.capture_id
-    rtree_location = schemas.RTreeLocation(
-        id=capture_id,
+    rtree_location = schemas.GeoCaptureRTreeBbox(
+        id=None,  # Auto-incremented by the database
+        capture_id=capture_id,
         latitude_min=geocapture.bbox_min.latitude,
         latitude_max=geocapture.bbox_max.latitude,
         longitude_min=geocapture.bbox_min.longitude,
@@ -66,21 +68,40 @@ def get_geocaptures_for_region(
     query = (
         select(schemas.GeoCapture)
         .where(
-            (schemas.RTreeLocation.latitude_max >= lat_min)
-            & (schemas.RTreeLocation.latitude_min <= lat_max)
-            & (schemas.RTreeLocation.longitude_max >= lon_min)
-            & (schemas.RTreeLocation.longitude_min <= lon_max)
+            (schemas.GeoCaptureRTreeBbox.latitude_max >= lat_min)
+            & (schemas.GeoCaptureRTreeBbox.latitude_min <= lat_max)
+            & (schemas.GeoCaptureRTreeBbox.longitude_max >= lon_min)
+            & (schemas.GeoCaptureRTreeBbox.longitude_min <= lon_max)
         )
         .join_from(
             schemas.GeoCapture,
-            schemas.RTreeLocation,
-            onclause=schemas.GeoCapture.id == schemas.RTreeLocation.id,
+            schemas.GeoCaptureRTreeBbox,
+            onclause=schemas.GeoCapture.capture_id
+            == schemas.GeoCaptureRTreeBbox.capture_id,
         )
     )
     if user:
         query = query.where(schemas.GeoCapture.user_id == user.email)
     captures = [gp[0] for gp in db.execute(query).all()]
     return captures
+
+
+def get_photos_for_capture(capture_id: str, db: Session) -> List[schemas.GeoPhoto]:
+    query_result = (
+        db.query(schemas.GeoPhoto)
+        .filter(schemas.GeoPhoto.capture_id == capture_id)
+        .all()
+    )
+    return query_result
+
+
+def get_videos_for_capture(capture_id: str, db: Session) -> List[schemas.GeoVideo]:
+    query_result = (
+        db.query(schemas.GeoVideo)
+        .filter(schemas.GeoVideo.capture_id == capture_id)
+        .all()
+    )
+    return query_result
 
 
 def get_user_by_email(email: str, db: Session) -> Optional[schemas.User]:
@@ -128,7 +149,7 @@ def save_capture_chunk_bytes(
     print(f"wrote capture file: {capture_id}.cap")
 
 
-def write_photo_from_bytes(
+def add_photo_from_bytes(
     image_bytes: bytes,
     capture_id: str,
     photo_id: str,
@@ -142,7 +163,7 @@ def write_photo_from_bytes(
     fs.opendir(capture_id).opendir("images").writebytes(
         f"{photo_id}.{data_format}", image_bytes
     )
-    logger.info(f"Saved image with {photo_id}")
+    logger.info(f"Saved image with id {photo_id}")
     if make_thumbnail:
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         scaling_factor = 100 / max(img.shape[:2])
@@ -164,6 +185,49 @@ def write_photo_from_bytes(
         data_format=data_format,
     )
     db.add(db_geophoto)
+    db.commit()
+
+
+def add_video_from_bytes(
+    video_bytes: bytes,
+    capture_id: str,
+    video_id: str,
+    waypoints: list[GeoPosition],
+    db: Session,
+    fs: FS,
+    bbox_min: GeoPosition | None = None,
+    bbox_max: GeoPosition | None = None,
+    make_thumbnail: bool = False,
+    data_format: str = "jpg",
+) -> None:
+    fs.opendir(capture_id).opendir("videos").writebytes(
+        f"{video_id}.{data_format}", video_bytes
+    )
+    logger.info(f"Stored video with id {video_id}")
+
+    if bbox_min is None:
+        bbox_min = GeoPosition(
+            latitude=min(pos.latitude for pos in waypoints),
+            longitude=min(pos.longitude for pos in waypoints),
+            elevation=min(pos.elevation for pos in waypoints),
+        )
+    if bbox_max is None:
+        bbox_max = GeoPosition(
+            latitude=max(pos.latitude for pos in waypoints),
+            longitude=max(pos.longitude for pos in waypoints),
+            elevation=max(pos.elevation for pos in waypoints),
+        )
+    db_geovideo = schemas.GeoVideo(
+        video_id=video_id,
+        capture_id=capture_id,
+        waypoints=json.dumps([pos.model_dump(mode="json") for pos in waypoints]),
+        latitude_min=bbox_min.latitude,
+        longitude_min=bbox_min.longitude,
+        latitude_max=bbox_max.latitude,
+        longitude_max=bbox_max.longitude,
+        data_format=data_format,
+    )
+    db.add(db_geovideo)
     db.commit()
 
 

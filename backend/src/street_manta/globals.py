@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+WAYPOINT_MIN_TIME_DELTA_SECONDS = 1
 
 def get_datastore_path() -> str:
     path = os.getenv("DATASTORE_PATH")

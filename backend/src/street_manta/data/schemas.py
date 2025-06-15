@@ -1,6 +1,5 @@
 from sqlalchemy import ForeignKey, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Mapped, declarative_base
 from sqlalchemy import Integer, String, Float, Double
 from sqlalchemy.orm import mapped_column, relationship
 
@@ -29,15 +28,15 @@ def get_db():
 
 class User(Base):
     __tablename__ = "users"
-    email = mapped_column(String, primary_key=True)
-    password_hash = mapped_column(
+    email: Mapped[str] = mapped_column(String, primary_key=True)
+    password_hash: Mapped[str] = mapped_column(
         String,
         unique=True,
         index=True,
     )
-    salt = mapped_column(String)
-    current_token = mapped_column(String)
-    token_expiry = mapped_column(Double)
+    salt: Mapped[str] = mapped_column(String)
+    current_token: Mapped[str | None] = mapped_column(String)
+    token_expiry: Mapped[float  | None] = mapped_column(Double)
 
 
 # class GeoPhoto(Base):
@@ -57,29 +56,29 @@ class User(Base):
 
 class GeoCapture(Base):
     __tablename__ = "geocaptures"
-    capture_id: str = mapped_column(String, primary_key=True)
-    user_id: str = mapped_column(ForeignKey("users.email"))
-    user: User = relationship("User")
-    latitude_min: float = mapped_column(Float)
-    longitude_min: float = mapped_column(Float)
-    elevation_min: float = mapped_column(Float)
-    latitude_max: float = mapped_column(Float)
-    longitude_max: float = mapped_column(Float)
-    elevation_max: float = mapped_column(Float)
-    description: str = mapped_column(String)
+    capture_id: Mapped[str] = mapped_column(String, primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.email"))
+    user: Mapped[User] = relationship("User")
+    latitude_min: Mapped[float] = mapped_column(Float)
+    longitude_min: Mapped[float] = mapped_column(Float)
+    elevation_min: Mapped[float] = mapped_column(Float)
+    latitude_max: Mapped[float] = mapped_column(Float)
+    longitude_max: Mapped[float] = mapped_column(Float)
+    elevation_max: Mapped[float] = mapped_column(Float)
+    description: Mapped[str] = mapped_column(String)
 
 
 class GeoPhoto(Base):
     __tablename__ = "geophotos"
-    photo_id: str = mapped_column(String, primary_key=True)
-    capture_id: str = mapped_column(
+    photo_id: Mapped[str] = mapped_column(String, primary_key=True)
+    capture_id = mapped_column(
         ForeignKey("geocaptures.capture_id"), primary_key=True
     )
-    capture: GeoCapture = relationship("GeoCapture")
-    latitude: float = mapped_column(Float)
-    longitude: float = mapped_column(Float)
-    elevation: float = mapped_column(Float)
-    data_format: str = mapped_column(String)  # e.g., "jpg", "png"
+    capture: Mapped[GeoCapture] = relationship("GeoCapture")
+    latitude: Mapped[float] = mapped_column(Float)
+    longitude: Mapped[float] = mapped_column(Float)
+    elevation: Mapped[float] = mapped_column(Float)
+    data_format: Mapped[str] = mapped_column(String)  # e.g., "jpg", "png"
 
 
 class GeoVideo(Base):
@@ -88,13 +87,18 @@ class GeoVideo(Base):
     capture_id = mapped_column(ForeignKey("geocaptures.capture_id"), primary_key=True)
     capture = relationship("GeoCapture")
     waypoints = mapped_column(String)  # JSON string for list of GeoPosition
-    data_format = mapped_column(String)  # e.g., "mp4", "avi"
-
-
-class RTreeLocation(Base):
-    __tablename__ = "geo_photos_rtree"
-    id = mapped_column(String, primary_key=True)
     latitude_min = mapped_column(Float)
     latitude_max = mapped_column(Float)
     longitude_min = mapped_column(Float)
     longitude_max = mapped_column(Float)
+    data_format = mapped_column(String)  # e.g., "mp4", "avi"
+
+
+class GeoCaptureRTreeBbox(Base):
+    __tablename__ = "geocaptures_rtree"
+    id = mapped_column(Integer, autoincrement=True, primary_key=True)
+    latitude_min = mapped_column(Float)
+    latitude_max = mapped_column(Float)
+    longitude_min = mapped_column(Float)
+    longitude_max = mapped_column(Float)
+    capture_id = mapped_column(String)

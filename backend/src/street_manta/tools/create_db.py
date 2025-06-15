@@ -13,7 +13,7 @@ from ..data.models import GeoCaptureDescriptor, GeoCapturePhoto, GeoPosition
 from ..data.schemas import Base, SessionLocal
 from ..data.storage_interface import (
     init_geocapture,
-    write_photo_from_bytes,
+    add_photo_from_bytes,
     create_geocapture_from_model,
 )
 from ..globals import DATASTORE_PATH
@@ -39,10 +39,11 @@ def create_database(path: Path, overwrite: bool = False):
     )
     Base.metadata.tables["geocaptures"].create(engine)
     Base.metadata.tables["geophotos"].create(engine)
+    Base.metadata.tables["geovideos"].create(engine)
     Base.metadata.tables["users"].create(engine)
     with engine.connect() as con:
         statement = text(
-            "CREATE VIRTUAL TABLE geo_photos_rtree USING rtree(id, latitude_min, latitude_max, longitude_min, longitude_max);"
+            "CREATE VIRTUAL TABLE geocaptures_rtree USING rtree(id, latitude_min, latitude_max, longitude_min, longitude_max, +capture_id TEXT);"
         )
         con.execute(statement)
     with contextlib.contextmanager(get_fs)() as fs:
@@ -73,11 +74,11 @@ def create_example_database(path: Path, overwrite: bool = False):
                 longitude=12.2371 + i * 0.01,
                 elevation=100.0,
             )
-            write_photo_from_bytes(img_bytes, capture_id=capture_id, photo_id=0, position=pos, fs=fs, db=db, data_format="png")
+            add_photo_from_bytes(img_bytes, capture_id=capture_id, photo_id=0, position=pos, fs=fs, db=db, data_format="png")
             create_geocapture_from_model(
                 db=db,
                 geocapture=GeoCaptureDescriptor(
-                    capture_id=str(i),
+                    capture_id=capture_id,
                     bbox_min=pos,
                     bbox_max=pos,
                     photos=[GeoCapturePhoto(photo_id="photo_{0}", position=pos, url=f"images/{capture_id}/0.png")],
