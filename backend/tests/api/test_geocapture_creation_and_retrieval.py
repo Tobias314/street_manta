@@ -1,7 +1,6 @@
 from io import BytesIO
 import sys
 from pathlib import Path
-import time
 
 from street_manta.protobufs import geo_capture_pb2
 
@@ -11,8 +10,6 @@ sys.path.append("./")
 from fastapi.datastructures import FormData
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import numpy as np
-import cv2
 from fastapi.testclient import TestClient
 from fs.memoryfs import MemoryFS
 
@@ -20,8 +17,8 @@ from street_manta.server import app, get_db, get_fs
 from street_manta.tools.create_db import create_database
 from street_manta.data.schemas import User
 
-from ..test_utils.photo import create_single_photo_geocapture
-from ..test_utils.video import create_video_geocapture
+from street_manta.utils import create_single_photo_geocapture_proto
+from street_manta.utils import create_video_geocapture_proto
 
 
 IMAGE_FS = None
@@ -97,23 +94,23 @@ def upload_geocapture_chunk(
     return response.json()
 
 
-def test_single_photo_end_to_end():
+def test_geocapture_end_to_end():
     create_user("tester@example.com", "password")
     token = get_token("tester@example.com", "password")
     upload_geocapture_chunk(
         "capture_1",
         token=token,
-        geocapture_chunk=create_single_photo_geocapture(longitude=0.5, latitude=0.5),
+        geocapture_chunk=create_single_photo_geocapture_proto(longitude=0.5, latitude=0.5),
     )
     upload_geocapture_chunk(
         "capture_2",
         token=token,
-        geocapture_chunk=create_single_photo_geocapture(longitude=1.0, latitude=2.0),
+        geocapture_chunk=create_single_photo_geocapture_proto(longitude=1.0, latitude=2.0),
     )
     upload_geocapture_chunk(
         "capture_3",
         token=token,
-        geocapture_chunk=create_single_photo_geocapture(longitude=3.0, latitude=3.0),
+        geocapture_chunk=create_single_photo_geocapture_proto(longitude=3.0, latitude=3.0),
     )
 
     video_positions = [
@@ -121,7 +118,7 @@ def test_single_photo_end_to_end():
         (1.0, 1.0, 100.0),
         (1.5, 1.5, 100.0),
     ]
-    video_capture = create_video_geocapture(positions=video_positions)
+    video_capture = create_video_geocapture_proto(positions=video_positions)
     upload_geocapture_chunk(
         "video_capture_1", token=token, geocapture_chunk=video_capture
     )

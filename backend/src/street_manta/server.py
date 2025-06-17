@@ -279,7 +279,6 @@ async def upload_geo_capture(
     capture_id: str,
     user: Annotated[models.User, Depends(get_current_user)],
     geocapture: UploadFile,
-    request: Request,
     db: Session = Depends(get_db),
     fs: FS = Depends(get_fs),
 ) -> str:
@@ -299,7 +298,6 @@ async def upload_geo_capture(
             raise ValueError(
                 f"Non-contiguous captures (one chunk, no video) are expected to be single image captures containing exactly one photo but {len(geocapture.photos)} photos were found."
             )
-    capture_photos = []
     for i, photo_capture in enumerate(geocapture.photos):
         image_bytes = photo_capture.data
         add_photo_from_bytes(
@@ -315,23 +313,6 @@ async def upload_geo_capture(
             fs=fs,
             make_thumbnail=True,
             data_format=photo_capture.format,
-        )
-        photo_position = models.GeoPosition(
-            latitude=photo_capture.gps.position.latitude,
-            longitude=photo_capture.gps.position.longitude,
-            elevation=photo_capture.gps.position.elevation,
-        )
-        capture_photos.append(
-            models.GeoCapturePhoto(
-                photo_id=photo_capture.identifier,
-                position=photo_position,
-                url=get_photo_url(
-                    base_url=request.base_url,
-                    capture_id=capture_id,
-                    image_id=photo_capture.identifier,
-                    data_format=photo_capture.format,
-                ),
-            )
         )
     if geocapture.HasField("video"):
         video_waypoints = []
@@ -388,9 +369,6 @@ async def upload_geo_capture(
             bbox_max=bbox_max,
             photos=[],
             video=None,
-            thumbnail_url=get_thumbnail_url(
-                base_url=request.base_url, capture_id=capture_id
-            ),
             description=geocapture.description,
         )
         storage_interface.create_geocapture_from_model(

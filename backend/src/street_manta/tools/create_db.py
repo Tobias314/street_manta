@@ -1,13 +1,17 @@
 import contextlib
+from io import BytesIO
 import os
 import argparse
 import asyncio
 
 import cv2
+from fastapi import UploadFile
 import numpy as np
 from sqlalchemy import create_engine, text
 
-from ..server import get_fs
+from street_manta.utils import create_video_geocapture_proto
+
+from ..server import get_fs, upload_geo_capture
 
 from ..data.models import GeoCaptureDescriptor, GeoCapturePhoto, GeoPosition
 from ..data.schemas import Base, SessionLocal
@@ -58,6 +62,7 @@ def create_example_database(path: Path, overwrite: bool = False):
     db = SessionLocal()
     tester_user = asyncio.run(create_user(email="test", password="test", db=db))
     with contextlib.contextmanager(get_fs)() as fs:
+        # Add 5 single photo geocaptures
         for i in range(5):
             capture_id = f"example_capture_{i}"
             init_geocapture(
@@ -74,18 +79,60 @@ def create_example_database(path: Path, overwrite: bool = False):
                 longitude=12.2371 + i * 0.01,
                 elevation=100.0,
             )
-            add_photo_from_bytes(img_bytes, capture_id=capture_id, photo_id=0, position=pos, fs=fs, db=db, data_format="png")
+            add_photo_from_bytes(
+                img_bytes,
+                capture_id=capture_id,
+                photo_id=0,
+                position=pos,
+                fs=fs,
+                db=db,
+                data_format="png",
+            )
             create_geocapture_from_model(
                 db=db,
                 geocapture=GeoCaptureDescriptor(
                     capture_id=capture_id,
                     bbox_min=pos,
                     bbox_max=pos,
-                    photos=[GeoCapturePhoto(photo_id="photo_{0}", position=pos, url=f"images/{capture_id}/0.png")],
+                    photos=[
+                        GeoCapturePhoto(
+                            photo_id="photo_{0}",
+                            position=pos,
+                            url=f"images/{capture_id}/0.png",
+                        )
+                    ],
                     description="example single photo capture",
                 ),
                 user=tester_user,
             )
+        # Add 1 video geocapture
+        capture_id = "example_video_capture"
+        start_position = (51.813571, 12.215657)
+        end_position = (51.822251, 12.215679)
+        num_positions = 300
+        video_positions = [
+            (
+                start_position[0]
+                + (end_position[0] - start_position[0]) * i / num_positions,
+                start_position[1]
+                + (end_position[1] - start_position[1]) * i / num_positions,
+                100.0,
+            )
+            for i in range(num_positions)
+        ]
+        video_capture_proto = create_video_geocapture_proto(positions=video_positions)
+        video_capture_bytes_io = UploadFile(
+            BytesIO(video_capture_proto.SerializeToString())
+        )
+        asyncio.run(
+            upload_geo_capture(
+                capture_id=capture_id,
+                user=tester_user,
+                geocapture=video_capture_bytes_io,
+                fs=fs,
+                db=db,
+            )
+        )
 
 
 def __main__(args):
