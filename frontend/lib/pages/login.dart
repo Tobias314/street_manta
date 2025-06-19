@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:street_manta_client/pages/map2.dart';
 
 import '../api/authentication.dart';
 import '../widgets/footer.dart';
@@ -131,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const MapPage(),
+              builder: (context) => MapPage(),
             ));
       }
     } on Exception {

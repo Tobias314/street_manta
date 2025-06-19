@@ -26,21 +26,39 @@ class GeoPhotoMarkerLayerState extends State<GeoPhotoMarkerLayer> {
   bool isFetching = false;
   PopupMarkerLayer markers =
       PopupMarkerLayer(options: PopupMarkerLayerOptions(markers: []));
+  PolylineLayer polylines = PolylineLayer(polylines: []);
 
   PopupMarkerLayer _createMarkerLayer(List<GeoCaptureDescriptor> geoCaptures) {
     return PopupMarkerLayer(
         options: PopupMarkerLayerOptions(
       markers: geoCaptures
-          .map((geopgeoCapture) => Marker(
-              point: LatLng(geopgeoCapture.bboxCenter.latitude,
-                  geopgeoCapture.bboxCenter.longitude),
-              child: GeoCaptureMarker(geopgeoCapture)))
+          .map((geoCapture) => Marker(
+              point: LatLng(geoCapture.bboxCenter.latitude,
+                  geoCapture.bboxCenter.longitude),
+              child: GeoCaptureMarker(geoCapture)))
           .toList(),
       popupDisplayOptions: PopupDisplayOptions(
         builder: (BuildContext context, Marker marker) => GeoPhotoMarkerPopup(
             ((marker.child) as GeoCaptureMarker).geoCapture),
       ),
     ));
+  }
+
+  PolylineLayer _createPolylineLayer(List<GeoCaptureDescriptor> geoCaptures) {
+    return PolylineLayer(
+      polylines: geoCaptures
+          .map((geoCapture) => Polyline(
+                points: [
+                  LatLng(geoCapture.bboxMin.latitude,
+                      geoCapture.bboxMin.longitude),
+                  LatLng(
+                      geoCapture.bboxMax.latitude, geoCapture.bboxMax.longitude)
+                ],
+                color: Colors.blue,
+                strokeWidth: 2.0,
+              ))
+          .toList(),
+    );
   }
 
   @override
@@ -60,6 +78,7 @@ class GeoPhotoMarkerLayerState extends State<GeoPhotoMarkerLayer> {
           .then((geocaptures) => {
                 setState(() {
                   markers = _createMarkerLayer(geocaptures);
+                  polylines = _createPolylineLayer(geocaptures);
                   isFetching = false;
                 })
               })
@@ -67,10 +86,11 @@ class GeoPhotoMarkerLayerState extends State<GeoPhotoMarkerLayer> {
                 setState(() {
                   logger.w('Could not fetch geophoto positions: $error');
                   markers = _createMarkerLayer([]);
+                  polylines = _createPolylineLayer([]);
                   isFetching = false;
                 })
               });
     }
-    return markers;
+    return MobileLayerTransformer(child: polylines);
   }
 }

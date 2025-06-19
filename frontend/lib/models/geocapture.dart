@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 class GeoPosition {
   final double latitude;
@@ -33,15 +32,56 @@ class GeoPosition {
   }
 }
 
+class GeoCapturePhoto {
+  final String photoId;
+  final GeoPosition position;
+  final String url;
+
+  GeoCapturePhoto({
+    required this.photoId,
+    required this.position,
+    required this.url,
+  });
+
+  static GeoCapturePhoto fromJson(Map<String, dynamic> json) {
+    return GeoCapturePhoto(
+      photoId: json['photo_id'],
+      position: GeoPosition.fromJson(json['position']),
+      url: json['url'],
+    );
+  }
+}
+
+class GeoCaptureVideo {
+  final String videoId;
+  final List<GeoPosition> waypoints;
+  final String url;
+
+  GeoCaptureVideo({
+    required this.videoId,
+    required this.waypoints,
+    required this.url,
+  });
+
+  static GeoCaptureVideo fromJson(Map<String, dynamic> json) {
+    return GeoCaptureVideo(
+      videoId: json['video_id'],
+      waypoints: (json['waypoints'] as List)
+          .map((waypoint) => GeoPosition.fromJson(waypoint))
+          .toList(),
+      url: json['url'],
+    );
+  }
+}
+
 class GeoCaptureDescriptor {
   final String captureId;
   final GeoPosition bboxMin;
   final GeoPosition bboxMax;
-  final List<String> photoIds;
-  final List<GeoPosition> positions;
-  final String? videoId;
-  final List<GeoPosition>? waypoints;
+  final List<GeoCapturePhoto> photos;
+  final GeoCaptureVideo? video;
   final String description;
+  final String? thumbnailUrl;
 
   GeoPosition get bboxCenter => GeoPosition(
         latitude: (bboxMin.latitude + bboxMax.latitude) / 2,
@@ -53,10 +93,9 @@ class GeoCaptureDescriptor {
       {required this.captureId,
       required this.bboxMin,
       required this.bboxMax,
-      this.photoIds = const [],
-      this.positions = const [],
-      this.videoId,
-      this.waypoints,
+      this.photos = const [],
+      this.video,
+      this.thumbnailUrl,
       this.description = ''});
 
   static GeoCaptureDescriptor fromJson(String json) {
@@ -68,14 +107,13 @@ class GeoCaptureDescriptor {
       captureId: json['capture_id'],
       bboxMin: GeoPosition.fromJson(json['bbox_min']),
       bboxMax: GeoPosition.fromJson(json['bbox_max']),
-      photoIds: (json['photo_ids'] as List).map((id) => id.toString()).toList(),
-      positions: (json['positions'] as List)
-          .map((pos) => GeoPosition.fromJson(pos))
+      photos: (json['photos'] as List)
+          .map((photo) => GeoCapturePhoto.fromJson(photo))
           .toList(),
-      videoId: json['video_id'],
-      waypoints: (json['waypoints'] as List?)
-          ?.map((pos) => GeoPosition.fromJson(pos))
-          .toList(),
+      video: json['video'] != null
+          ? GeoCaptureVideo.fromJson(json['video'])
+          : null,
+      thumbnailUrl: json['thumbnail_url'],
       description: json['description'] ?? '',
     );
   }

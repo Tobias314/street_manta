@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:street_manta_client/globals.dart';
-import 'geo_photo_marker_layer.dart';
+import 'geocapture_map_layer.dart';
 
 import '../utils/recorder.dart';
 

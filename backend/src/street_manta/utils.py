@@ -152,8 +152,8 @@ def create_video_geocapture_proto(
         gps_reading = geo_capture_pb2.GpsReading(
             epoch_micro_seconds=int(ts),
             position=geo_capture_pb2.GpsPosition(
-                longitude=float(pos[0]),
-                latitude=float(pos[1]),
+                latitude=float(pos[0]),
+                longitude=float(pos[1]),
                 elevation=float(pos[2]),
             ),
         )

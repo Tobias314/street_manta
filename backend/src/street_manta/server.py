@@ -51,6 +51,10 @@ from .protobufs.geo_capture_pb2 import GeoCaptureChunk
 
 
 logger = logging.getLogger(__name__)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
 
 app = FastAPI()
 register_exception(app)
@@ -291,7 +295,6 @@ async def upload_geo_capture(
             capture_id=capture_id,
             fs=fs,
         )
-    chunk_index_str = f"{chunk_index:05d}"
     save_capture_chunk_bytes(capture_id, chunk_index, geo_capture_bytes, fs)
     if chunk_index == 0 and geocapture.is_last_chunk and geocapture.video is None:
         if len(geocapture.photos) != 1:

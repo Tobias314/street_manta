@@ -29,7 +29,7 @@ class PhotoViewPageState extends State<PhotoViewPage> {
       body: Column(children: <Widget>[
         FutureBuilder(
             future: fetchImage(widget.geoCapture.captureId,
-                widget.geoCapture.photoIds.first),
+                widget.geoCapture.photos.first.photoId),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return snapshot.data!;
