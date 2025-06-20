@@ -116,6 +116,7 @@ message VideoCapture {
 }
 
 message GeoCaptureChunk {
+  string identifier = 16;
   string device = 1;
   optional GpsCapture gps = 2;
   optional OrientationCapture orientation = 3;

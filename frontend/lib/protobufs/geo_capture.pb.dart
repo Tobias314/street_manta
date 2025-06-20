@@ -1336,6 +1336,7 @@ class GeoCaptureChunk extends $pb.GeneratedMessage {
     $fixnum.Int64? chunkIndex,
     $core.bool? isLastChunk,
     $fixnum.Int64? version,
+    $core.String? identifier,
   }) {
     final result = create();
     if (device != null) result.device = device;
@@ -1353,6 +1354,7 @@ class GeoCaptureChunk extends $pb.GeneratedMessage {
     if (chunkIndex != null) result.chunkIndex = chunkIndex;
     if (isLastChunk != null) result.isLastChunk = isLastChunk;
     if (version != null) result.version = version;
+    if (identifier != null) result.identifier = identifier;
     return result;
   }
 
@@ -1377,6 +1379,7 @@ class GeoCaptureChunk extends $pb.GeneratedMessage {
     ..aInt64(13, _omitFieldNames ? '' : 'chunkIndex')
     ..aOB(14, _omitFieldNames ? '' : 'isLastChunk')
     ..aInt64(15, _omitFieldNames ? '' : 'version')
+    ..aOS(16, _omitFieldNames ? '' : 'identifier')
     ..hasRequiredFields = false
   ;
 
@@ -1531,6 +1534,15 @@ class GeoCaptureChunk extends $pb.GeneratedMessage {
   $core.bool hasVersion() => $_has(14);
   @$pb.TagNumber(15)
   void clearVersion() => $_clearField(15);
+
+  @$pb.TagNumber(16)
+  $core.String get identifier => $_getSZ(15);
+  @$pb.TagNumber(16)
+  set identifier($core.String value) => $_setString(15, value);
+  @$pb.TagNumber(16)
+  $core.bool hasIdentifier() => $_has(15);
+  @$pb.TagNumber(16)
+  void clearIdentifier() => $_clearField(16);
 }
 
 

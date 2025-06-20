@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import '../models/geocapture.dart';
@@ -88,35 +89,21 @@ Future<List<GeoCaptureDescriptor>> fetchGeoCapturesForRegion(
   }
 }
 
-Future<Image> fetchThumbnail(String captureId) async {
+Future<Image> fetchImage(String imageUrl) async {
   final globals = await Globals.getInstance();
   Map<String, String> headers = {
     'Content-type': 'application/json',
     'Accept': 'image/png',
     'Authorization': 'Bearer ${await getUserToken()}',
   };
-  Uri uri =
-      Uri.parse('${globals.backendUrl}/api/geocaptures/${captureId}/thumbnail');
+  Uri uri = Uri.parse(imageUrl);
   var imageResponse = await http.get(
     uri,
     headers: headers,
   );
-  return Image.memory(imageResponse.bodyBytes);
-}
-
-Future<Image> fetchImage(String captureId, String imageId,
-    {bool fetchThumbnail = false}) async {
-  final globals = await Globals.getInstance();
-  Map<String, String> headers = {
-    'Content-type': 'application/json',
-    'Accept': 'image/png',
-    'Authorization': 'Bearer ${await getUserToken()}',
-  };
-  Uri uri = Uri.parse(
-      '${globals.backendUrl}/api/geocaptures/${captureId}/${fetchThumbnail ? "thumbnail" : "image"}/$imageId');
-  var imageResponse = await http.get(
-    uri,
-    headers: headers,
-  );
+  if (imageResponse.statusCode != 200) {
+    throw Exception('Failed to load image from $imageUrl');
+  }
+  // Return the image as a widget
   return Image.memory(imageResponse.bodyBytes);
 }

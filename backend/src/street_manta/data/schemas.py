@@ -66,6 +66,17 @@ class GeoCapture(Base):
     longitude_max: Mapped[float] = mapped_column(Float)
     elevation_max: Mapped[float] = mapped_column(Float)
     description: Mapped[str] = mapped_column(String)
+    
+class GeoCaptureChunk(Base):
+    __tablename__ = "geocapture_chunks"
+    chunk_index = mapped_column(Integer, primary_key=True)
+    capture_id = mapped_column(ForeignKey("geocaptures.capture_id"), primary_key=True)
+    capture = relationship("GeoCapture")
+    waypoints = mapped_column(String)  # JSON string for list of GeoPosition
+    latitude_min = mapped_column(Float)
+    latitude_max = mapped_column(Float)
+    longitude_min = mapped_column(Float)
+    longitude_max = mapped_column(Float)
 
 
 class GeoPhoto(Base):

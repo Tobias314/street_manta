@@ -28,8 +28,7 @@ class PhotoViewPageState extends State<PhotoViewPage> {
       appBar: AppBar(title: const Text('Fotoansicht')),
       body: Column(children: <Widget>[
         FutureBuilder(
-            future: fetchImage(widget.geoCapture.captureId,
-                widget.geoCapture.photos.first.photoId),
+            future: fetchImage(widget.geoCapture.photos.first.url),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return snapshot.data!;

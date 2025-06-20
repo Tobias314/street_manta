@@ -44,7 +44,7 @@ from .data.storage_interface import (
     init_geocapture,
     read_photo_bytes,
     read_thumbnail_bytes,
-    save_capture_chunk_bytes,
+    add_capture_chunk,
     add_photo_from_bytes,
 )
 from .protobufs.geo_capture_pb2 import GeoCaptureChunk
@@ -53,7 +53,7 @@ from .protobufs.geo_capture_pb2 import GeoCaptureChunk
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 ch.setFormatter(formatter)
 
 app = FastAPI()
@@ -79,34 +79,20 @@ def get_fs():
         fs.close()
 
 
-# def get_image_fs():
-#     image_fs_dir = Path(f"{DATASTORE_PATH}/images")
-#     image_fs_dir.mkdir(parents=True, exist_ok=True)
-#     image_fs = OSFS(str(image_fs_dir))
-#     try:
-#         yield image_fs
-#     finally:
-#         image_fs.close()
+def get_thumbnail_url(base_url: str, capture_id: str) -> str:
+    return f"{base_url}api/geocaptures/{capture_id}/thumbnail.{THUMBNAIL_FORMAT}"
 
 
-# def get_video_fs():
-#     video_fs_dir = Path(f"{DATASTORE_PATH}/videos")
-#     video_fs_dir.mkdir(parents=True, exist_ok=True)
-#     video_fs = OSFS(str(video_fs_dir))
-#     try:
-#         yield video_fs
-#     finally:
-#         video_fs.close()
+def get_photo_url(
+    base_url: str, capture_id: str, image_id: str, data_format: str
+) -> str:
+    return f"{base_url}api/geocaptures/{capture_id}/photos/{image_id}.{data_format}"
 
 
-# def get_capture_fs():
-#     capture_fs_dir = Path(f"{DATASTORE_PATH}/captures")
-#     capture_fs_dir.mkdir(parents=True, exist_ok=True)
-#     video_fs = OSFS(str(capture_fs_dir))
-#     try:
-#         yield video_fs
-#     finally:
-#         video_fs.close()
+def get_video_url(
+    base_url: str, capture_id: str, video_id: str, data_format: str
+) -> str:
+    return f"{base_url}api/geocaptures/{capture_id}/video/{video_id}.{data_format}"
 
 
 @app.get("/")
@@ -154,6 +140,7 @@ def get_geocaptures_for_region(
     lon_max: float,
     request: Request,
     db: Session = Depends(get_db),
+    fs: FS = Depends(get_fs),
 ) -> List[models.GeoCaptureDescriptor]:
     captures = storage_interface.get_geocaptures_for_region(
         lat_min=lat_min,
@@ -171,6 +158,12 @@ def get_geocaptures_for_region(
         capture_videos = storage_interface.get_videos_for_capture(
             capture_id=capture.capture_id, db=db
         )
+        thumbnail_url = (
+            get_thumbnail_url(capture_id=capture.capture_id, base_url=request.base_url)
+            if fs.exists(f"{capture.capture_id}/thumbnail.{THUMBNAIL_FORMAT}")
+            else None
+        )
+        print(f"Thumbnail URL: {thumbnail_url}")
         result.append(
             models.GeoCaptureDescriptor(
                 capture_id=capture.capture_id,
@@ -219,28 +212,10 @@ def get_geocaptures_for_region(
                 )
                 if capture_videos
                 else None,
-                thumbnail_url=f"thumbnail.{THUMBNAIL_FORMAT}",
+                thumbnail_url=thumbnail_url,
             )
         )
     return result
-
-
-def get_thumbnail_url(base_url: str, capture_id: str) -> str:
-    return (
-        f"https://{base_url}/api/geocaptures/{capture_id}/thumbnail.{THUMBNAIL_FORMAT}"
-    )
-
-
-def get_photo_url(
-    base_url: str, capture_id: str, image_id: str, data_format: str
-) -> str:
-    return f"https://{base_url}/api/geocaptures/{capture_id}/photos/{image_id}.{data_format}"
-
-
-def get_video_url(
-    base_url: str, capture_id: str, video_id: str, data_format: str
-) -> str:
-    return f"https://{base_url}/api/geocaptures/{capture_id}/video/{video_id}.{data_format}"
 
 
 @api_router.get("/geocaptures/{capture_id}/photos/{file_name}")
@@ -250,7 +225,7 @@ async def fetch_photo(
     user: Annotated[models.User, Depends(get_current_user)],
     fs: FS = Depends(get_fs),
 ) -> str:
-    image_bytes = fs.opendir("images").readbytes(file_name)
+    image_bytes = read_photo_bytes(capture_id=capture_id, file_name=file_name, fs=fs)
     return Response(content=image_bytes, media_type=f"image/{Path(file_name).suffix}")
 
 
@@ -278,9 +253,8 @@ async def fetch_thumbnail(
     )
 
 
-@api_router.post("/geocaptures/{capture_id}")
+@api_router.post("/upload_geocapture_chunk")
 async def upload_geo_capture(
-    capture_id: str,
     user: Annotated[models.User, Depends(get_current_user)],
     geocapture: UploadFile,
     db: Session = Depends(get_db),
@@ -289,18 +263,26 @@ async def upload_geo_capture(
     geo_capture_bytes = await geocapture.read()
     geocapture = GeoCaptureChunk()
     geocapture.ParseFromString(geo_capture_bytes)
+    capture_id = geocapture.identifier
     chunk_index = geocapture.chunk_index
+    logger.info(
+        f"Received geocapture chunk for capture {capture_id}, chunk index {chunk_index}, is_last_chunk: {geocapture.is_last_chunk}"
+    )
     if chunk_index == 0:
         init_geocapture(
             capture_id=capture_id,
             fs=fs,
         )
-    save_capture_chunk_bytes(capture_id, chunk_index, geo_capture_bytes, fs)
     if chunk_index == 0 and geocapture.is_last_chunk and geocapture.video is None:
         if len(geocapture.photos) != 1:
             raise ValueError(
                 f"Non-contiguous captures (one chunk, no video) are expected to be single image captures containing exactly one photo but {len(geocapture.photos)} photos were found."
             )
+    add_capture_chunk(
+        geocapture_chunk=geocapture,
+        db=db,
+        fs=fs,
+    )
     for i, photo_capture in enumerate(geocapture.photos):
         image_bytes = photo_capture.data
         add_photo_from_bytes(
@@ -317,41 +299,15 @@ async def upload_geo_capture(
             make_thumbnail=True,
             data_format=photo_capture.format,
         )
-    if geocapture.HasField("video"):
-        video_waypoints = []
-        last_reading_time = None
-        for gps_reading in geocapture.gps.readings:
-            if (
-                last_reading_time is None
-                or gps_reading.epoch_micro_seconds - last_reading_time
-                > WAYPOINT_MIN_TIME_DELTA_SECONDS * 1_000_000
-            ):
-                video_waypoints.append(
-                    models.GeoPosition(
-                        latitude=gps_reading.position.latitude,
-                        longitude=gps_reading.position.longitude,
-                        elevation=gps_reading.position.elevation,
-                    )
-                )
-                last_reading_time = gps_reading.epoch_micro_seconds
-        add_video_from_bytes(
-            video_bytes=geocapture.video.data,
-            capture_id=capture_id,
-            video_id=geocapture.video.identifier,
-            waypoints=video_waypoints,
-            db=db,
-            fs=fs,
-            data_format=geocapture.video.format,
-        )
 
     if geocapture.is_last_chunk:
         capture_photos = get_photos_for_capture(capture_id=capture_id, db=db)
-        capture_videos = storage_interface.get_videos_for_capture(
+        capture_chunks = storage_interface.get_chunks_for_capture(
             capture_id=capture_id, db=db
         )
         positions = [[photo.latitude, photo.longitude] for photo in capture_photos]
-        for video in capture_videos:
-            for pos in json.loads(video.waypoints):
+        for chunk in capture_chunks:
+            for pos in json.loads(chunk.waypoints):
                 positions.append([pos["latitude"], pos["longitude"]])
         positions = np.array(positions)
         min_pos = np.min(positions, axis=0)

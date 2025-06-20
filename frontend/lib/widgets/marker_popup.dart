@@ -25,6 +25,31 @@ class GeoPhotoMarkerPopup extends StatefulWidget {
 }
 
 class _GeoPhotoMarkerPopupState extends State<GeoPhotoMarkerPopup> {
+  Widget? _thumbnail;
+
+  @override
+  void initState() {
+    super.initState();
+    _initThumbnail();
+  }
+
+  Future<void> _initThumbnail() async {
+    Widget thumbnail = SizedBox(
+        width: 100,
+        height: 100,
+        child: Center(
+          child: Icon(Icons.image),
+        ));
+    if (widget.geoCapture.thumbnailUrl != null) {
+      try {
+        thumbnail = await fetchImage(widget.geoCapture.thumbnailUrl!);
+      } catch (e) {}
+    }
+    setState(() {
+      _thumbnail = thumbnail;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -34,21 +59,14 @@ class _GeoPhotoMarkerPopupState extends State<GeoPhotoMarkerPopup> {
             children: <Widget>[
               Padding(
                   padding: const EdgeInsets.only(left: 20, right: 10),
-                  child: FutureBuilder(
-                      future: fetchThumbnail(widget.geoCapture.captureId),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return snapshot.data!;
-                        } else {
-                          return const SizedBox(
-                            width: 100,
-                            height: 100,
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        }
-                      })),
+                  child: _thumbnail ??
+                      SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      )),
               _cardDescription(context),
             ],
           ),

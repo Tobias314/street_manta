@@ -4,7 +4,7 @@ class Globals {
   static Globals? _singleton;
   static const int IN_APP_UPLOAD_PERIOD_SECONDS = 60;
   late SharedPreferences preferences;
-  static const double GEO_CAPTURE_CHUNK_LENGTH_SECONDS = 30;
+  static const double GEO_CAPTURE_CHUNK_LENGTH_SECONDS = 10;
   static const int DEFAULT_VIDEO_FPS = 30;
   static const int DEFAULT_VIDEO_BITRATE = 12000000;
   static const double DEFAULT_VIDEO_EXPOSURE_OFFSET = -1.0; //in EV

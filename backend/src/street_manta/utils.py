@@ -27,6 +27,7 @@ def register_exception(app: FastAPI):
 
 
 def create_single_photo_geocapture_proto(
+    capture_id: str,
     img: np.ndarray = None,
     longitude: float = 0.0,
     latitude: float = 0.0,
@@ -73,6 +74,7 @@ def create_single_photo_geocapture_proto(
         orientation=orientation_reading,
     )
     chunk = geo_capture_pb2.GeoCaptureChunk(
+        identifier=capture_id,
         device=device,
         photos=[photo],
         description=description,
@@ -103,6 +105,7 @@ def encode_video(
 
 
 def create_video_geocapture_proto(
+    capture_id: str,
     positions: list[tuple[float, float, float]],
     frames: list[np.ndarray] | None = None,
     start_epoch_us: int | None = None,
@@ -159,6 +162,7 @@ def create_video_geocapture_proto(
         )
         gps_readings.append(gps_reading)
     chunk = geo_capture_pb2.GeoCaptureChunk(
+        identifier=capture_id,
         device=device,
         video=video_capture,
         gps=geo_capture_pb2.GpsCapture(readings=gps_readings),

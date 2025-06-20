@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:street_manta_client/pages/map2.dart';
 
 import '../constants.dart';
 import '../pages/capture.dart';
@@ -36,7 +35,7 @@ class MenuDrawer extends StatelessWidget {
           Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) =>MapPage(),
+                builder: (context) => MapPage(),
               ));
         },
       ),

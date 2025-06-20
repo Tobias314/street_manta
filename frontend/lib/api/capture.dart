@@ -66,15 +66,13 @@ Future<http.Response> uploadGeoCaptureFile(String geoCaptureZipFilePath,
       backOff *= 2;
     }
     var multipartFile = await http.MultipartFile.fromPath(
-      'geo_capture',
+      'geocapture',
       geoCaptureZipFilePath,
       contentType: MediaType('application', 'zip'),
     );
 
     var request = http.MultipartRequest(
-        "POST",
-        Uri.parse(
-            '${globals.backendUrl}/api/geocaptures/${Uuid().v4()}'));
+        "POST", Uri.parse('${globals.backendUrl}/api/upload_geocapture_chunk'));
     request.files.add(multipartFile);
     request.headers['Authorization'] = 'Bearer ${await getUserToken()}';
     var streamedResponse = await request.send();

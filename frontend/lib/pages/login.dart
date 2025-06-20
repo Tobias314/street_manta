@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:street_manta_client/pages/map2.dart';
 
 import '../api/authentication.dart';
 import '../widgets/footer.dart';

@@ -42,6 +42,7 @@ def create_database(path: Path, overwrite: bool = False):
         f"sqlite:///{str(path)}", connect_args={"check_same_thread": False}
     )
     Base.metadata.tables["geocaptures"].create(engine)
+    Base.metadata.tables["geocapture_chunks"].create(engine)
     Base.metadata.tables["geophotos"].create(engine)
     Base.metadata.tables["geovideos"].create(engine)
     Base.metadata.tables["users"].create(engine)
@@ -50,10 +51,6 @@ def create_database(path: Path, overwrite: bool = False):
             "CREATE VIRTUAL TABLE geocaptures_rtree USING rtree(id, latitude_min, latitude_max, longitude_min, longitude_max, +capture_id TEXT);"
         )
         con.execute(statement)
-    with contextlib.contextmanager(get_fs)() as fs:
-        fs.makedir("images", recreate=True)
-        fs.makedir("videos", recreate=True)
-        fs.makedir("captures", recreate=True)
 
 
 def create_example_database(path: Path, overwrite: bool = False):
@@ -87,6 +84,7 @@ def create_example_database(path: Path, overwrite: bool = False):
                 fs=fs,
                 db=db,
                 data_format="png",
+                make_thumbnail=True,
             )
             create_geocapture_from_model(
                 db=db,
@@ -120,13 +118,12 @@ def create_example_database(path: Path, overwrite: bool = False):
             )
             for i in range(num_positions)
         ]
-        video_capture_proto = create_video_geocapture_proto(positions=video_positions)
+        video_capture_proto = create_video_geocapture_proto(capture_id=capture_id, positions=video_positions)
         video_capture_bytes_io = UploadFile(
             BytesIO(video_capture_proto.SerializeToString())
         )
         asyncio.run(
             upload_geo_capture(
-                capture_id=capture_id,
                 user=tester_user,
                 geocapture=video_capture_bytes_io,
                 fs=fs,

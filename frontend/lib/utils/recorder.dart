@@ -28,6 +28,7 @@ class Recorder {
   late Globals globals;
 
   //GeoCapture
+  String? currentCaptureId;
   GeoCaptureHandle? currentGeoCaptureHandle;
   bool isRecording = false;
   String deviceModel = 'Unknown';
@@ -79,10 +80,15 @@ class Recorder {
     deviceModel = await getDeviceModel();
   }
 
+  String _generateCaptureIdentifier() {
+    return Uuid().v4();
+  }
+
   _initNewChunk() {
     logger.d("Initializing new chunk");
     currentChunkIndex += 1;
     currentGeoCaptureHandle = GeoCaptureHandle();
+    currentGeoCaptureHandle!.geoCapture.identifier = currentCaptureId!;
     currentGeoCaptureHandle!.geoCapture.chunkIndex = Int64(currentChunkIndex);
     currentGeoCaptureHandle!.geoCapture.traceIdentifier = traceIdentifier;
     currentGeoCaptureHandle!.geoCapture.gps = GpsCapture();
@@ -94,18 +100,20 @@ class Recorder {
     currentGeoCaptureHandle!.geoCapture.chunkIndex = Int64(currentChunkIndex);
   }
 
-  void _chunkCurrentGeoCapture() {
+  void _chunkCurrentGeoCapture({bool isLast = false}) {
     logger.d('Chunking GeoCapture');
     var oldGeoCaptureHandle = currentGeoCaptureHandle;
     _initNewChunk();
     chunkQueue.add(_closeCurrentGeoCaptureHandle(oldGeoCaptureHandle!,
-        pathlib.join(uploadDirectory.path, '${Uuid().v4()}.cap')));
+        pathlib.join(uploadDirectory.path, '${Uuid().v4()}.cap'),
+        isLast: isLast));
   }
 
   Future<void> startGeoCapture(double geoCaptureChunkLengthSeconds) async {
     if (!isRecording) {
       currentChunkIndex = -1; // Start at -1 so that the first chunk is 0
       currentGeoCaptureHandle = GeoCaptureHandle();
+      currentCaptureId = _generateCaptureIdentifier();
       traceIdentifier = Uuid().v4();
       _initNewChunk();
       continuousUploadTimer = Timer.periodic(
@@ -130,7 +138,7 @@ class Recorder {
   Future<void> stopGeoCapture() async {
     if (isRecording) {
       continuousUploadTimer!.cancel();
-      _chunkCurrentGeoCapture();
+      _chunkCurrentGeoCapture(isLast: true);
       if (cameraController != null) {
         (CameraPlatform.instance as AndroidCamera)
             .stopChunkableVideoRecording(cameraController!.cameraId);
@@ -156,8 +164,9 @@ class Recorder {
   }
 
   Future<void> _closeCurrentGeoCaptureHandle(
-      GeoCaptureHandle geoCaptureHandle, String outputFilePath) async {
-    logger.d('Finishing off GeoCapture...');
+      GeoCaptureHandle geoCaptureHandle, String outputFilePath,
+      {bool isLast = false}) async {
+    logger.d('Finishing off GeoCapture chunk...');
     if (cameraController != null) {
       var cameraPlatform = CameraPlatform.instance as AndroidCamera;
       var videoChunk =
@@ -174,6 +183,11 @@ class Recorder {
           data: bytes,
           fps: Int64(fps));
       await File(videoFile.path).delete();
+    }
+    if (isLast) {
+      geoCaptureHandle.geoCapture.isLastChunk = true;
+    } else {
+      geoCaptureHandle.geoCapture.isLastChunk = false;
     }
     logger.d('Writing new GeoCapture chunk...');
     logger.d('Closing GeoCapture handle (Encoding video)...');
@@ -209,6 +223,7 @@ class Recorder {
         gps: GpsReading(epochMicroSeconds: time, position: gpsPositionProto),
         orientation: lastOrientationReading!);
     var capture = GeoCaptureChunk();
+    capture.identifier = _generateCaptureIdentifier();
     capture.photos.add(photoCapture);
     capture.chunkIndex = Int64(0);
     capture.isLastChunk = true;

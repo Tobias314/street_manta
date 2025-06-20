@@ -7,9 +7,12 @@ import cv2
 import numpy as np
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from street_manta.globals import WAYPOINT_MIN_TIME_DELTA_SECONDS
 
 from . import schemas
 from .models import GeoCaptureDescriptor, GeoCapturePhoto, User, GeoPosition
+from ..protobufs.geo_capture_pb2 import GeoCaptureChunk
+from street_manta.data import models
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +89,18 @@ def get_geocaptures_for_region(
     return captures
 
 
+def get_chunks_for_capture(
+    capture_id: str, db: Session
+) -> List[schemas.GeoCaptureChunk]:
+    query_result = (
+        db.query(schemas.GeoCaptureChunk)
+        .filter(schemas.GeoCaptureChunk.capture_id == capture_id)
+        .order_by(schemas.GeoCaptureChunk.chunk_index)
+        .all()
+    )
+    return query_result
+
+
 def get_photos_for_capture(capture_id: str, db: Session) -> List[schemas.GeoPhoto]:
     query_result = (
         db.query(schemas.GeoPhoto)
@@ -142,10 +157,72 @@ def init_geocapture(capture_id, fs: FS):
     capture_fs.makedirs("chunks", recreate=True)
 
 
-def save_capture_chunk_bytes(
-    capture_id: str, chunk_index: str, chunk_bytes: bytes, fs: FS
-) -> str:
-    fs.opendir(capture_id).writebytes(f"{chunk_index}.cap", chunk_bytes)
+def add_capture_chunk(geocapture_chunk: GeoCaptureChunk, db: Session, fs: FS) -> str:
+    capture_id = geocapture_chunk.identifier
+    chunk_index = geocapture_chunk.chunk_index
+    chunk_bytes = geocapture_chunk.SerializeToString()
+    fs.opendir(capture_id).opendir("chunks").writebytes(
+        f"{chunk_index}.cap", chunk_bytes
+    )
+
+    positions = []
+    waypoints = []
+    for photo in geocapture_chunk.photos:
+        if photo.HasField("gps"):
+            positions.append(
+                (
+                    photo.gps.position.latitude,
+                    photo.gps.position.longitude,
+                    photo.gps.position.elevation,
+                )
+            )
+    if geocapture_chunk.HasField("gps"):
+        last_reading_time = None
+        for reading in geocapture_chunk.gps.readings:
+            positions.append(
+                (
+                    reading.position.latitude,
+                    reading.position.longitude,
+                    reading.position.elevation,
+                )
+            )
+            if (
+                last_reading_time is None
+                or reading.epoch_micro_seconds - last_reading_time
+                > WAYPOINT_MIN_TIME_DELTA_SECONDS * 1_000_000
+            ):
+                waypoints.append(
+                    models.GeoPosition(
+                        latitude=reading.position.latitude,
+                        longitude=reading.position.longitude,
+                        elevation=reading.position.elevation,
+                    )
+                )
+                last_reading_time = reading.epoch_micro_seconds
+    positions = np.array(positions, dtype=np.float64)
+    bbox_min = GeoPosition(
+        latitude=np.min(positions[:, 0]),
+        longitude=np.min(positions[:, 1]),
+        elevation=np.min(positions[:, 2]),
+    )
+    bbox_max = GeoPosition(
+        latitude=np.max(positions[:, 0]),
+        longitude=np.max(positions[:, 1]),
+        elevation=np.max(positions[:, 2]),
+    )
+
+    db_geovideo = schemas.GeoCaptureChunk(
+        chunk_index=chunk_index,
+        capture_id=capture_id,
+        waypoints=json.dumps([pos.model_dump(mode="json") for pos in waypoints]),
+        latitude_min=bbox_min.latitude,
+        longitude_min=bbox_min.longitude,
+        latitude_max=bbox_max.latitude,
+        longitude_max=bbox_max.longitude,
+    )
+    db.add(db_geovideo)
+    db.commit()
+
     print(f"wrote capture file: {capture_id}.cap")
 
 

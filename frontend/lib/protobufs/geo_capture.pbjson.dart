@@ -363,6 +363,7 @@ final $typed_data.Uint8List videoCaptureDescriptor = $convert.base64Decode(
 const GeoCaptureChunk$json = {
   '1': 'GeoCaptureChunk',
   '2': [
+    {'1': 'identifier', '3': 16, '4': 1, '5': 9, '10': 'identifier'},
     {'1': 'device', '3': 1, '4': 1, '5': 9, '10': 'device'},
     {'1': 'gps', '3': 2, '4': 1, '5': 11, '6': '.street_manata.GpsCapture', '9': 0, '10': 'gps', '17': true},
     {'1': 'orientation', '3': 3, '4': 1, '5': 11, '6': '.street_manata.OrientationCapture', '9': 1, '10': 'orientation', '17': true},
@@ -392,21 +393,21 @@ const GeoCaptureChunk$json = {
 
 /// Descriptor for `GeoCaptureChunk`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List geoCaptureChunkDescriptor = $convert.base64Decode(
-    'Cg9HZW9DYXB0dXJlQ2h1bmsSFgoGZGV2aWNlGAEgASgJUgZkZXZpY2USMAoDZ3BzGAIgASgLMh'
-    'kuc3RyZWV0X21hbmF0YS5HcHNDYXB0dXJlSABSA2dwc4gBARJICgtvcmllbnRhdGlvbhgDIAEo'
-    'CzIhLnN0cmVldF9tYW5hdGEuT3JpZW50YXRpb25DYXB0dXJlSAFSC29yaWVudGF0aW9uiAEBEk'
-    'sKDGFjY2VsZXJhdGlvbhgEIAEoCzIiLnN0cmVldF9tYW5hdGEuQWNjZWxlcmF0aW9uQ2FwdHVy'
-    'ZUgCUgxhY2NlbGVyYXRpb26IAQESVQoQYW5ndWxhcl92ZWxvY2l0eRgFIAEoCzIlLnN0cmVldF'
-    '9tYW5hdGEuQW5ndWxhclZlbG9jaXR5Q2FwdHVyZUgDUg9hbmd1bGFyVmVsb2NpdHmIAQESTwoO'
-    'bWFnbmV0aWNfZmllbGQYBiABKAsyIy5zdHJlZXRfbWFuYXRhLk1hZ25ldGljRmllbGRDYXB0dX'
-    'JlSARSDW1hZ25ldGljRmllbGSIAQESMwoGcGhvdG9zGAcgAygLMhsuc3RyZWV0X21hbmF0YS5Q'
-    'aG90b0NhcHR1cmVSBnBob3RvcxI2CgV2aWRlbxgIIAEoCzIbLnN0cmVldF9tYW5hdGEuVmlkZW'
-    '9DYXB0dXJlSAVSBXZpZGVviAEBEiUKC2Rlc2NyaXB0aW9uGAkgASgJSAZSC2Rlc2NyaXB0aW9u'
-    'iAEBEhIKBHRhZ3MYCiADKAlSBHRhZ3MSKQoQdHJhY2VfaWRlbnRpZmllchgLIAEoCVIPdHJhY2'
-    'VJZGVudGlmaWVyEkEKHXRpbWVzdGFtcF9lcG9jaF9taWNyb19zZWNvbmRzGAwgASgDUhp0aW1l'
-    'c3RhbXBFcG9jaE1pY3JvU2Vjb25kcxIfCgtjaHVua19pbmRleBgNIAEoA1IKY2h1bmtJbmRleB'
-    'IiCg1pc19sYXN0X2NodW5rGA4gASgIUgtpc0xhc3RDaHVuaxIYCgd2ZXJzaW9uGA8gASgDUgd2'
-    'ZXJzaW9uQgYKBF9ncHNCDgoMX29yaWVudGF0aW9uQg8KDV9hY2NlbGVyYXRpb25CEwoRX2FuZ3'
-    'VsYXJfdmVsb2NpdHlCEQoPX21hZ25ldGljX2ZpZWxkQggKBl92aWRlb0IOCgxfZGVzY3JpcHRp'
-    'b24=');
+    'Cg9HZW9DYXB0dXJlQ2h1bmsSHgoKaWRlbnRpZmllchgQIAEoCVIKaWRlbnRpZmllchIWCgZkZX'
+    'ZpY2UYASABKAlSBmRldmljZRIwCgNncHMYAiABKAsyGS5zdHJlZXRfbWFuYXRhLkdwc0NhcHR1'
+    'cmVIAFIDZ3BziAEBEkgKC29yaWVudGF0aW9uGAMgASgLMiEuc3RyZWV0X21hbmF0YS5Pcmllbn'
+    'RhdGlvbkNhcHR1cmVIAVILb3JpZW50YXRpb26IAQESSwoMYWNjZWxlcmF0aW9uGAQgASgLMiIu'
+    'c3RyZWV0X21hbmF0YS5BY2NlbGVyYXRpb25DYXB0dXJlSAJSDGFjY2VsZXJhdGlvbogBARJVCh'
+    'Bhbmd1bGFyX3ZlbG9jaXR5GAUgASgLMiUuc3RyZWV0X21hbmF0YS5Bbmd1bGFyVmVsb2NpdHlD'
+    'YXB0dXJlSANSD2FuZ3VsYXJWZWxvY2l0eYgBARJPCg5tYWduZXRpY19maWVsZBgGIAEoCzIjLn'
+    'N0cmVldF9tYW5hdGEuTWFnbmV0aWNGaWVsZENhcHR1cmVIBFINbWFnbmV0aWNGaWVsZIgBARIz'
+    'CgZwaG90b3MYByADKAsyGy5zdHJlZXRfbWFuYXRhLlBob3RvQ2FwdHVyZVIGcGhvdG9zEjYKBX'
+    'ZpZGVvGAggASgLMhsuc3RyZWV0X21hbmF0YS5WaWRlb0NhcHR1cmVIBVIFdmlkZW+IAQESJQoL'
+    'ZGVzY3JpcHRpb24YCSABKAlIBlILZGVzY3JpcHRpb26IAQESEgoEdGFncxgKIAMoCVIEdGFncx'
+    'IpChB0cmFjZV9pZGVudGlmaWVyGAsgASgJUg90cmFjZUlkZW50aWZpZXISQQoddGltZXN0YW1w'
+    'X2Vwb2NoX21pY3JvX3NlY29uZHMYDCABKANSGnRpbWVzdGFtcEVwb2NoTWljcm9TZWNvbmRzEh'
+    '8KC2NodW5rX2luZGV4GA0gASgDUgpjaHVua0luZGV4EiIKDWlzX2xhc3RfY2h1bmsYDiABKAhS'
+    'C2lzTGFzdENodW5rEhgKB3ZlcnNpb24YDyABKANSB3ZlcnNpb25CBgoEX2dwc0IOCgxfb3JpZW'
+    '50YXRpb25CDwoNX2FjY2VsZXJhdGlvbkITChFfYW5ndWxhcl92ZWxvY2l0eUIRCg9fbWFnbmV0'
+    'aWNfZmllbGRCCAoGX3ZpZGVvQg4KDF9kZXNjcmlwdGlvbg==');
 

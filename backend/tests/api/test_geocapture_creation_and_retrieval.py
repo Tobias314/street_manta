@@ -77,14 +77,14 @@ def create_user(email: str, password: str):
 
 
 def upload_geocapture_chunk(
-    capture_id: str, token: str, geocapture_chunk: geo_capture_pb2.GeoCaptureChunk
+    token: str, geocapture_chunk: geo_capture_pb2.GeoCaptureChunk
 ):
     response = client.post(
-        f"/api/geocaptures/{capture_id}",
+        f"/api/upload_geocapture_chunk/",
         headers={"Authorization": f"Bearer {token}"},
         files={
             "geocapture": (
-                f"{capture_id}.cap",
+                "geocapture_chunk.cap",
                 BytesIO(geocapture_chunk.SerializeToString()),
                 "application/zip",
             )
@@ -98,30 +98,48 @@ def test_geocapture_end_to_end():
     create_user("tester@example.com", "password")
     token = get_token("tester@example.com", "password")
     upload_geocapture_chunk(
-        "capture_1",
         token=token,
-        geocapture_chunk=create_single_photo_geocapture_proto(longitude=0.5, latitude=0.5),
+        geocapture_chunk=create_single_photo_geocapture_proto(
+            "capture_1", longitude=0.5, latitude=0.5
+        ),
     )
     upload_geocapture_chunk(
-        "capture_2",
         token=token,
-        geocapture_chunk=create_single_photo_geocapture_proto(longitude=1.0, latitude=2.0),
+        geocapture_chunk=create_single_photo_geocapture_proto(
+            "capture_2", longitude=1.0, latitude=2.0
+        ),
     )
     upload_geocapture_chunk(
-        "capture_3",
         token=token,
-        geocapture_chunk=create_single_photo_geocapture_proto(longitude=3.0, latitude=3.0),
+        geocapture_chunk=create_single_photo_geocapture_proto(
+            "capture_3", longitude=3.0, latitude=3.0
+        ),
     )
 
-    video_positions = [
+    video_chunk1_positions = [
         (0.5, 0.5, 100.0),
         (1.0, 1.0, 100.0),
         (1.5, 1.5, 100.0),
     ]
-    video_capture = create_video_geocapture_proto(positions=video_positions)
-    upload_geocapture_chunk(
-        "video_capture_1", token=token, geocapture_chunk=video_capture
+    video_capture_chunk1 = create_video_geocapture_proto(
+        capture_id="video_capture_1",
+        positions=video_chunk1_positions,
+        chunk_index=0,
+        is_last_chunk=False,
     )
+    upload_geocapture_chunk(token=token, geocapture_chunk=video_capture_chunk1)
+    video_chunk2_positions = [
+        (2.0, 2.0, 100.0),
+        (3.0, 3.0, 100.0),
+        (3.5, 3.5, 100.0),
+    ]
+    video_capture_chunk2 = create_video_geocapture_proto(
+        capture_id="video_capture_1",
+        positions=video_chunk2_positions,
+        chunk_index=1,
+        is_last_chunk=True,
+    )
+    upload_geocapture_chunk(token=token, geocapture_chunk=video_capture_chunk2)
 
     region_res = client.get(
         "/api/geocaptures_for_region/0.0,0.0,2.5,2.5",

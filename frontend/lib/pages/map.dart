@@ -51,7 +51,7 @@ class MapPageState extends State<MapPage> {
                       LatLng(waypoint.latitude, waypoint.longitude))
                   .toList(),
               color: Colors.blue,
-              strokeWidth: 2.0,
+              strokeWidth: 10.0,
             ))
         .toList();
   }
