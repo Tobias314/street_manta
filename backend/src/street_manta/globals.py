@@ -13,3 +13,5 @@ def get_datastore_path() -> str:
 
 
 DATASTORE_PATH = get_datastore_path()
+
+VIDEO_STORAGE_FORMAT = "mp4"

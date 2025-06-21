@@ -11,7 +11,7 @@ from sqlalchemy import create_engine, text
 
 from street_manta.utils import create_video_geocapture_proto
 
-from ..server import get_fs, upload_geo_capture
+from ..server import finalize_geocapture, get_fs, get_storage_path, ingest_geocapture_chunk, upload_geo_capture
 
 from ..data.models import GeoCaptureDescriptor, GeoCapturePhoto, GeoPosition
 from ..data.schemas import Base, SessionLocal
@@ -58,6 +58,7 @@ def create_example_database(path: Path, overwrite: bool = False):
     print("Adding example GeoPhotos to database...")
     db = SessionLocal()
     tester_user = asyncio.run(create_user(email="test", password="test", db=db))
+    storage_path = get_storage_path()
     with contextlib.contextmanager(get_fs)() as fs:
         # Add 5 single photo geocaptures
         for i in range(5):
@@ -118,18 +119,22 @@ def create_example_database(path: Path, overwrite: bool = False):
             )
             for i in range(num_positions)
         ]
-        video_capture_proto = create_video_geocapture_proto(capture_id=capture_id, positions=video_positions)
-        video_capture_bytes_io = UploadFile(
-            BytesIO(video_capture_proto.SerializeToString())
+        video_capture_proto = create_video_geocapture_proto(
+            capture_id=capture_id, positions=video_positions
         )
-        asyncio.run(
-            upload_geo_capture(
-                user=tester_user,
-                geocapture=video_capture_bytes_io,
-                fs=fs,
+        ingest_geocapture_chunk(
+            geocapture=video_capture_proto,
+            fs=fs,
+            db=db,
+        )
+        if video_capture_proto.is_last_chunk:
+            finalize_geocapture(
+                user_token=tester_user.current_token,
+                capture_id=video_capture_proto.identifier,
+                storage_path=storage_path,
                 db=db,
+                description=video_capture_proto.description,
             )
-        )
 
 
 def __main__(args):

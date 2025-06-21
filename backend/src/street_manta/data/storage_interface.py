@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from upath import UPath
 from street_manta.globals import WAYPOINT_MIN_TIME_DELTA_SECONDS
 
 from . import schemas
@@ -159,6 +160,7 @@ def init_geocapture(capture_id, fs: FS):
 
 def add_capture_chunk(geocapture_chunk: GeoCaptureChunk, db: Session, fs: FS) -> str:
     capture_id = geocapture_chunk.identifier
+    trace_id = geocapture_chunk.trace_identifier
     chunk_index = geocapture_chunk.chunk_index
     chunk_bytes = geocapture_chunk.SerializeToString()
     fs.opendir(capture_id).opendir("chunks").writebytes(
@@ -212,6 +214,7 @@ def add_capture_chunk(geocapture_chunk: GeoCaptureChunk, db: Session, fs: FS) ->
     )
 
     db_geovideo = schemas.GeoCaptureChunk(
+        trace_id=trace_id,
         chunk_index=chunk_index,
         capture_id=capture_id,
         waypoints=json.dumps([pos.model_dump(mode="json") for pos in waypoints]),
@@ -275,13 +278,36 @@ def add_video_from_bytes(
     bbox_min: GeoPosition | None = None,
     bbox_max: GeoPosition | None = None,
     make_thumbnail: bool = False,
-    data_format: str = "jpg",
+    data_format: str = "mp4",
 ) -> None:
     fs.opendir(capture_id).opendir("videos").writebytes(
         f"{video_id}.{data_format}", video_bytes
     )
-    logger.info(f"Stored video with id {video_id}")
+    register_video(
+        capture_id=capture_id,
+        video_id=video_id,
+        waypoints=waypoints,
+        db=db,
+        bbox_min=bbox_min,
+        bbox_max=bbox_max,
+        data_format=data_format,
+    )
 
+def get_video_storage_path(capture_id: str, video_id: str, storage_path: UPath, video_format: str = '.mp4') -> UPath:
+    """
+    Get the storage path for a video file based on capture_id and video_id.
+    """
+    return storage_path / capture_id / "videos" / f"{video_id}.{video_format}"
+
+def register_video(
+    capture_id: str,
+    video_id: str,
+    waypoints: list[GeoPosition],
+    db: Session,
+    bbox_min: GeoPosition | None = None,
+    bbox_max: GeoPosition | None = None,
+    data_format: str = "jpg",
+):
     if bbox_min is None:
         bbox_min = GeoPosition(
             latitude=min(pos.latitude for pos in waypoints),

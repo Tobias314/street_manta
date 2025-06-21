@@ -1,6 +1,9 @@
+import asyncio
+from collections import defaultdict
 import io
 import json
 from pathlib import Path
+import time
 from typing import Dict, List, Annotated
 import logging
 import zipfile
@@ -15,6 +18,7 @@ from fastapi import (
     Depends,
     HTTPException,
 )
+from fastapi import BackgroundTasks
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
@@ -24,13 +28,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from uuid import uuid4
 from fs.osfs import OSFS
 from fs.base import FS
+from upath import UPath
 
+from .video import concatenate_video_chunks
 from .utils import register_exception
-
 from .data import models
 from .data import storage_interface
-from .data.schemas import get_db
-from .globals import DATASTORE_PATH, WAYPOINT_MIN_TIME_DELTA_SECONDS
+from .data.schemas import SessionLocal, get_db
+from .globals import (
+    DATASTORE_PATH,
+    VIDEO_STORAGE_FORMAT,
+)
 from .authentication import (
     create_user,
     get_current_user,
@@ -39,13 +47,15 @@ from .authentication import (
 )
 from .data.storage_interface import (
     THUMBNAIL_FORMAT,
-    add_video_from_bytes,
     get_photos_for_capture,
+    get_user_for_token,
+    get_video_storage_path,
     init_geocapture,
     read_photo_bytes,
     read_thumbnail_bytes,
     add_capture_chunk,
     add_photo_from_bytes,
+    register_video,
 )
 from .protobufs.geo_capture_pb2 import GeoCaptureChunk
 
@@ -79,6 +89,15 @@ def get_fs():
         fs.close()
 
 
+def get_storage_path() -> UPath:
+    """
+    Returns the path to the storage directory.
+    """
+    storage_path = UPath(DATASTORE_PATH)
+    storage_path.mkdir(parents=True, exist_ok=True)
+    return storage_path
+
+
 def get_thumbnail_url(base_url: str, capture_id: str) -> str:
     return f"{base_url}api/geocaptures/{capture_id}/thumbnail.{THUMBNAIL_FORMAT}"
 
@@ -93,6 +112,91 @@ def get_video_url(
     base_url: str, capture_id: str, video_id: str, data_format: str
 ) -> str:
     return f"{base_url}api/geocaptures/{capture_id}/video/{video_id}.{data_format}"
+
+
+def finalize_geocapture(
+    capture_id: str,
+    user_token: str,
+    storage_path: UPath,
+    db: Session,
+    description: str = "",
+) -> None:
+    """
+    Finalizes the geocapture by processing the video and generating a thumbnail.
+    """
+    # The given session is probably already closed, when this is run as a background task,
+    # so we need to create a new session for the same database.
+    with Session(
+        bind=db.get_bind(),
+        autocommit=False,
+        autoflush=False,
+    ) as db_session:
+        logger.info(f"Finalizing geocapture {capture_id}")
+        user = get_user_for_token(token=user_token, db=db_session)
+        capture_photos = get_photos_for_capture(capture_id=capture_id, db=db_session)
+        capture_chunks = storage_interface.get_chunks_for_capture(
+            capture_id=capture_id, db=db_session
+        )
+        positions = [[photo.latitude, photo.longitude] for photo in capture_photos]
+        trace_chunk_paths = defaultdict(list)
+        trace_waypoints = defaultdict(list)
+        for chunk in capture_chunks:
+            trace_chunk_paths[chunk.trace_id].append(
+                storage_path / f"{capture_id}/chunks/{chunk.chunk_index}.cap"
+            )
+            for pos in json.loads(chunk.waypoints):
+                positions.append([pos["latitude"], pos["longitude"]])
+                trace_waypoints[chunk.trace_id].append(
+                    models.GeoPosition(
+                        latitude=pos["latitude"],
+                        longitude=pos["longitude"],
+                        elevation=pos["elevation"],
+                    )
+                )
+            positions.append((chunk.latitude_min, chunk.longitude_min))
+            positions.append((chunk.latitude_max, chunk.longitude_max))
+        positions = np.array(positions)
+        min_pos = np.min(positions, axis=0)
+        max_pos = np.max(positions, axis=0)
+        bbox_min = models.GeoPosition(
+            latitude=min_pos[0],
+            longitude=min_pos[1],
+            elevation=0,  # Elevation is not used in bounding box calculations yet
+        )
+        bbox_max = models.GeoPosition(
+            latitude=max_pos[0],
+            longitude=max_pos[1],
+            elevation=0,  # Elevation is not used in bounding box calculations yet
+        )
+        for trace_id, chunk_paths in trace_chunk_paths.items():
+            is_video_created = concatenate_video_chunks(
+                chunk_paths=chunk_paths,
+                output_path=get_video_storage_path(
+                    capture_id=capture_id,
+                    video_id=trace_id,
+                    storage_path=storage_path,
+                    video_format=VIDEO_STORAGE_FORMAT,
+                ),
+            )
+            if is_video_created:
+                register_video(
+                    video_id=trace_id,
+                    capture_id=capture_id,
+                    waypoints=trace_waypoints[trace_id],
+                    data_format=VIDEO_STORAGE_FORMAT,
+                    db=db_session,
+                )
+        geocapture_model = models.GeoCaptureDescriptor(
+            capture_id=capture_id,
+            bbox_min=bbox_min,
+            bbox_max=bbox_max,
+            photos=[],  # can be left empty, not needed for db here
+            video=None,  # can be left empty, not needed for db here
+            description=description,
+        )
+        storage_interface.create_geocapture_from_model(
+            db=db_session, geocapture=geocapture_model, user=user
+        )
 
 
 @app.get("/")
@@ -126,6 +230,78 @@ async def login(
     user_generate_token(user, db=db)
     print(user.current_token)
     return {"access_token": user.current_token, "token_type": "bearer"}
+
+
+def ingest_geocapture_chunk(
+    geocapture: GeoCaptureChunk,
+    fs: FS,
+    db: Session,
+) -> None:
+    capture_id = geocapture.identifier
+    chunk_index = geocapture.chunk_index
+    logger.info(
+        f"Received geocapture chunk for capture {capture_id}, chunk index {chunk_index}, is_last_chunk: {geocapture.is_last_chunk}"
+    )
+    if chunk_index == 0:
+        init_geocapture(
+            capture_id=capture_id,
+            fs=fs,
+        )
+    if chunk_index == 0 and geocapture.is_last_chunk and geocapture.video is None:
+        if len(geocapture.photos) != 1:
+            raise ValueError(
+                f"Non-contiguous captures (one chunk, no video) are expected to be single image captures containing exactly one photo but {len(geocapture.photos)} photos were found."
+            )
+    add_capture_chunk(
+        geocapture_chunk=geocapture,
+        db=db,
+        fs=fs,
+    )
+    for i, photo_capture in enumerate(geocapture.photos):
+        image_bytes = photo_capture.data
+        add_photo_from_bytes(
+            image_bytes,
+            capture_id=capture_id,
+            photo_id=photo_capture.identifier,
+            position=models.GeoPosition(
+                latitude=photo_capture.gps.position.latitude,
+                longitude=photo_capture.gps.position.longitude,
+                elevation=photo_capture.gps.position.elevation,
+            ),
+            db=db,
+            fs=fs,
+            make_thumbnail=True,
+            data_format=photo_capture.format,
+        )
+
+
+@api_router.post("/upload_geocapture_chunk")
+async def upload_geo_capture(
+    user: Annotated[models.User, Depends(get_current_user)],
+    geocapture: UploadFile,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    fs: FS = Depends(get_fs),
+    storage_path: UPath = Depends(get_storage_path),
+) -> str:
+    geo_capture_bytes = await geocapture.read()
+    geocapture = GeoCaptureChunk()
+    geocapture.ParseFromString(geo_capture_bytes)
+    ingest_geocapture_chunk(
+        geocapture=geocapture,
+        fs=fs,
+        db=db,
+    )
+    if geocapture.is_last_chunk:
+        background_tasks.add_task(
+            finalize_geocapture,
+            user_token=user.current_token,
+            capture_id=geocapture.identifier,
+            storage_path=storage_path,
+            db=db,
+            description=geocapture.description,
+        )
+    return geocapture.identifier
 
 
 @api_router.get(
@@ -251,115 +427,6 @@ async def fetch_thumbnail(
     return Response(
         content=read_thumbnail_bytes(capture_id, fs), media_type="image/jpeg"
     )
-
-
-@api_router.post("/upload_geocapture_chunk")
-async def upload_geo_capture(
-    user: Annotated[models.User, Depends(get_current_user)],
-    geocapture: UploadFile,
-    db: Session = Depends(get_db),
-    fs: FS = Depends(get_fs),
-) -> str:
-    geo_capture_bytes = await geocapture.read()
-    geocapture = GeoCaptureChunk()
-    geocapture.ParseFromString(geo_capture_bytes)
-    capture_id = geocapture.identifier
-    chunk_index = geocapture.chunk_index
-    logger.info(
-        f"Received geocapture chunk for capture {capture_id}, chunk index {chunk_index}, is_last_chunk: {geocapture.is_last_chunk}"
-    )
-    if chunk_index == 0:
-        init_geocapture(
-            capture_id=capture_id,
-            fs=fs,
-        )
-    if chunk_index == 0 and geocapture.is_last_chunk and geocapture.video is None:
-        if len(geocapture.photos) != 1:
-            raise ValueError(
-                f"Non-contiguous captures (one chunk, no video) are expected to be single image captures containing exactly one photo but {len(geocapture.photos)} photos were found."
-            )
-    add_capture_chunk(
-        geocapture_chunk=geocapture,
-        db=db,
-        fs=fs,
-    )
-    for i, photo_capture in enumerate(geocapture.photos):
-        image_bytes = photo_capture.data
-        add_photo_from_bytes(
-            image_bytes,
-            capture_id=capture_id,
-            photo_id=photo_capture.identifier,
-            position=models.GeoPosition(
-                latitude=photo_capture.gps.position.latitude,
-                longitude=photo_capture.gps.position.longitude,
-                elevation=photo_capture.gps.position.elevation,
-            ),
-            db=db,
-            fs=fs,
-            make_thumbnail=True,
-            data_format=photo_capture.format,
-        )
-
-    if geocapture.is_last_chunk:
-        capture_photos = get_photos_for_capture(capture_id=capture_id, db=db)
-        capture_chunks = storage_interface.get_chunks_for_capture(
-            capture_id=capture_id, db=db
-        )
-        positions = [[photo.latitude, photo.longitude] for photo in capture_photos]
-        for chunk in capture_chunks:
-            for pos in json.loads(chunk.waypoints):
-                positions.append([pos["latitude"], pos["longitude"]])
-        positions = np.array(positions)
-        min_pos = np.min(positions, axis=0)
-        max_pos = np.max(positions, axis=0)
-        bbox_min = models.GeoPosition(
-            latitude=min_pos[0],
-            longitude=min_pos[1],
-            elevation=0,  # Elevation is not used in bounding box calculations yet
-        )
-        bbox_max = models.GeoPosition(
-            latitude=max_pos[0],
-            longitude=max_pos[1],
-            elevation=0,  # Elevation is not used in bounding box calculations yet
-        )
-        geocapture_model = models.GeoCaptureDescriptor(
-            capture_id=capture_id,
-            bbox_min=bbox_min,
-            bbox_max=bbox_max,
-            photos=[],
-            video=None,
-            description=geocapture.description,
-        )
-        storage_interface.create_geocapture_from_model(
-            db=db, geocapture=geocapture_model, user=user
-        )
-    return capture_id
-
-
-# @api_router.post("/geophoto/upload_image")
-# async def upload_image(
-#     user: Annotated[models.User, Depends(get_current_user)],
-#     image: UploadFile,
-#     fs: FS = Depends(get_fs),
-# ) -> str:
-#     image_bytes = await image.read()
-#     image_id = str(uuid4())
-#     save_image_from_bytes(image_bytes, image_id, fs)
-#     return image_id
-
-
-# @api_router.post("/geophoto/create")
-# def create_single_geophoto(
-#     geophoto: models.GeoPhotoCreate,
-#     user: Annotated[models.User, Depends(get_current_user)],
-#     db: Session = Depends(get_db),
-#     fs: FS = Depends(get_fs),
-# ) -> int:
-#     image_path = f"{geophoto.image_id}.png"
-#     print(image_path)
-#     assert fs.opendir("images").exists(image_path)
-#     geophoto_id = db_interface.create_geophoto(db=db, geophoto=geophoto, user=user)
-#     return geophoto_id
 
 
 app.include_router(api_router)

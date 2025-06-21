@@ -1,5 +1,5 @@
 from sqlalchemy import ForeignKey, create_engine
-from sqlalchemy.orm import sessionmaker, Mapped, declarative_base
+from sqlalchemy.orm import sessionmaker, Mapped, declarative_base, Session
 from sqlalchemy import Integer, String, Float, Double
 from sqlalchemy.orm import mapped_column, relationship
 
@@ -18,7 +18,7 @@ Base = declarative_base()
 
 
 # Dependency
-def get_db():
+async def get_db():
     db = SessionLocal()
     try:
         yield db
@@ -36,7 +36,7 @@ class User(Base):
     )
     salt: Mapped[str] = mapped_column(String)
     current_token: Mapped[str | None] = mapped_column(String)
-    token_expiry: Mapped[float  | None] = mapped_column(Double)
+    token_expiry: Mapped[float | None] = mapped_column(Double)
 
 
 # class GeoPhoto(Base):
@@ -66,9 +66,11 @@ class GeoCapture(Base):
     longitude_max: Mapped[float] = mapped_column(Float)
     elevation_max: Mapped[float] = mapped_column(Float)
     description: Mapped[str] = mapped_column(String)
-    
+
+
 class GeoCaptureChunk(Base):
     __tablename__ = "geocapture_chunks"
+    trace_id = mapped_column(String, primary_key=True)
     chunk_index = mapped_column(Integer, primary_key=True)
     capture_id = mapped_column(ForeignKey("geocaptures.capture_id"), primary_key=True)
     capture = relationship("GeoCapture")
@@ -82,9 +84,7 @@ class GeoCaptureChunk(Base):
 class GeoPhoto(Base):
     __tablename__ = "geophotos"
     photo_id: Mapped[str] = mapped_column(String, primary_key=True)
-    capture_id = mapped_column(
-        ForeignKey("geocaptures.capture_id"), primary_key=True
-    )
+    capture_id = mapped_column(ForeignKey("geocaptures.capture_id"), primary_key=True)
     capture: Mapped[GeoCapture] = relationship("GeoCapture")
     latitude: Mapped[float] = mapped_column(Float)
     longitude: Mapped[float] = mapped_column(Float)

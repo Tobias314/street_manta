@@ -1,6 +1,11 @@
+import asyncio
 from io import BytesIO
+import shutil
 import sys
 from pathlib import Path
+import time
+
+from upath import UPath
 
 from street_manta.protobufs import geo_capture_pb2
 
@@ -12,8 +17,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 from fs.memoryfs import MemoryFS
+from fs.osfs import OSFS
 
-from street_manta.server import app, get_db, get_fs
+from street_manta.server import app, get_db, get_fs, get_storage_path
 from street_manta.tools.create_db import create_database
 from street_manta.data.schemas import User
 
@@ -21,15 +27,32 @@ from street_manta.utils import create_single_photo_geocapture_proto
 from street_manta.utils import create_video_geocapture_proto
 
 
+TEST_STORAGE_PATH = Path(__file__).parent.parent.parent.parent / "test_datastore"
 IMAGE_FS = None
 
 
+def setup_module(module):
+    """setup any state specific to the execution of the given module."""
+    TEST_STORAGE_PATH.mkdir(parents=True, exist_ok=True)
+    create_database(TEST_STORAGE_PATH / "test_database.db", overwrite=True)
+    global IMAGE_FS
+    IMAGE_FS = OSFS(str(TEST_STORAGE_PATH))
+
+
+def teardown_module(module):
+    """teardown any state that was previously setup with a setup_module
+    method.
+    """
+    shutil.rmtree(TEST_STORAGE_PATH, ignore_errors=True)
+
+
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{str(TEST_STORAGE_PATH)}/test_database.db"
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 async def override_get_db():
-    SQLALCHEMY_DATABASE_URL = "sqlite:///./test_database.db"
-    engine = create_engine(
-        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-    )
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     db = SessionLocal()
     try:
         yield db
@@ -39,6 +62,10 @@ async def override_get_db():
 
 async def override_get_fs():
     yield IMAGE_FS
+
+
+async def override_get_storage_path() -> UPath:
+    yield UPath(TEST_STORAGE_PATH)
 
 
 async def override_get_current_user():
@@ -54,14 +81,8 @@ async def override_get_current_user():
 client = TestClient(app)
 app.dependency_overrides[get_db] = override_get_db
 app.dependency_overrides[get_fs] = override_get_fs
+app.dependency_overrides[get_storage_path] = override_get_storage_path
 # app.dependency_overrides[get_current_user] = override_get_current_user
-
-
-def setup_module(module):
-    """setup any state specific to the execution of the given module."""
-    create_database(Path("./test_database.db"), overwrite=True)
-    global IMAGE_FS
-    IMAGE_FS = MemoryFS()
 
 
 def get_token(email: str, password: str):
@@ -90,6 +111,7 @@ def upload_geocapture_chunk(
             )
         },
     )
+    print('Response:', response.text)
     assert response.status_code == 200
     return response.json()
 
@@ -116,11 +138,12 @@ def test_geocapture_end_to_end():
         ),
     )
 
-    video_chunk1_positions = [
-        (0.5, 0.5, 100.0),
-        (1.0, 1.0, 100.0),
-        (1.5, 1.5, 100.0),
-    ]
+    video_chunk1_num_positions = 50
+    video_chunk1_positions = []
+    start, end = 0.0, 1.5
+    for i in range(video_chunk1_num_positions):
+        coord = start + (end-start) * i / (video_chunk1_num_positions)
+        video_chunk1_positions.append((coord, coord, 100.0))
     video_capture_chunk1 = create_video_geocapture_proto(
         capture_id="video_capture_1",
         positions=video_chunk1_positions,
@@ -128,11 +151,12 @@ def test_geocapture_end_to_end():
         is_last_chunk=False,
     )
     upload_geocapture_chunk(token=token, geocapture_chunk=video_capture_chunk1)
-    video_chunk2_positions = [
-        (2.0, 2.0, 100.0),
-        (3.0, 3.0, 100.0),
-        (3.5, 3.5, 100.0),
-    ]
+    video_chunk2_num_positions = 50
+    video_chunk2_positions = []
+    start, end = 2.0, 3.5
+    for i in range(video_chunk2_num_positions):
+        coord = start + (end-start) * i / (video_chunk2_num_positions)
+        video_chunk2_positions.append((coord, coord, 100.0))
     video_capture_chunk2 = create_video_geocapture_proto(
         capture_id="video_capture_1",
         positions=video_chunk2_positions,

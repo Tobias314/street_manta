@@ -90,12 +90,16 @@ def create_single_photo_geocapture_proto(
 
 
 def encode_video(
-    frames: list[np.ndarray], fps: int = 30, size: tuple[int, int] = (640, 480)
+    frames: np.ndarray, fps: int = 30,
 ) -> bytes:
+    assert len(frames) > 0, "No frames to encode"
+    assert frames.shape[3] == 3, "Frames must be in RGB format"
+    assert frames.dtype == np.uint8, "Frames must be of type uint8"
+    size = frames.shape[2], frames.shape[1]
     with TemporaryDirectory() as temp_dir:
         video_path = f"{temp_dir}/output.mp4"
         out = cv2.VideoWriter(
-            video_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, size, False
+            video_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, size, True
         )
         for frame in frames:
             out.write(frame)
@@ -138,7 +142,7 @@ def create_video_geocapture_proto(
             )
             frames.append(frame)
     video_bytes = encode_video(
-        frames, fps=fps, size=(frames[0].shape[1], frames[0].shape[0])
+        np.array(frames), fps=fps,
     )
     if start_epoch_us is None:
         start_epoch_us = int((time.time() - len(positions) / fps) * 1e6)
