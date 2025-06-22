@@ -8,7 +8,7 @@ node {
       }
       stage('Test image') {
             app.inside {
-                  sh 'cd backend && pytest tests'
+                  sh 'cd backend && ./test.sh'
             }
       }
       stage('Push image') {
