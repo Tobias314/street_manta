@@ -5,9 +5,10 @@ import base64
 from string import ascii_uppercase, digits, ascii_lowercase
 from uuid import uuid4
 import time
+import logging
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import APIKeyQuery, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from .data.schemas import User, get_db
@@ -16,7 +17,7 @@ from .data.storage_interface import get_user_for_token, update_user
 
 SALT_CHARACTERS = ascii_uppercase + digits + ascii_lowercase
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token")
+logger = logging.getLogger(__name__)
 
 
 def hash_password_with_random_salt(password: str) -> Tuple[str, str]:
@@ -50,10 +51,15 @@ def user_generate_token(user: User, db: Session) -> None:
 
 
 async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[str, Depends(get_db)]
+    header_token: Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="api/token", auto_error=False))],
+    query_token: Annotated[str, Depends(APIKeyQuery(name="user_token", auto_error=False))],
+    db: Annotated[str, Depends(get_db)],
 ) -> User:
-    print(f"checking token {token}")
-    user = get_user_for_token(token, db=db)
+    logger.info(f"checking authorization header token {header_token}")
+    user = get_user_for_token(header_token, db=db)
+    if not user and query_token:
+        logger.info(f"checking for query parameter user token {query_token}")
+        user = get_user_for_token(query_token, db=db)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

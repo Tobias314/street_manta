@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:flutter_map_polywidget/flutter_map_polywidget.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:logger/logger.dart';
 import 'package:street_manta_client/api/geocapture.dart';
@@ -31,6 +32,8 @@ class MapPageState extends State<MapPage> {
 
   List<GeoCaptureDescriptor> geoCaptures = [];
   PolylineLayer polylines = PolylineLayer(polylines: []);
+  final LayerHitNotifier polylineHitNotifier = ValueNotifier(null);
+  List<Marker> _polylinePopupMarkers = [];
 
   List<Marker> _createMarkers(List<GeoCaptureDescriptor> geoCaptures) {
     return geoCaptures
@@ -52,8 +55,27 @@ class MapPageState extends State<MapPage> {
                   .toList(),
               color: Colors.blue,
               strokeWidth: 10.0,
+              hitValue: geoCapture,
             ))
         .toList();
+  }
+
+  void _updatePolylinePopupMarkers(
+      List<GeoCaptureDescriptor> selectedGeoCaptures) {
+    print("${selectedGeoCaptures.length} geocaptures popups");
+    var markers = selectedGeoCaptures
+        .map((geoCapture) => Marker(
+              point: LatLng(geoCapture.bboxCenter.latitude,
+                  geoCapture.bboxCenter.longitude),
+              width: GeoPhotoMarkerPopup.POPUP_WIDTH,
+              height: GeoPhotoMarkerPopup.POPUP_HEIGHT,
+              child: GeoPhotoMarkerPopup(geoCapture),
+              rotate: true,
+            ))
+        .toList();
+    setState(() {
+      _polylinePopupMarkers = markers;
+    });
   }
 
   void _updateGeocapturesForCurrentMapRegion(LatLngBounds cameraBounds) {
@@ -117,6 +139,21 @@ class MapPageState extends State<MapPage> {
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               ),
+              GestureDetector(
+                  child: PolylineLayer(
+                      polylines: _createPolylines(geoCaptures),
+                      hitNotifier: polylineHitNotifier),
+                  onTap: () {
+                    final LayerHitResult? hitResult = polylineHitNotifier.value;
+                    if (hitResult == null) {
+                      _updatePolylinePopupMarkers([]);
+                    } else {
+                      _updatePolylinePopupMarkers(polylineHitNotifier
+                          .value!.hitValues
+                          .map((result) => result as GeoCaptureDescriptor)
+                          .toList());
+                    }
+                  }),
               PopupMarkerLayer(
                   options: PopupMarkerLayerOptions(
                 markers: _createMarkers(geoCaptures),
@@ -126,7 +163,7 @@ class MapPageState extends State<MapPage> {
                           ((marker.child) as GeoCaptureMarker).geoCapture),
                 ),
               )),
-              PolylineLayer(polylines: _createPolylines(geoCaptures)),
+              MarkerLayer(markers: _polylinePopupMarkers),
               RichAttributionWidget(
                 attributions: [
                   TextSourceAttribution(

@@ -85,7 +85,7 @@ RUN cp build/app/outputs/flutter-apk/app-release.apk build/web/app/android/stree
 WORKDIR /street_manta/backend
 COPY backend/create_db.sh /street_manta/backend/create_db.sh
 COPY backend/tests /street_manta/backend/tests
-COPY backend/app /street_manta/backend/app
+COPY backend/src /street_manta/backend/src
 # create and activate virtual environment
 # using final folder name to avoid path issues with packages
 # Expose the port that FastAPI will run on
@@ -94,7 +94,7 @@ EXPOSE 80
 WORKDIR /street_manta/backend
 # Command to run the application using uvicorn
 ARG DATASTORE_PATH="/datastore"
-CMD DATASTORE_PATH="/datastore" ./create_db.sh && fastapi run app/server.py --host 0.0.0.0 --proxy-headers --port 80
+CMD DATASTORE_PATH="/datastore" ./create_db.sh && uv pip install . && uv run fastapi run street_manta.server:app --host 0.0.0.0 --proxy-headers --port 80
 
 
 

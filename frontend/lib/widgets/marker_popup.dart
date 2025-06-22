@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:street_manta_client/pages/geocapture_display.dart';
 
 import '../api/geocapture.dart';
 import '../models/geocapture.dart';
@@ -17,6 +18,8 @@ class GeoCaptureMarker extends StatelessWidget {
 
 class GeoPhotoMarkerPopup extends StatefulWidget {
   final GeoCaptureDescriptor geoCapture;
+  static double POPUP_WIDTH = 200;
+  static double POPUP_HEIGHT = 150;
 
   const GeoPhotoMarkerPopup(this.geoCapture, {super.key});
 
@@ -52,30 +55,33 @@ class _GeoPhotoMarkerPopupState extends State<GeoPhotoMarkerPopup> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-        child: Card(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 10),
-                  child: _thumbnail ??
-                      SizedBox(
-                        width: 100,
-                        height: 100,
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      )),
-              _cardDescription(context),
-            ],
-          ),
-        ),
-        onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    PhotoViewPage(geoCapture: widget.geoCapture))));
+    return Container(
+        child: GestureDetector(
+            child: Card(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Padding(
+                      padding: const EdgeInsets.only(left: 20, right: 10),
+                      child: _thumbnail ??
+                          SizedBox(
+                            width: 100,
+                            height: 100,
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          )),
+                  _cardDescription(context),
+                ],
+              ),
+            ),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => GeoCaptureDisplayPage(
+                        geoCaptureDescriptor: widget.geoCapture)))),
+        width: GeoPhotoMarkerPopup.POPUP_WIDTH,
+        height: GeoPhotoMarkerPopup.POPUP_HEIGHT);
   }
 
   Widget _cardDescription(BuildContext context) {

@@ -171,3 +171,10 @@ def test_geocapture_end_to_end():
     )
     print(region_res.json())
     assert len(region_res.json()) == 3
+    
+    # Test downloading a geocapture
+    download_res = client.get(
+        "/api/geocaptures/capture_1/download",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert download_res.status_code == 200

@@ -1,22 +1,20 @@
-import asyncio
 from collections import defaultdict
-import io
 import json
 from pathlib import Path
-import time
+import shutil
+from tempfile import TemporaryDirectory
 from typing import Dict, List, Annotated
 import logging
-import zipfile
-
-import cv2
 from fastapi import (
     FastAPI,
+    Header,
     Request,
     Response,
     UploadFile,
     APIRouter,
     Depends,
     HTTPException,
+    status,
 )
 from fastapi import BackgroundTasks
 from fastapi.responses import FileResponse, RedirectResponse
@@ -25,7 +23,6 @@ from fastapi.security import OAuth2PasswordRequestForm
 import numpy as np
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
-from uuid import uuid4
 from fs.osfs import OSFS
 from fs.base import FS
 from upath import UPath
@@ -34,9 +31,10 @@ from .video import concatenate_video_chunks
 from .utils import register_exception
 from .data import models
 from .data import storage_interface
-from .data.schemas import SessionLocal, get_db
+from .data.schemas import get_db
 from .globals import (
     DATASTORE_PATH,
+    VIDEO_SERVING_CHUNK_SIZE,
     VIDEO_STORAGE_FORMAT,
 )
 from .authentication import (
@@ -49,6 +47,7 @@ from .data.storage_interface import (
     THUMBNAIL_FORMAT,
     get_photos_for_capture,
     get_user_for_token,
+    get_video_file_path,
     get_video_storage_path,
     init_geocapture,
     read_photo_bytes,
@@ -111,7 +110,9 @@ def get_photo_url(
 def get_video_url(
     base_url: str, capture_id: str, video_id: str, data_format: str
 ) -> str:
-    return f"{base_url}api/geocaptures/{capture_id}/video/{video_id}.{data_format}"
+    video_url = f"{base_url}api/geocaptures/{capture_id}/video/{video_id}.{data_format}"
+    print(f"Video URL: {video_url}")
+    return video_url
 
 
 def finalize_geocapture(
@@ -405,17 +406,53 @@ async def fetch_photo(
     return Response(content=image_bytes, media_type=f"image/{Path(file_name).suffix}")
 
 
+# @api_router.get("/geocaptures/{capture_id}/video/{file_name}")
+# async def fetch_video(
+#     capture_id: str,
+#     file_name: str,
+#     user: Annotated[models.User, Depends(get_current_user)],
+#     fs: FS = Depends(get_fs),
+# ) -> str:
+#     return Response(
+#         content=read_photo_bytes(capture_id, file_name, fs),
+#         media_type=f"image/{Path(file_name).suffix}",
+#     )
+
+
 @api_router.get("/geocaptures/{capture_id}/video/{file_name}")
-async def fetch_video(
+async def serve_video(
     capture_id: str,
     file_name: str,
     user: Annotated[models.User, Depends(get_current_user)],
+    request: Request,
+    range: str = Header(None),
     fs: FS = Depends(get_fs),
-) -> str:
-    return Response(
-        content=read_photo_bytes(capture_id, file_name, fs),
-        media_type=f"image/{Path(file_name).suffix}",
+    storage_path: UPath = Depends(get_storage_path),
+) -> Response:
+    print(request.headers)
+    if range is None or not range.startswith("bytes="):
+        start, end = 0, None
+    else:
+        start, end = range.replace("bytes=", "").split("-")
+    start = int(start)
+    end = int(end) if end else start + VIDEO_SERVING_CHUNK_SIZE
+    video_path = get_video_file_path(
+        capture_id=capture_id, file_name=file_name, storage_path=storage_path
     )
+    with video_path.open("rb") as video:
+        video.seek(start)
+        data = video.read(end - start)
+        filesize = str(video_path.stat().st_size)
+        headers = {
+            "Content-Range": f"bytes {str(start)}-{str(end)}/{filesize}",
+            "Accept-Ranges": "bytes",
+        }
+        return Response(
+            data,
+            status_code=206,
+            headers=headers,
+            media_type=f"video/{Path(file_name).suffix}",
+        )
 
 
 @api_router.get("/geocaptures/{capture_id}/thumbnail." + THUMBNAIL_FORMAT)
@@ -426,6 +463,43 @@ async def fetch_thumbnail(
 ) -> str:
     return Response(
         content=read_thumbnail_bytes(capture_id, fs), media_type="image/jpeg"
+    )
+
+
+def cleanup_temp_dir(temp_dir: Path):
+    """
+    Cleans up the temporary directory.
+    """
+    if temp_dir.exists():
+        shutil.rmtree(temp_dir)
+        logger.info(f"Temporary directory {temp_dir} cleaned up.")
+
+
+@api_router.get("/geocaptures/{capture_id}/download")
+async def download_geocapture(
+    capture_id: str,
+    user: Annotated[models.User, Depends(get_current_user)],
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    fs: FS = Depends(get_fs),
+    storage_path: UPath = Depends(get_storage_path),
+) -> FileResponse:
+    """
+    Downloads the geocapture as a zip file.
+    """
+    temp_dir = Path(TemporaryDirectory().name)
+    logger.info(f"created temporary directory at {temp_dir}")
+    capture_directory_path = storage_path / capture_id
+    if not capture_directory_path.exists():
+        raise HTTPException(status_code=404, detail="Geocapture not found")
+    shutil.make_archive(str(temp_dir / capture_id), "zip", str(capture_directory_path))
+    # Create a zip file from the exported geocapture
+    zip_file_path = temp_dir / f"{capture_id}.zip"
+    background_tasks.add_task(cleanup_temp_dir, temp_dir)
+    return FileResponse(
+        path=zip_file_path,
+        media_type="application/zip",
+        filename=f"{capture_id}.zip",
     )
 
 

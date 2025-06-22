@@ -340,3 +340,11 @@ def read_thumbnail_bytes(capture_id: str, fs: FS) -> bytes:
 
 def read_photo_bytes(capture_id: str, file_name: str, fs: FS) -> bytes:
     return fs.opendir(capture_id).opendir("images").readbytes(file_name)
+
+def get_video_file_path(
+    capture_id: str, file_name: str, storage_path: UPath
+) -> UPath:
+    """
+    Get the handle for a video file based on capture_id and video_id.
+    """
+    return storage_path / capture_id / "videos" / file_name
