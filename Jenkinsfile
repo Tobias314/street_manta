@@ -8,7 +8,7 @@ node {
       }
       stage('Test image') {
             app.inside {
-                  sh 'cd backend && ./test.sh'
+                  sh 'cd /street_manta/backend && ./test.sh'
             }
       }
       stage('Push image') {
