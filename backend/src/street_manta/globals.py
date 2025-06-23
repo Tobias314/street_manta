@@ -17,3 +17,5 @@ DATASTORE_PATH = get_datastore_path()
 VIDEO_STORAGE_FORMAT = "mp4"
 
 VIDEO_SERVING_CHUNK_SIZE = 1024*1024
+
+BASE_URL = os.getenv("BASE_URL", None)

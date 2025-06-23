@@ -14,7 +14,6 @@ from fastapi import (
     APIRouter,
     Depends,
     HTTPException,
-    status,
 )
 from fastapi import BackgroundTasks
 from fastapi.responses import FileResponse, RedirectResponse
@@ -36,6 +35,7 @@ from .globals import (
     DATASTORE_PATH,
     VIDEO_SERVING_CHUNK_SIZE,
     VIDEO_STORAGE_FORMAT,
+    BASE_URL,
 )
 from .authentication import (
     create_user,
@@ -95,6 +95,13 @@ def get_storage_path() -> UPath:
     storage_path = UPath(DATASTORE_PATH)
     storage_path.mkdir(parents=True, exist_ok=True)
     return storage_path
+
+
+def get_base_url(request: Request) -> str:
+    base_url = globals.BASE_URL
+    if base_url is None:
+        base_url = str(request.base_url)
+    return base_url
 
 
 def get_thumbnail_url(base_url: str, capture_id: str) -> str:
@@ -392,6 +399,10 @@ def get_geocaptures_for_region(
                 thumbnail_url=thumbnail_url,
             )
         )
+    logger.info(
+        f"Found captures for region {lat_min}, {lon_min}, {lat_max}, {lon_max}:"
+    )
+    logger.info("\n".join([res.model_dump_json() for res in result]))
     return result
 
 
@@ -404,19 +415,6 @@ async def fetch_photo(
 ) -> str:
     image_bytes = read_photo_bytes(capture_id=capture_id, file_name=file_name, fs=fs)
     return Response(content=image_bytes, media_type=f"image/{Path(file_name).suffix}")
-
-
-# @api_router.get("/geocaptures/{capture_id}/video/{file_name}")
-# async def fetch_video(
-#     capture_id: str,
-#     file_name: str,
-#     user: Annotated[models.User, Depends(get_current_user)],
-#     fs: FS = Depends(get_fs),
-# ) -> str:
-#     return Response(
-#         content=read_photo_bytes(capture_id, file_name, fs),
-#         media_type=f"image/{Path(file_name).suffix}",
-#     )
 
 
 @api_router.get("/geocaptures/{capture_id}/video/{file_name}")

@@ -87,7 +87,7 @@ EXPOSE 80
 
 WORKDIR /street_manta/backend
 # Command to run the application using uvicorn
-CMD DATASTORE_PATH="/datastore" ./create_db.sh && DATASTORE_PATH="/datastore" uv run fastapi run src/street_manta/server.py --host 0.0.0.0 --proxy-headers --port 80
+CMD DATASTORE_PATH="/datastore" ./create_db.sh && DATASTORE_PATH="/datastore" BACKEND_URL=${BACKEND_URL} uv run fastapi run src/street_manta/server.py --host 0.0.0.0 --proxy-headers --port 80
 
 
 
