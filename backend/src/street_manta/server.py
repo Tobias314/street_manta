@@ -343,7 +343,9 @@ def get_geocaptures_for_region(
             capture_id=capture.capture_id, db=db
         )
         thumbnail_url = (
-            get_thumbnail_url(capture_id=capture.capture_id, base_url=request.base_url)
+            get_thumbnail_url(
+                capture_id=capture.capture_id, base_url=get_base_url(request)
+            )
             if fs.exists(f"{capture.capture_id}/thumbnail.{THUMBNAIL_FORMAT}")
             else None
         )
@@ -370,7 +372,7 @@ def get_geocaptures_for_region(
                             elevation=photo.elevation,
                         ),
                         url=get_photo_url(
-                            base_url=request.base_url,
+                            base_url=get_base_url(request),
                             capture_id=capture.capture_id,
                             image_id=photo.photo_id,
                             data_format=photo.data_format,
@@ -388,7 +390,7 @@ def get_geocaptures_for_region(
                         for pos in json.loads(capture_videos[0].waypoints)
                     ],
                     url=get_video_url(
-                        base_url=request.base_url,
+                        base_url=get_base_url(request),
                         capture_id=capture.capture_id,
                         video_id=capture_videos[0].video_id,
                         data_format=capture_videos[0].data_format,
