@@ -62,10 +62,6 @@ RUN rm lib/main.dart
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-# Install backend dependencies
-WORKDIR /street_manta/backend
-COPY backend/pyproject.toml /street_manta/backend/pyproject.toml
-RUN uv sync
 
 # Build frontend
 ARG BACKEND_URL="https://streetmanta.redpielabs.com:4343"
@@ -80,20 +76,18 @@ RUN cp build/app/outputs/flutter-apk/app-release.apk build/web/app/android/stree
 
 # Build Backend
 WORKDIR /street_manta/backend
+COPY backend/pyproject.toml /street_manta/backend/pyproject.toml
 COPY backend/create_db.sh /street_manta/backend/create_db.sh
 COPY backend/tests /street_manta/backend/tests
 COPY backend/test.sh /street_manta/backend/test.sh
 COPY backend/src /street_manta/backend/src
-# We need the editable install to find the static web files via the relative path (we might want to change this in the future)
-RUN uv pip install -e .
 
 # Expose the port that FastAPI will run on
 EXPOSE 80
 
 WORKDIR /street_manta/backend
 # Command to run the application using uvicorn
-ARG DATASTORE_PATH="/datastore"
-CMD DATASTORE_PATH="/datastore" ./create_db.sh && uv run fastapi run src/street_manta/server.py --host 0.0.0.0 --proxy-headers --port 80
+CMD DATASTORE_PATH="/datastore" ./create_db.sh && DATASTORE_PATH="/datastore" uv run fastapi run src/street_manta/server.py --host 0.0.0.0 --proxy-headers --port 80
 
 
 

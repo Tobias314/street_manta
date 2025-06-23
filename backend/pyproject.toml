@@ -18,3 +18,7 @@ dependencies = [
     "universal-pathlib>=0.2.6",
     "ffmpeg-python>=0.2.0",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

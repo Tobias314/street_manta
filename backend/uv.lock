@@ -963,7 +963,7 @@ wheels = [
 [[package]]
 name = "street-manta"
 version = "0.0.1"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "fastapi", extra = ["standard"] },
     { name = "ffmpeg-python" },
