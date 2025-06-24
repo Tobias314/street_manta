@@ -98,7 +98,7 @@ def get_storage_path() -> UPath:
 
 
 def get_base_url(request: Request) -> str:
-    base_url = globals.BASE_URL
+    base_url = BASE_URL
     if base_url is None:
         base_url = str(request.base_url)
     return base_url
