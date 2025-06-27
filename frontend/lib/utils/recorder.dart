@@ -233,6 +233,7 @@ class Recorder {
   }
 
   void _handlePositionUpdate(Position position) {
+    logger.i('Location update: $position');
     if (isRecording) {
       var gpsPosition = GpsPosition(
           latitude: position.latitude,
@@ -294,10 +295,14 @@ class Recorder {
     }
 
     const LocationSettings locationSettings = LocationSettings(
-      accuracy: LocationAccuracy.high,
+      accuracy: LocationAccuracy.best,
       distanceFilter: 0,
     );
-    Geolocator.getPositionStream(locationSettings: locationSettings)
+    AndroidSettings androidSettings = AndroidSettings(
+      forceLocationManager: false,
+      intervalDuration: Duration(milliseconds: 0),
+    );
+    Geolocator.getPositionStream(locationSettings: androidSettings)
         .listen(_handlePositionUpdate);
 
     sensors.accelerometerEventStream().listen(
