@@ -1,16 +1,17 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
-import 'dart:io';
-import '../api/geo_photo.dart';
-import '../models/geo_photo.dart';
+import 'package:street_manta_client/protobufs/geo_capture.pb.dart';
+import '../api/capture.dart';
 
 // A screen that allows users to take a picture using a given camera.
 class UploadGeoPhotoScreen extends StatefulWidget {
   const UploadGeoPhotoScreen({
     super.key,
-    required this.geoPhoto,
+    required this.singlePhotoCapture,
   });
 
-  final GeoPhotoUpload geoPhoto;
+  final GeoCaptureChunk singlePhotoCapture;
 
   @override
   UploadGeoPhotoScreenState createState() => UploadGeoPhotoScreenState();
@@ -18,13 +19,13 @@ class UploadGeoPhotoScreen extends StatefulWidget {
 
 // A widget that displays the picture taken by the user.
 class UploadGeoPhotoScreenState extends State<UploadGeoPhotoScreen> {
-  late GeoPhotoUpload geoPhoto;
+  late GeoCaptureChunk singlePhotoCapture;
   bool waitingForApiCall = false;
 
   @override
   void initState() {
     super.initState();
-    geoPhoto = widget.geoPhoto;
+    singlePhotoCapture = widget.singlePhotoCapture;
   }
 
   @override
@@ -35,7 +36,8 @@ class UploadGeoPhotoScreenState extends State<UploadGeoPhotoScreen> {
       // constructor with the given path to display the image.
       body: Column(children: <Widget>[
         Flexible(
-          child: Image.file(File(geoPhoto.path)),
+          child: Image.memory(
+              Uint8List.fromList(singlePhotoCapture.photos[0].data)),
         ),
         const TextField(
           decoration: InputDecoration(hintText: 'Description'),
@@ -45,15 +47,15 @@ class UploadGeoPhotoScreenState extends State<UploadGeoPhotoScreen> {
               setState(() {
                 waitingForApiCall = true;
               });
-              _uploadGeoPhoto();
+              _uploadPhotoCapture();
             },
             child: const Text('Upload')),
       ]),
     );
   }
 
-  void _uploadGeoPhoto() async {
-    var response = await uploadGeoPhoto(geoPhoto);
+  void _uploadPhotoCapture() async {
+    var response = await uploadGeoCaptureChunk(singlePhotoCapture);
     if (!mounted) return;
     if (response.statusCode == 200) {
       Navigator.pop(context);

@@ -1,8 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:street_manta_client/utils/geo_photo_uploader.dart';
+import 'package:flutter/services.dart';
+import 'package:street_manta_client/utils/file_uploader.dart';
+import 'package:street_manta_client/utils/recorder.dart';
+import 'package:logger/logger.dart';
 
 import '../globals.dart';
 import '../widgets/footer.dart';
+
+
+Logger logger = Logger();
+
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -14,25 +23,28 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   //final TextEditingController _serverUrlController = TextEditingController();
   bool waitingForApiCall = false;
+
   final Future<Globals> _globalsFuture = Globals.getInstance();
   late Globals globals;
   int filesQueuedForUpload = 0;
+  bool imuCalibrationRunning = false;
+  String imuCalibrationButtonText = 'Start IMU Calibration';
 
   @override
   void initState() {
     super.initState();
-    GeoPhotoUploader().registerCallback(this.widget, () {
+    FileUploader().registerCallback(widget, () {
       setState(() {
-        filesQueuedForUpload = GeoPhotoUploader().filesQueuedForUpload.length;
+        filesQueuedForUpload = FileUploader().filesQueuedForUpload.length;
       });
     });
-    GeoPhotoUploader().reloadListOfQueuedFiles();
+    FileUploader().reloadListOfQueuedFiles();
   }
 
   @override
   void dispose() {
     //_serverUrlController.dispose();
-    GeoPhotoUploader().unregisterCallback(this.widget);
+    FileUploader().unregisterCallback(widget);
     super.dispose();
   }
 
@@ -77,10 +89,75 @@ class _SettingsPageState extends State<SettingsPage> {
                               globals.backendUrl = text.trim(),
                         ),
                         const SizedBox(height: 20),
+                        TextField(
+                          controller: TextEditingController(
+                              text: globals.videoExposureOffset.toString()),
+                          decoration: const InputDecoration(
+                            labelText: 'Video Exposure Offset (EV)',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.video_camera_back_outlined),
+                          ),
+                          keyboardType: TextInputType.number,
+                          onSubmitted: (text) =>
+                              globals.videoExposureOffset = double.parse(
+                            text.trim(),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        TextField(
+                          controller: TextEditingController(
+                              text: globals.videoFps.toString()),
+                          decoration: const InputDecoration(
+                            labelText: 'Video FPS',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.video_camera_back_outlined),
+                          ),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          onSubmitted: (text) => globals.videoFps = int.parse(
+                            text.trim(),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        TextField(
+                          controller: TextEditingController(
+                              text: globals.videoBitrate.toString()),
+                          decoration: const InputDecoration(
+                            labelText: 'Video Bitrate',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.video_camera_back_outlined),
+                          ),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          onSubmitted: (text) =>
+                              globals.videoBitrate = int.parse(
+                            text.trim(),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
                         ListTile(
                           title: Text(
                               'Anzahl Dateien in Uploadwarteschlange: $filesQueuedForUpload'),
                         ),
+                        ElevatedButton(
+                          onPressed: () {
+                            FileUploader().triggerUpload();
+                          },
+                          child: const Text('Trigger Upload'),
+                        ),
+                        ElevatedButton(
+                            onPressed: () {
+                              if(!imuCalibrationRunning) {
+                                return imuCalibration;
+                              }else{
+                                return null;
+                              }
+                            }(),
+                            child: Text(imuCalibrationButtonText)),
                       ],
                     ),
                   )),
@@ -91,5 +168,33 @@ class _SettingsPageState extends State<SettingsPage> {
               }
               return const CircularProgressIndicator();
             }));
+  }
+
+  Future<void> imuCalibration() async {
+    setState(() {
+      imuCalibrationRunning = true;
+    });
+    var recorder = Recorder();
+    await recorder.initializeWithoutCamera();
+    int secondsRemaining = Globals.IMU_CALIBRATION_LENGTH_SECONDS.toInt();
+    await recorder.startGeoCapture(Globals.IMU_CALIBRATION_CHUNK_LENGTH_SECONDS);
+    logger.i('Started IMU Calibration');
+    var timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      secondsRemaining -= 1;
+      logger.i('IMU Calibration in Progress: $secondsRemaining');
+      setState(() {
+        imuCalibrationButtonText =
+            'IMU Calibration in Progress: ${secondsRemaining}s remaining';
+      });
+    });
+    await Future.delayed(
+        Duration(seconds: Globals.IMU_CALIBRATION_LENGTH_SECONDS.toInt()));
+    timer.cancel();
+    recorder.stopGeoCapture();
+    logger.i('Done IMU Calibration');
+    setState(() {
+      imuCalibrationRunning = false;
+      imuCalibrationButtonText = 'Start IMU Calibration';
+    });
   }
 }

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:street_manta_client/pages/geocapture_display.dart';
 
-import '../api/geo_photo.dart';
-import '../models/geo_photo.dart';
+import '../api/geocapture.dart';
+import '../models/geocapture.dart';
 import '../pages/photo_view.dart';
 
-class GeoPhotoMarker extends StatelessWidget {
-  final GeoPhoto geoPhoto;
+class GeoCaptureMarker extends StatelessWidget {
+  final GeoCaptureDescriptor geoCapture;
 
-  const GeoPhotoMarker(this.geoPhoto, {super.key});
+  const GeoCaptureMarker(this.geoCapture, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,49 +17,71 @@ class GeoPhotoMarker extends StatelessWidget {
 }
 
 class GeoPhotoMarkerPopup extends StatefulWidget {
-  final GeoPhoto geoPhoto;
+  final GeoCaptureDescriptor geoCapture;
+  static double POPUP_WIDTH = 200;
+  static double POPUP_HEIGHT = 150;
 
-  const GeoPhotoMarkerPopup(this.geoPhoto, {super.key});
+  const GeoPhotoMarkerPopup(this.geoCapture, {super.key});
 
   @override
   State<StatefulWidget> createState() => _GeoPhotoMarkerPopupState();
 }
 
 class _GeoPhotoMarkerPopupState extends State<GeoPhotoMarkerPopup> {
+  Widget? _thumbnail;
+
+  @override
+  void initState() {
+    super.initState();
+    _initThumbnail();
+  }
+
+  Future<void> _initThumbnail() async {
+    Widget thumbnail = SizedBox(
+        width: 100,
+        height: 100,
+        child: Center(
+          child: Icon(Icons.image),
+        ));
+    if (widget.geoCapture.thumbnailUrl != null) {
+      try {
+        thumbnail = await fetchImage(widget.geoCapture.thumbnailUrl!);
+      } catch (e) {}
+    }
+    setState(() {
+      _thumbnail = thumbnail;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-        child: Card(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 10),
-                  child: FutureBuilder(
-                      future: fetchImage(widget.geoPhoto.imageId,
-                          fetchThumbnail: true),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return snapshot.data!;
-                        } else {
-                          return const SizedBox(
+    return Container(
+        child: GestureDetector(
+            child: Card(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Padding(
+                      padding: const EdgeInsets.only(left: 20, right: 10),
+                      child: _thumbnail ??
+                          SizedBox(
                             width: 100,
                             height: 100,
                             child: Center(
                               child: CircularProgressIndicator(),
                             ),
-                          );
-                        }
-                      })),
-              _cardDescription(context),
-            ],
-          ),
-        ),
-        onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    PhotoViewPage(geoPhoto: widget.geoPhoto))));
+                          )),
+                  _cardDescription(context),
+                ],
+              ),
+            ),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => GeoCaptureDisplayPage(
+                        geoCaptureDescriptor: widget.geoCapture)))),
+        width: GeoPhotoMarkerPopup.POPUP_WIDTH,
+        height: GeoPhotoMarkerPopup.POPUP_HEIGHT);
   }
 
   Widget _cardDescription(BuildContext context) {
@@ -81,10 +104,10 @@ class _GeoPhotoMarkerPopupState extends State<GeoPhotoMarkerPopup> {
               ),
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
-            Text(
-              'Location: ${widget.geoPhoto.latitude}, ${widget.geoPhoto.longitude}',
-              style: const TextStyle(fontSize: 12.0),
-            ),
+            // Text(
+            //   'Location: ${widget.geoCapture.latitude}, ${widget.geoCapture.longitude}',
+            //   style: const TextStyle(fontSize: 12.0),
+            // ),
           ],
         ),
       ),

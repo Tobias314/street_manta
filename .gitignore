@@ -2,8 +2,9 @@
 image_data/
 database.db
 test_database.db
-.vscode/
-
+/.vscode/*
+!/.vscode/launch.json
+street_manta_datastore/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

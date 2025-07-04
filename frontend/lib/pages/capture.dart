@@ -1,10 +1,13 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import '../constants.dart';
-import '../utils/geo_camera.dart';
+import '../utils/recorder.dart';
 import '../widgets/menu_drawer.dart';
-import '../widgets/auto_photo.dart';
+import '../widgets/continuous_capture.dart';
 import '../widgets/single_photo.dart';
+
+Logger logger = Logger();
 
 class CapturePage extends StatefulWidget {
   const CapturePage({super.key});
@@ -14,20 +17,20 @@ class CapturePage extends StatefulWidget {
 }
 
 class _CapturePageState extends State<CapturePage> {
-  late Future<GeoCamera> geoCameraFuture;
+  late Future<Recorder> recorderFuture;
   //late Future<CameraController> _initializationFuture;
   bool _continuousMode = false;
   @override
   void initState() {
     super.initState();
-    geoCameraFuture = _initializationFuture();
+    recorderFuture = _initializationFuture();
   }
 
-  Future<GeoCamera> _initializationFuture() async {
+  Future<Recorder> _initializationFuture() async {
     var availableCameraDescriptors = await availableCameras();
-    var geoCamera = GeoCamera(availableCameraDescriptors.first);
-    await geoCamera.initialize();
-    return geoCamera;
+    var recorder = Recorder();
+    await recorder.initializeWithCamera(availableCameraDescriptors.first);
+    return recorder;
   }
 
   @override
@@ -38,15 +41,15 @@ class _CapturePageState extends State<CapturePage> {
 
   @override
   Widget build(BuildContext context) {
-    late var body = FutureBuilder<GeoCamera>(
-        future: geoCameraFuture,
+    late var body = FutureBuilder<Recorder>(
+        future: recorderFuture,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            var geoCamera = snapshot.data!;
+            var recorder = snapshot.data!;
             if (!_continuousMode) {
-              return SinglePhotoWidget(geoCamera: geoCamera);
+              return SinglePhotoWidget(recorder: recorder);
             } else {
-              return AutoPhotoWidget(geoCamera: geoCamera);
+              return AutoPhotoWidget(recorder: recorder);
             }
           } else {
             return const Center(child: CircularProgressIndicator());

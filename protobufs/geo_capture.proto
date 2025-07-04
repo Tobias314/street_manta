@@ -1,0 +1,135 @@
+syntax = "proto3";
+
+package street_manata;
+
+message GpsPosition {
+  float longitude = 1;
+  float latitude = 2;
+  float elevation = 3;
+  optional float position_accuracy = 4;
+  optional float elevation_accuracy = 5;
+  optional float speed = 6;
+  optional float speed_accuracy = 7;
+  optional float heading = 8;
+  optional float heading_accuracy = 9;
+}
+
+message Orientation {
+  float roll = 1;
+  float pitch = 2;
+  float yaw = 3;
+}
+
+message Acceleration {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message AngularVelocity {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message MagneticField {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message OrientationReading {
+  int64 epoch_micro_seconds = 1;
+  Orientation orientation = 2;
+}
+
+message GpsReading {
+  int64 epoch_micro_seconds = 1;
+  GpsPosition position = 2;
+}
+
+message AccelerationReading {
+  int64 epoch_micro_seconds = 1;
+  Acceleration acceleration = 2;
+}
+
+message AngularVelocityReading {
+  int64 epoch_micro_seconds = 1;
+  AngularVelocity angular_velocity = 2;
+}
+
+message MagneticFieldReading {
+  int64 epoch_micro_seconds = 1;
+  MagneticField magnetic_field = 2;
+}
+
+message OrientationCapture {
+  repeated OrientationReading readings = 1;
+  optional string identifier = 2;
+}
+
+message GpsCapture {
+  repeated GpsReading readings = 1;
+  optional string identifier = 2;
+}
+
+message AccelerationCapture {
+  repeated AccelerationReading readings = 1;
+  optional string identifier = 2;
+}
+
+message AngularVelocityCapture {
+  repeated AngularVelocityReading readings = 1;
+  optional string identifier = 2;
+}
+
+message MagneticFieldCapture {
+  repeated MagneticFieldReading readings = 1;
+  optional string identifier = 2;
+}
+
+message CameraSpecification {
+  optional int32 camera_index = 1;
+  optional float focal_length = 2;
+  optional float exposure_time = 3;
+}
+
+message PhotoCapture {
+  int64 epoch_micro_seconds = 1;
+  string format = 2;
+  bytes data = 3;
+  GpsReading gps = 4;
+  OrientationReading orientation = 5;
+  optional CameraSpecification camera_specification = 6;
+  optional string identifier = 7;
+}
+
+message VideoCapture {
+  int64 start_epoch_micro_seconds = 1;
+  string format = 3;
+  bytes data = 4;
+  optional int64 fps = 5;
+  optional int64 end_epoch_micro_seconds = 2;
+  repeated int64 frame_epochs_micro_seconds = 8;
+  optional CameraSpecification camera_specification = 6;
+  optional string identifier = 7;
+}
+
+message GeoCaptureChunk {
+  string identifier = 16;
+  string device = 1;
+  optional GpsCapture gps = 2;
+  optional OrientationCapture orientation = 3;
+  optional AccelerationCapture acceleration = 4;
+  optional AngularVelocityCapture angular_velocity = 5;
+  optional MagneticFieldCapture magnetic_field = 6;
+  repeated PhotoCapture photos = 7;
+  optional VideoCapture video = 8;
+  optional string description = 9;
+  repeated string tags = 10;
+  string trace_identifier = 11;
+  int64 timestamp_epoch_micro_seconds = 12;
+  int64 chunk_index = 13;
+  bool is_last_chunk = 14;
+  int64 version = 15;
+}

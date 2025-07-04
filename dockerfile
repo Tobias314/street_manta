@@ -60,18 +60,11 @@ RUN echo 'import "package:flutter/material.dart";Future<void> main() async {runA
 RUN flutter build apk --dart-define=BACKEND_URL=${BACKEND_URL} lib/main.dart
 RUN rm lib/main.dart
 
-# Install backend dependencies
-COPY backend/requirements.txt /street_manta/backend/requirements.txt
-WORKDIR /street_manta/backend
-RUN python3 -m venv /home/myuser/venv
-ENV PATH="/home/myuser/venv/bin:$PATH"
-#RUN python --version
-RUN pip install --no-cache-dir -r requirements.txt
-
-
-ARG BACKEND_URL="https://streetmanta.redpielabs.com:4343"
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Build frontend
+ARG BACKEND_URL="https://streetmanta.redpielabs.com:4343"
 COPY frontend/assets /street_manta/frontend/assets
 COPY frontend/lib /street_manta/frontend/lib
 WORKDIR /street_manta/frontend
@@ -83,18 +76,18 @@ RUN cp build/app/outputs/flutter-apk/app-release.apk build/web/app/android/stree
 
 # Build Backend
 WORKDIR /street_manta/backend
+COPY backend/pyproject.toml /street_manta/backend/pyproject.toml
 COPY backend/create_db.sh /street_manta/backend/create_db.sh
 COPY backend/tests /street_manta/backend/tests
-COPY backend/app /street_manta/backend/app
-# create and activate virtual environment
-# using final folder name to avoid path issues with packages
+COPY backend/test.sh /street_manta/backend/test.sh
+COPY backend/src /street_manta/backend/src
+
 # Expose the port that FastAPI will run on
 EXPOSE 80
 
 WORKDIR /street_manta/backend
 # Command to run the application using uvicorn
-ARG DATASTORE_PATH="/datastore"
-CMD DATASTORE_PATH="/datastore" ./create_db.sh && DATASTORE_PATH="/datastore" fastapi run app/server.py --host 0.0.0.0 --proxy-headers --port 80
+CMD DATASTORE_PATH="/datastore" ./create_db.sh && DATASTORE_PATH="/datastore" BACKEND_URL=${BACKEND_URL} uv run fastapi run src/street_manta/server.py --host 0.0.0.0 --proxy-headers --port 80
 
 
 

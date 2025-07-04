@@ -14,8 +14,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController =
+      TextEditingController(text: 'test');
+  final TextEditingController _passwordController =
+      TextEditingController(text: 'test');
   bool waitingForApiCall = false;
   bool _passwordVisible = false;
 
@@ -129,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const MapPage(),
+              builder: (context) => MapPage(),
             ));
       }
     } on Exception {

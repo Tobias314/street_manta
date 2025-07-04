@@ -12,8 +12,27 @@ subprojects {
         if (project.plugins.hasPlugin("com.android.application") ||
                 project.plugins.hasPlugin("com.android.library")) {
             project.android {
-                compileSdkVersion 34
+                ndkVersion = "27.1.12297006"
+                compileSdkVersion 35
                 buildToolsVersion "34.0.0"
+                defaultConfig {
+                    multiDexEnabled true
+                }
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_1_8
+                    targetCompatibility JavaVersion.VERSION_1_8
+                    coreLibraryDesugaringEnabled true
+                }
+            }
+            dependencies {
+                coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2'
+            }
+        }
+        if (project.hasProperty("kotlin")) {
+            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+                kotlinOptions {
+                    jvmTarget = JavaVersion.VERSION_1_8
+                }
             }
         }
     }
