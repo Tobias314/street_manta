@@ -49,11 +49,13 @@ from .data.storage_interface import (
     get_user_for_token,
     get_video_file_path,
     get_video_storage_path,
+    get_thumbvideo_storage_path,
     init_geocapture,
     read_photo_bytes,
     read_thumbnail_bytes,
     add_capture_chunk,
     add_photo_from_bytes,
+    read_thumbvideo_frame,
     register_video,
 )
 from .protobufs.geo_capture_pb2 import GeoCaptureChunk
@@ -184,6 +186,10 @@ def finalize_geocapture(
                     video_id=trace_id,
                     storage_path=storage_path,
                     video_format=VIDEO_STORAGE_FORMAT,
+                ),
+                downsampled_path=get_thumbvideo_storage_path(
+                    capture_id=capture_id,
+                    storage_path=storage_path,
                 ),
             )
             if is_video_created:
@@ -463,6 +469,17 @@ async def fetch_thumbnail(
 ) -> str:
     return Response(
         content=read_thumbnail_bytes(capture_id, fs), media_type="image/jpeg"
+    )
+    
+@api_router.get("/geocaptures/{capture_id}/thumbvideo/frame/{time_epoch_ms}")
+async def fetch_thumbvideo_frame(
+    capture_id: str,
+    time_epoch_ms: int,
+    user: Annotated[models.User, Depends(get_current_user)],
+    storage_path: UPath = Depends(get_storage_path),
+) -> str:
+    return Response(
+        content=read_thumbvideo_frame(capture_id, storage_path, frame_time=time_epoch_ms), media_type="image/jpeg"
     )
 
 

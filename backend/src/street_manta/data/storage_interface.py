@@ -18,6 +18,7 @@ from street_manta.data import models
 logger = logging.getLogger(__name__)
 
 THUMBNAIL_FORMAT = "jpg"
+THUMBVIDEO_FORMAT = "mp4"
 
 
 def create_geocapture_from_model(
@@ -88,6 +89,18 @@ def get_geocaptures_for_region(
         query = query.where(schemas.GeoCapture.user_id == user.email)
     captures = [gp[0] for gp in db.execute(query).all()]
     return captures
+
+
+def get_geocapture_by_id(
+    capture_id: str, db: Session, user: Optional[schemas.User] = None
+) -> Optional[schemas.GeoCapture]:
+    query = db.query(schemas.GeoCapture).filter(
+        schemas.GeoCapture.capture_id == capture_id
+    )
+    if user:
+        query = query.filter(schemas.GeoCapture.user_id == user.email)
+    result = query.first()
+    return result
 
 
 def get_chunks_for_capture(
@@ -293,11 +306,22 @@ def add_video_from_bytes(
         data_format=data_format,
     )
 
-def get_video_storage_path(capture_id: str, video_id: str, storage_path: UPath, video_format: str = '.mp4') -> UPath:
+
+def get_video_storage_path(
+    capture_id: str, video_id: str, storage_path: UPath, video_format: str = ".mp4"
+) -> UPath:
     """
     Get the storage path for a video file based on capture_id and video_id.
     """
     return storage_path / capture_id / "videos" / f"{video_id}.{video_format}"
+
+
+def get_thumbvideo_storage_path(capture_id: str, storage_path: UPath) -> UPath:
+    """
+    Get the storage path for the thumbnail of a video based on capture_id.
+    """
+    return storage_path / capture_id / f"thumbvideo.{THUMBVIDEO_FORMAT}"
+
 
 def register_video(
     capture_id: str,
@@ -338,12 +362,38 @@ def read_thumbnail_bytes(capture_id: str, fs: FS) -> bytes:
     return fs.opendir(capture_id).readbytes(f"thumbnail.{THUMBNAIL_FORMAT}")
 
 
+def read_thumbvideo_frame(
+    capture_id: str, db: Session, storage_path: UPath, time_epoch_ms: int
+) -> bytes:
+    """
+    Read a frame from the thumbnail video for a given capture_id at a specific time.
+    """
+    capture = get_geocapture_by_id(capture_id, db)
+    thumbvideo_path = get_thumbvideo_storage_path(capture_id, storage_path)
+    cap = cv2.VideoCapture(str(thumbvideo_path))
+    if not cap.isOpened():
+        raise FileNotFoundError(f"Thumbnail video for {capture_id} not found.")
+
+    # Set the position of the video to the specified time
+    cap.set(cv2.CAP_PROP_POS_MSEC, time_epoch_ms - capture.start_epoch_ms)
+
+    ret, frame = cap.read()
+    cap.release()
+
+    if not ret:
+        raise ValueError(
+            f"Could not read frame at {time_epoch_ms} ms from {thumbvideo_path}."
+        )
+
+    _, buffer = cv2.imencode(f".{THUMBNAIL_FORMAT}", frame)
+    return buffer.tobytes()
+
+
 def read_photo_bytes(capture_id: str, file_name: str, fs: FS) -> bytes:
     return fs.opendir(capture_id).opendir("images").readbytes(file_name)
 
-def get_video_file_path(
-    capture_id: str, file_name: str, storage_path: UPath
-) -> UPath:
+
+def get_video_file_path(capture_id: str, file_name: str, storage_path: UPath) -> UPath:
     """
     Get the handle for a video file based on capture_id and video_id.
     """

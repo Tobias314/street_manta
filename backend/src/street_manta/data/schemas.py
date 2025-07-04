@@ -7,7 +7,6 @@ from ..globals import DATASTORE_PATH
 
 
 SQLALCHEMY_DATABASE_URL = f"sqlite:///{DATASTORE_PATH}/database.db"
-# SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
@@ -39,21 +38,6 @@ class User(Base):
     token_expiry: Mapped[float | None] = mapped_column(Double)
 
 
-# class GeoPhoto(Base):
-#     __tablename__ = "geo_photos"
-#     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-#     image_id = mapped_column(String)
-#     user_id = mapped_column(ForeignKey("users.email"))
-#     user = relationship("User")
-#     latitude = mapped_column(Float)
-#     longitude = mapped_column(Float)
-#     elevation = mapped_column(Integer)
-#     pitch = mapped_column(Float)
-#     roll = mapped_column(Float)
-#     yaw = mapped_column(Float)
-#     description = mapped_column(String)
-
-
 class GeoCapture(Base):
     __tablename__ = "geocaptures"
     capture_id: Mapped[str] = mapped_column(String, primary_key=True)
@@ -65,6 +49,8 @@ class GeoCapture(Base):
     latitude_max: Mapped[float] = mapped_column(Float)
     longitude_max: Mapped[float] = mapped_column(Float)
     elevation_max: Mapped[float] = mapped_column(Float)
+    start_epoch_ms: Mapped[int] = mapped_column(Integer)
+    end_epoch_ms: Mapped[int] = mapped_column(Integer)
     description: Mapped[str] = mapped_column(String)
 
 
