@@ -11,7 +11,7 @@ from upath import UPath
 from street_manta.globals import WAYPOINT_MIN_TIME_DELTA_SECONDS
 
 from . import schemas
-from .models import GeoCaptureDescriptor, GeoCapturePhoto, User, GeoPosition
+from .models import GeoCaptureDescriptor, User, GeoPosition
 from ..protobufs.geo_capture_pb2 import GeoCaptureChunk
 from street_manta.data import models
 
@@ -24,12 +24,6 @@ def create_geocapture_from_model(
     db: Session, geocapture: GeoCaptureDescriptor, user: User
 ) -> int:
     print(f"Creating geocapture {geocapture.capture_id} for user {user.email}")
-    # data = {
-    #     "photo_ids": geocapture.photo_ids,
-    #     "positions": [tuple(pos) for pos in geocapture.positions],
-    #     "video_id": geocapture.video_id,
-    #     "waypoints": [tuple[pos] for pos in geocapture.waypoints],
-    # }
     db_geocapture = schemas.GeoCapture(
         capture_id=geocapture.capture_id,
         user=user,

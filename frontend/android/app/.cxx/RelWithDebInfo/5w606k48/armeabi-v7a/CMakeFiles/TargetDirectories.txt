@@ -1,2 +1,0 @@
-/home/redpielabs/dev/redpielabs/street_manta/frontend/android/app/.cxx/RelWithDebInfo/5w606k48/armeabi-v7a/CMakeFiles/edit_cache.dir
-/home/redpielabs/dev/redpielabs/street_manta/frontend/android/app/.cxx/RelWithDebInfo/5w606k48/armeabi-v7a/CMakeFiles/rebuild_cache.dir

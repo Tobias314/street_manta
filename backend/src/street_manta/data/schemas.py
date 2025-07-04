@@ -1,5 +1,5 @@
 from sqlalchemy import ForeignKey, create_engine
-from sqlalchemy.orm import sessionmaker, Mapped, declarative_base, Session
+from sqlalchemy.orm import sessionmaker, Mapped, declarative_base
 from sqlalchemy import Integer, String, Float, Double
 from sqlalchemy.orm import mapped_column, relationship
 
@@ -7,7 +7,6 @@ from ..globals import DATASTORE_PATH
 
 
 SQLALCHEMY_DATABASE_URL = f"sqlite:///{DATASTORE_PATH}/database.db"
-# SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
@@ -37,21 +36,6 @@ class User(Base):
     salt: Mapped[str] = mapped_column(String)
     current_token: Mapped[str | None] = mapped_column(String)
     token_expiry: Mapped[float | None] = mapped_column(Double)
-
-
-# class GeoPhoto(Base):
-#     __tablename__ = "geo_photos"
-#     id = mapped_column(Integer, primary_key=True, autoincrement=True)
-#     image_id = mapped_column(String)
-#     user_id = mapped_column(ForeignKey("users.email"))
-#     user = relationship("User")
-#     latitude = mapped_column(Float)
-#     longitude = mapped_column(Float)
-#     elevation = mapped_column(Integer)
-#     pitch = mapped_column(Float)
-#     roll = mapped_column(Float)
-#     yaw = mapped_column(Float)
-#     description = mapped_column(String)
 
 
 class GeoCapture(Base):

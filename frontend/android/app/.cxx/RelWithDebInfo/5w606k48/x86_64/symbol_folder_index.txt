@@ -1,1 +1,0 @@
-/home/redpielabs/dev/redpielabs/street_manta/frontend/build/app/intermediates/cxx/RelWithDebInfo/5w606k48/obj/x86_64
