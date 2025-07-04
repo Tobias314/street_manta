@@ -7,6 +7,8 @@ The below video gives a short overview over the current functionality of Street 
 
 The goal of Street Manta is to contribute to the digitalization of small to medium-sized local governments by providing easy-to-use open-source software for simple but common use cases in the field of road maintenance. 
 
+> :warning: **This repository is still work in progress! Heavy construction is ongoing and things might change rapidly. Information might be outdated, features might have changed or be currently broken! Use at your own risk!**
+
 # Demo
 A demo version of Street Manta can be found under:
 [https://streetmanta.redpielabs.com/](https://streetmanta.redpielabs.com/)
