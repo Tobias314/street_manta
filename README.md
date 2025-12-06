@@ -9,12 +9,6 @@ The goal of Street Manta is to contribute to the digitalization of small to medi
 
 > :warning: **This repository is still work in progress! Heavy construction is ongoing and things might change rapidly. Information might be outdated, features might have changed or be currently broken! Use at your own risk!**
 
-# Demo
-A demo version of Street Manta can be found under:
-[https://streetmanta.redpielabs.com/](https://streetmanta.redpielabs.com/)
-
-Please note that this deployment is for demonstration purposes only and should not be used in production!
-
 # Features
 - Android app to capture geo-tagged (via the devices' GPS sensor) photos with additional descriptions
 - Upload captured photos to a (self-hosted) server for centralized storage and easy access from any device
@@ -70,5 +64,6 @@ Pay attention to setting a valid BACKEND_URL. E.g. you need to specify http://10
 To compile protocol buffers (.proto) files you need to install the protoc compiler e.g. by finding and installing the latest release via the [offical protobuf page](https://protobuf.dev/downloads/). In addition, to build the dart files from the .proto specification you also need to install the Dart plugin for the protoc compiler e.g. by following the description on [this site](https://github.com/google/protobuf.dart/tree/master/protoc_plugin#how-to-build). If all is set up correctly you can now run:
 
 `./protobufs/generate_protobufs.sh` 
+
 
 from the repository root directory to generate the Python and Dart files from the .proto specification.
